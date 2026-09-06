@@ -2650,15 +2650,26 @@ function wireTimer(seconds) {
 ============================================================ */
 
 function whoLabel(who, team) {
-  if (who === 'room') return 'EVERYBODY. Last one standing — or first to finish — banks it for their team.';
-  if (who === 'team') return `${team.name} goes as a team. Beat it, or another team can steal.`;
-  return `One person from ${team.name}. They have to beat it. If they choke and someone else finishes, that team steals.`;
+  if (who === 'room') return 'EVERYBODY PLAYS. Winner\'s team banks the points.';
+  if (who === 'team') return `${team.name} — the whole team. Beat it or get nothing.`;
+  return `${team.name} — one person. They do it, or this square pays nobody.`;
 }
 
 function runChallenge(ctx, filterType) {
   const { val, team, done } = ctx;
   const types = filterType ? [].concat(filterType) : null;
   const ch = drawFrom(CHALLENGES, 'challenge', types ? (c => types.indexOf(c.type) !== -1) : null);
+  const room = ch.who === 'room';
+  const footer = room ? `
+    <div class="who-line" style="margin-top:16px;">Who won? That team banks ${val}.</div>
+    ${teamButtonsHtml('chalaward')}
+    <button class="btn-secondary none-btn" id="chalNoneBtn">Nobody — no points</button>
+  ` : `
+    <div class="row-gap judge-row">
+      <button class="btn-primary" id="chalYes">${escapeHtml(team.name)} beat it (+${val})</button>
+      <button class="btn-secondary" id="chalNoneBtn">They choked — nothing</button>
+    </div>
+  `;
   const card = document.querySelector('#overlay .card');
   card.innerHTML = `
     <div class="tag wild">${ch.type === 'drink' ? '🍺' : '🔥'} ${escapeHtml(ch.t)}</div>
@@ -2671,32 +2682,29 @@ function runChallenge(ctx, filterType) {
         <button class="btn-secondary forfeit-reroll" id="forfeitReroll">🎲 Different One</button>
       </div>` : ''}
     ${ch.timer ? timerHtml(ch.timer) : ''}
-    <div class="who-line" style="margin-top:16px;">
-      Who beat it? ${escapeHtml(team.name)} if they finished — somebody else if they stole it. Winner banks ${val}. Nobody finishes, nobody scores.
-    </div>
-    ${teamButtonsHtml('chalaward')}
-    <button class="btn-secondary none-btn" id="chalNoneBtn">Nobody — no points</button>
+    ${footer}
   `;
   if (ch.timer) wireTimer(ch.timer);
   const $reroll = document.getElementById('forfeitReroll');
   if ($reroll) {
-    // Swap the text in place — a full re-render would restart the timer.
     $reroll.onclick = () => {
       document.getElementById('forfeitText').textContent = drawForfeit().d;
     };
   }
-  document.querySelectorAll('[data-prefix="chalaward"]').forEach(btn => {
-    btn.onclick = () => {
-      const winner = state.teams.find(t => t.id == btn.dataset.team);
-      scoreEvent(winner, val, { isAnswer: true, isChallenge: true });
-      playCorrect();
-      done();
-    };
-  });
-  document.getElementById('chalNoneBtn').onclick = () => {
-    playWrong();
+  const pay = (winner) => {
+    scoreEvent(winner, val, { isAnswer: true, isChallenge: true });
+    playCorrect();
     done();
   };
+  const none = () => { playWrong(); done(); };
+  if (room) {
+    document.querySelectorAll('[data-prefix="chalaward"]').forEach(btn => {
+      btn.onclick = () => pay(state.teams.find(t => t.id == btn.dataset.team));
+    });
+  } else {
+    document.getElementById('chalYes').onclick = () => pay(team);
+  }
+  document.getElementById('chalNoneBtn').onclick = none;
 }
 
 function runDuel(ctx) {

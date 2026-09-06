@@ -67,7 +67,7 @@ the board all night. Anyone can still shout out the answer.
 
 | | |
 |---|---|
-| 🔥 Challenge Accepted | Put the phone down. Beat it, or the team that finishes steals. |
+| 🔥 Challenge Accepted | Some are yours alone — beat it or get nothing. Some are the whole room, and the winner scores. |
 | ⚔️ Duel | Pick an opponent. Only one of you walks away with points. |
 | 🗳️ The People's Court | The room votes. The majority gets paid. |
 | 🏹 Robin Hood | Take points straight off the leader. |
