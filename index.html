@@ -200,6 +200,94 @@
   @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
 
   footer { text-align:center; opacity:.4; font-size:.75rem; padding: 10px; }
+  /* ---------- Live-action squares ---------- */
+  .who-line {
+    opacity: .85; font-size: .95rem; line-height: 1.5;
+    margin: 10px 0; max-width: 620px; margin-left: auto; margin-right: auto;
+  }
+  .card .qtext.task {
+    font-size: clamp(1.1rem, 2.6vw, 1.5rem);
+    line-height: 1.45; font-weight: 600;
+  }
+  .judge-row { margin-top: 18px; }
+  .vote-grid { grid-template-columns: 1fr 1fr; }
+  .vote-opt { font-size: 1.05rem; padding: 18px 12px; }
+  .team-btn.awarded {
+    background: rgba(46,204,113,.25);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* ---------- Countdown timer ---------- */
+  .timer-wrap { margin: 18px auto; max-width: 380px; }
+  .timer-num {
+    font-size: 3.2rem; font-weight: 900; color: var(--gold);
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .timer-num.urgent { color: var(--red); animation: pulse .4s infinite alternate; }
+  .timer-num.done { color: var(--red); font-size: 2.2rem; letter-spacing: 3px; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+  .timer-track {
+    height: 10px; background: rgba(255,255,255,.12);
+    border-radius: 6px; overflow: hidden; margin: 10px 0;
+  }
+  .timer-fill { height: 100%; background: var(--gold); transition: width 1s linear; }
+  .timer-btn { margin-top: 4px; }
+
+  /* ---------- Score editor ---------- */
+  .edit-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .edit-name { flex: 1; text-align: left; font-weight: bold; }
+  .edit-score {
+    min-width: 70px; font-weight: 900; color: var(--gold);
+    font-size: 1.15rem; font-variant-numeric: tabular-nums;
+  }
+  .edit-btn { padding: 6px 12px; font-size: .9rem; }
+
+  /* ---------- Weekend tournament ---------- */
+  .weekend-box {
+    margin-top: 18px; padding: 14px 16px;
+    background: rgba(245,197,24,.07);
+    border: 2px solid var(--gold-dim); border-radius: 12px;
+  }
+  .weekend-title {
+    color: var(--gold); font-weight: 900; text-align: center;
+    margin-bottom: 10px; letter-spacing: .5px;
+  }
+
+  /* ---------- Setup extras ---------- */
+  .spice-toggle { display: flex; gap: 10px; margin: 4px 0 14px; }
+  .spice-opt {
+    flex: 1; padding: 12px 10px; border-radius: 10px; cursor: pointer;
+    border: 2px solid var(--gold-dim); background: rgba(255,255,255,.04);
+    color: var(--text); font-family: inherit; font-size: .9rem; text-align: center;
+    transition: all .15s;
+  }
+  .spice-opt .st-name { font-weight: 900; display: block; }
+  .spice-opt .st-desc { opacity: .65; font-size: .78rem; display: block; margin-top: 3px; }
+  .spice-opt.on {
+    background: rgba(245,197,24,.16); border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(245,197,24,.35);
+  }
+  .resume-box {
+    border: 2px solid var(--green); border-radius: 12px;
+    padding: 14px; margin-bottom: 16px; background: rgba(46,204,113,.08);
+  }
+
+  /* ---------- Board host bar ---------- */
+  .host-bar {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin-top: 10px;
+  }
+  .host-bar button { padding: 8px 14px; font-size: .85rem; }
+  .gauntlet-badge {
+    display: inline-block; font-size: .7rem; font-weight: 900;
+    background: var(--purple); color: #fff; border-radius: 5px;
+    padding: 2px 7px; margin-left: 8px; vertical-align: middle;
+    letter-spacing: 1px;
+  }
 </style>
 </head>
 <body>
@@ -707,6 +795,98 @@ const ROUNDS = [
         500: { q: "What Polk County city near Lakeland is home to LEGOLAND Florida?", a: "Winter Haven" }
       }
     }
+  },
+  {
+    id: "r8",
+    name: "Round 8: Last Call of Summer",
+    tagline: "Cookouts, coolers, road trips and the long weekend itself",
+    categories: [
+      "Cookouts & Grilling", "Pool, Lake & Beach", "Road Trip", "End of Summer",
+      "Boats & Water", "The Great Outdoors", "Labor Day", "Backyard Games"
+    ],
+    wildcardSlots: {
+      "Cookouts & Grilling": 300,
+      "Pool, Lake & Beach": 200,
+      "Road Trip": 400,
+      "End of Summer": 100,
+      "Boats & Water": 500,
+      "The Great Outdoors": 300,
+      "Labor Day": 200,
+      "Backyard Games": 400
+    },
+    dailyDouble: { category: "Labor Day", value: 400 },
+    questions: {
+      "Cookouts & Grilling": {
+        100: { q: "What's the term for cooking with the heat source directly under the food versus off to the side?", a: "Direct heat (versus indirect heat)" },
+        200: { q: "What cut of beef, notoriously tough and full of connective tissue, becomes the centerpiece of Texas barbecue after 12+ hours of smoke?", a: "Brisket" },
+        400: { q: "What's the name for the pink ring just under the surface of properly smoked meat — the one that proves you did it right?", a: "The smoke ring" },
+        500: { q: "The four classic American barbecue regions are Texas, Memphis, Kansas City, and this state known for whole-hog and a vinegar-based sauce.", a: "North Carolina" }
+      },
+      "Pool, Lake & Beach": {
+        100: { q: "What chemical is most commonly used to keep a swimming pool sanitized?", a: "Chlorine" },
+        200: { q: "In the pool game 'Marco Polo,' what must the person who is 'it' keep closed?", a: "Their eyes" },
+        300: { q: "What does the 'SPF' in sunscreen stand for?", a: "Sun Protection Factor" },
+        500: { q: "What's the name for the dangerous narrow current that pulls swimmers away from shore — the one you escape by swimming parallel to the beach?", a: "A rip current (or rip tide)" }
+      },
+      "Road Trip": {
+        100: { q: "What famous highway, decommissioned in 1985, ran from Chicago to Santa Monica and is nicknamed 'The Mother Road'?", a: "Route 66" },
+        200: { q: "In the U.S. Interstate system, odd-numbered interstates run in what direction?", a: "North–south (even numbers run east–west)" },
+        300: { q: "What roadside restaurant chain, founded in 1964, is famous for its orange roof, 'Free Ice Water' billboards... actually, what South Dakota tourist trap is famous for free ice water and thousands of billboards?", a: "Wall Drug" },
+        500: { q: "What is the longest interstate highway in the United States, running roughly 3,000 miles from Boston to Seattle?", a: "I-90" }
+      },
+      "End of Summer": {
+        200: { q: "Astronomically speaking, summer ends at which event, occurring around September 22nd?", a: "The autumnal equinox" },
+        300: { q: "What flavor famously floods American coffee shops the moment the calendar hits September?", a: "Pumpkin spice" },
+        400: { q: "What's the meteorological term for an unseasonably warm, dry spell that arrives in autumn after the first frost?", a: "Indian summer" },
+        500: { q: "The 'dog days of summer' are named after the heliacal rising of which star, the brightest in the night sky?", a: "Sirius (the Dog Star)" }
+      },
+      "Boats & Water": {
+        100: { q: "On a boat, which side is 'port' — left or right when facing forward?", a: "Left" },
+        200: { q: "What's the nautical term for the front of a boat?", a: "The bow" },
+        300: { q: "What piece of safety equipment does the Coast Guard require one of, per person, on board?", a: "A life jacket (personal flotation device)" },
+        400: { q: "What's the international radio distress signal, derived from the French for 'come help me'?", a: "Mayday (from 'm'aidez')" }
+      },
+      "The Great Outdoors": {
+        100: { q: "What's the rule of thumb for identifying poison ivy?", a: "Leaves of three, let it be" },
+        200: { q: "What's the outdoor ethics principle that says you should pack out everything you pack in?", a: "Leave No Trace" },
+        400: { q: "Which U.S. president is most associated with the creation of the national park system's expansion and is carved into Mount Rushmore for it?", a: "Theodore Roosevelt" },
+        500: { q: "What's the name of the 2,190-mile hiking trail running from Georgia to Maine?", a: "The Appalachian Trail" }
+      },
+      "Labor Day": {
+        100: { q: "Labor Day is observed on which day of the year in the United States?", a: "The first Monday in September" },
+        200: { q: "Labor Day unofficially marks the end of what season?", a: "Summer" },
+        300: { q: "What outdated fashion rule is traditionally said to take effect the day after Labor Day?", a: "No wearing white" },
+        500: { q: "President Grover Cleveland signed Labor Day into federal law in 1894, just days after federal troops broke up what massive railroad strike?", a: "The Pullman Strike" }
+      },
+      "Backyard Games": {
+        100: { q: "In cornhole, how many points is it worth to sink a bag through the hole?", a: "Three points" },
+        200: { q: "What lawn game involves tossing horseshoes at a stake in the ground — and what's it called when you circle the stake?", a: "Horseshoes — a 'ringer'" },
+        300: { q: "In the yard game commonly called ladder toss, what are the two connected balls on a string called?", a: "Bolas" },
+        400: { q: "What Scandinavian lawn game involves throwing wooden batons at numbered pins to reach exactly 50 points?", a: "Kubb (or Mölkky, for the numbered-pin version — either accepted)" }
+      }
+    }
+  },
+  {
+    id: "r9",
+    type: "gauntlet",
+    name: "Round 9: The Reckoning",
+    tagline: "No trivia. Forty squares of tasks, dares, duels and public judgment.",
+    categories: [
+      "Physical Feats", "Center Stage", "Fast Hands", "Head to Head",
+      "The People Decide", "Hot Seat", "Dares", "All In"
+    ],
+    wildcardSlots: {},
+    // Every square draws live from the decks — the board is never the same twice.
+    deckFor: {
+      "Physical Feats":    { deck: "challenge", type: "physical" },
+      "Center Stage":      { deck: "challenge", type: "performance" },
+      "Fast Hands":        { deck: "challenge", type: "speed" },
+      "Head to Head":      { deck: "duel" },
+      "The People Decide": { deck: "vote" },
+      "Hot Seat":          { deck: "hotseat" },
+      "Dares":             { deck: "challenge", type: "social" },
+      "All In":            { deck: "challenge", type: "room" }
+    }
   }
 ];
 
@@ -727,35 +907,285 @@ const BONUS_QUESTIONS = [
   { q: "What's the fastest land animal in the world?", a: "The cheetah" },
   { q: "How many strings does a standard guitar have?", a: "Six" },
   { q: "What country gifted the Statue of Liberty to the United States?", a: "France" },
-  { q: "What's the hardest naturally occurring substance on Earth?", a: "Diamond" }
+  { q: "What's the hardest naturally occurring substance on Earth?", a: "Diamond" },
+  { q: "What's the only U.S. state whose name is a single syllable?", a: "Maine" },
+  { q: "How many bones are in the adult human body?", a: "206" },
+  { q: "What's the smallest country in the world by area?", a: "Vatican City" },
+  { q: "In what year did the Titanic sink?", a: "1912" },
+  { q: "What's the only letter that doesn't appear in any U.S. state name?", a: "Q" },
+  { q: "What's the largest desert in the world?", a: "Antarctica (it's a cold desert)" },
+  { q: "How many time zones does Russia span?", a: "Eleven" },
+  { q: "What's the chemical symbol for gold?", a: "Au" },
+  { q: "What's the loudest animal on Earth?", a: "The sperm whale" },
+  { q: "What planet is closest to the sun?", a: "Mercury" },
+  { q: "How many hearts does an octopus have?", a: "Three" },
+  { q: "What's the only food that never spoils?", a: "Honey" },
+  { q: "What color is a polar bear's skin under its fur?", a: "Black" },
+  { q: "What U.S. state was an independent republic before joining the union?", a: "Texas" },
+  { q: "How many keys are on a standard QWERTY keyboard's home row?", a: "Eleven (including the two under the pinkies) — nine letters plus ; and '" },
+  { q: "What's the deepest point in the ocean called?", a: "The Mariana Trench (Challenger Deep)" },
+  { q: "How many sides does a stop sign have?", a: "Eight" },
+  { q: "What's the only continent with land in all four hemispheres?", a: "Africa" },
+  { q: "What year did the first iPhone go on sale?", a: "2007" },
+  { q: "What's the national animal of Scotland?", a: "The unicorn" },
+  { q: "How long is a marathon, in miles?", a: "26.2 miles" },
+  { q: "What's the most widely spoken first language in the world?", a: "Mandarin Chinese" },
+  { q: "What do you call a group of crows?", a: "A murder" },
+  { q: "What's the only mammal that can't jump?", a: "The elephant" },
+  { q: "In Monopoly, how much money do you collect for passing Go?", a: "$200" },
+  { q: "What's the hottest planet in our solar system?", a: "Venus" },
+  { q: "How many stripes are on the American flag?", a: "Thirteen" },
+  { q: "What's the strongest muscle in the human body, by weight?", a: "The masseter (jaw muscle)" },
+  { q: "What sport is played at Wimbledon?", a: "Tennis" },
+  { q: "What's the longest river in the world?", a: "The Nile (or the Amazon, depending on how you measure — either accepted)" },
+  { q: "What's the term for a word that reads the same forwards and backwards?", a: "A palindrome" },
+  { q: "How many players are on a baseball field for the defensive team?", a: "Nine" }
+];
+
+/* ============================================================
+   LIVE-ACTION DECKS
+   Everything below is a "spice"-taggable pool. Items with
+   spice:"party" only appear when the host flips the game into
+   After Dark mode on the setup screen.
+   who: "one"  -> one person from the picking team
+        "team" -> the whole picking team
+        "room" -> everybody plays, best performance scores
+============================================================ */
+
+const CHALLENGES = [
+  /* ---------- physical ---------- */
+  { t: "Plank Standoff", d: "One person from your team holds a plank. The room counts out loud. Make it to the buzzer and the points are yours.", timer: 45, who: "one", type: "physical" },
+  { t: "Wall Sit", d: "Back flat on a wall, thighs parallel to the floor. Hold it. No hands on knees, no sliding down.", timer: 45, who: "one", type: "physical" },
+  { t: "Twenty Push-Ups", d: "Twenty push-ups before the buzzer. Chest to fist, all the way up. The room is judging your form and the room is merciless.", timer: 30, who: "one", type: "physical" },
+  { t: "Flamingo", d: "Stand on one foot with your eyes closed and your arms crossed. Put a foot down and it's over.", timer: 30, who: "one", type: "physical" },
+  { t: "Ice Fist", d: "Hold an ice cube in a closed fist until the buzzer. You may not put it down, and you may not stop making eye contact with the room.", timer: 45, who: "one", type: "physical" },
+  { t: "Steady Hand", d: "Hold a full cup of water straight out at arm's length. Elbow locked. Spill it or bend it and you get nothing.", timer: 60, who: "one", type: "physical" },
+  { t: "Bottle Flip", d: "Land a partly-full water bottle upright. Three attempts. That's it.", timer: 0, who: "one", type: "physical" },
+  { t: "Cap Shot", d: "Toss a bottle cap into a cup from six feet away. Three attempts.", timer: 0, who: "one", type: "physical" },
+  { t: "Sock Hoops", d: "Roll up a sock and sink it into a trash can from across the room. Three attempts.", timer: 0, who: "one", type: "physical" },
+  { t: "Pack Mule", d: "Stack five household objects, carry them across the room and back without dropping a single one.", timer: 45, who: "one", type: "physical" },
+  { t: "The Blind Crossing", d: "One player closes their eyes. A teammate talks them across the room and back using words only. No touching.", timer: 60, who: "team", type: "physical" },
+  { t: "Burpee Sprint", d: "Ten burpees before the buzzer. Chest down, jump up, hands overhead. Go.", timer: 30, who: "one", type: "physical" },
+  { t: "Cup Pyramid", d: "Build a pyramid out of at least six cups and get it standing before the buzzer.", timer: 30, who: "one", type: "physical" },
+  { t: "The Limbo", d: "Someone holds a broom. You go under it. It gets lower. Knees don't touch, hands don't touch.", timer: 0, who: "one", type: "physical" },
+  { t: "Beast of Burden", d: "Piggyback a teammate one full lap around the room. Both feet down early and you're done.", timer: 45, who: "team", type: "physical" },
+  { t: "Spoon Walk", d: "Balance a lime on a spoon, held in your mouth, and walk a lap. Drop it and you're out.", timer: 45, who: "one", type: "physical" },
+
+  /* ---------- performance ---------- */
+  { t: "Do The Voice", d: "Do an impression of somebody in this room. Say nothing about who it is. If three or more people correctly name them, you score.", timer: 45, who: "one", type: "performance" },
+  { t: "Nature Documentary", d: "Narrate this room like David Attenborough narrating a struggling species. Thirty seconds. Commit to the accent.", timer: 30, who: "one", type: "performance" },
+  { t: "Infomercial", d: "The team to your left hands you any object in the house. Sell it to the room like it's 2am on cable television.", timer: 40, who: "one", type: "performance" },
+  { t: "Play-By-Play", d: "Call the last five minutes of this game like a broadcaster on the biggest stage of the season. Names, stakes, everything.", timer: 40, who: "one", type: "performance" },
+  { t: "The Bard", d: "Make up a four-line rhyming poem about whoever is currently in the lead. It has to actually rhyme.", timer: 60, who: "one", type: "performance" },
+  { t: "Villain Reading", d: "Recite a nursery rhyme as a Shakespearean villain. Full menace. No laughing — if you break, you lose it.", timer: 40, who: "one", type: "performance" },
+  { t: "Silent Movie", d: "Act out a famous movie scene with zero words. The room gets one minute to guess it.", timer: 60, who: "one", type: "performance" },
+  { t: "Name That Hum", d: "Hum a song. The room has forty-five seconds to name it. No words, no rhythm tapping.", timer: 45, who: "one", type: "performance" },
+  { t: "Pep Talk", d: "Deliver a locker-room speech to whichever team is in last place. Make them believe. The room votes on whether it worked.", timer: 45, who: "one", type: "performance" },
+  { t: "Runway", d: "Strut a full lap of the room like it's fashion week. The room scores you on confidence alone.", timer: 30, who: "one", type: "performance" },
+  { t: "Dance Break", d: "The host plays twenty seconds of anything. You dance for all twenty. Stopping early is a forfeit.", timer: 25, who: "one", type: "performance" },
+  { t: "Accent Reading", d: "Read your most recent text message out loud in a British accent. It has to survive the whole message.", timer: 30, who: "one", type: "performance" },
+  { t: "One-Man Band", d: "Perform the chorus of a song the room picks. Every word correct or no points.", timer: 45, who: "one", type: "performance" },
+  { t: "Interpretive", d: "The room names an everyday chore. Perform it as interpretive dance until they guess it.", timer: 60, who: "one", type: "performance" },
+
+  /* ---------- speed / mental ---------- */
+  { t: "Ten Franchises", d: "Name ten NFL teams before the buzzer. No repeats, no hesitating.", timer: 20, who: "one", type: "speed" },
+  { t: "Capital Run", d: "Twelve U.S. state capitals before the buzzer. Go.", timer: 30, who: "one", type: "speed" },
+  { t: "Backwards Alphabet", d: "Say the alphabet backwards. All twenty-six. Start over if you break it.", timer: 30, who: "one", type: "speed" },
+  { t: "Sevens", d: "Count down from one hundred by sevens. Five correct steps before the buzzer.", timer: 20, who: "one", type: "speed" },
+  { t: "One Word Titles", d: "Ten movies with one-word titles. No repeats.", timer: 30, who: "one", type: "speed" },
+  { t: "Beach Bag", d: "Fifteen things you'd pack for a day at the beach. Keep talking, don't stop.", timer: 30, who: "one", type: "speed" },
+  { t: "Cereal Aisle", d: "Ten breakfast cereals before the buzzer.", timer: 20, who: "one", type: "speed" },
+  { t: "Tap The Keg", d: "Name a different beer brand for five different letters of the alphabet.", timer: 30, who: "one", type: "speed" },
+  { t: "Commander In Chief", d: "Ten U.S. presidents before the buzzer. Any order.", timer: 20, who: "one", type: "speed" },
+  { t: "Twister", d: "Say \"she sells seashells by the seashore\" three times fast, cleanly. The room is the judge and the room is petty.", timer: 25, who: "one", type: "speed" },
+  { t: "Roll Call", d: "Name every person in this room in reverse alphabetical order by first name.", timer: 45, who: "one", type: "speed" },
+  { t: "Toppings", d: "Eight pizza toppings before the buzzer. Anything already said tonight doesn't count.", timer: 15, who: "one", type: "speed" },
+  { t: "The Fifty", d: "Name twelve U.S. states before the buzzer. No repeats.", timer: 20, who: "one", type: "speed" },
+  { t: "Crayon Box", d: "Ten colors that are not red, blue, green, or yellow.", timer: 20, who: "one", type: "speed" },
+
+  /* ---------- social ---------- */
+  { t: "Say Something Nice", d: "Give a genuine, specific compliment to every single person in this room. Generic doesn't count and the room will call it.", timer: 90, who: "one", type: "social" },
+  { t: "Make The Call", d: "Call a parent or a sibling right now and tell them you love them. No explanation, no context. Hang up.", timer: 60, who: "one", type: "social" },
+  { t: "Interrogation", d: "Speak only in questions until your team's next turn. Slip once and the points come back off.", timer: 0, who: "one", type: "social" },
+  { t: "On Your Feet", d: "You are standing for the rest of this round. Sit down and it's a forfeit.", timer: 0, who: "one", type: "social" },
+  { t: "Storytime", d: "Tell a genuinely embarrassing story about yourself. The room votes on whether it was worth the points.", timer: 90, who: "one", spice: "party", type: "social" },
+  { t: "Camera Roll", d: "Show the room the most recent photo in your camera roll. No scrolling, no choosing.", timer: 20, who: "one", spice: "party", type: "social" },
+  { t: "Read It Aloud", d: "Read your most recent sent text message out loud. Whole thing.", timer: 20, who: "one", spice: "party", type: "social" },
+  { t: "I've Made A Huge Mistake", d: "Text the fifth person in your recent messages exactly: \"I've made a huge mistake.\" Nothing else. Show the room the send.", timer: 45, who: "one", spice: "party", type: "social" },
+  { t: "New Wallpaper", d: "The room picks your phone wallpaper. It stays until this game ends.", timer: 45, who: "one", spice: "party", type: "social" },
+  { t: "Wardrobe Swap", d: "Swap one visible article of clothing with someone else in the room. It stays swapped for the rest of the round.", timer: 45, who: "one", spice: "party", type: "social" },
+  { t: "Confiscated", d: "Hand your phone to the host. You get it back after your team's next turn.", timer: 0, who: "one", spice: "party", type: "social" },
+
+  /* ---------- whole room ---------- */
+  { t: "Last One Standing", d: "EVERYBODY. Wall sit, all at once. Last person holding wins it for their team.", timer: 0, who: "room", type: "room" },
+  { t: "Room-Wide Rochambeau", d: "EVERYBODY. Rock-paper-scissors, single elimination bracket, right now. Winner takes the points for their team.", timer: 0, who: "room", type: "room" },
+  { t: "The Long Stare", d: "EVERYBODY. Staring contest, elimination style. Blink and you're out. Last eyes open score.", timer: 0, who: "room", type: "room" },
+  { t: "Telephone", d: "EVERYBODY. The host whispers a sentence to one person. It goes around the room. If it survives intact, every team scores.", timer: 0, who: "room", type: "room" },
+  { t: "Closest Guess", d: "EVERYBODY. The host thinks of a number between 1 and 100 and writes it down. Everyone guesses once. Closest wins.", timer: 45, who: "room", type: "room" },
+  { t: "Human Knot", d: "EVERYBODY. Grab two hands that aren't next to you. Untangle without letting go. Beat the clock and every team scores.", timer: 120, who: "room", type: "room" },
+  { t: "Freeze", d: "EVERYBODY. Freeze in place. Nobody moves, nobody laughs. First to break is out, last one frozen scores.", timer: 0, who: "room", type: "room" },
+];
+
+const GROUP_VOTES = [
+  { q: "Is a hot dog a sandwich?", opts: ["It's a sandwich", "It absolutely is not"] },
+  { q: "Pineapple on pizza:", opts: ["Delicacy", "War crime"] },
+  { q: "Superior cookout side:", opts: ["Potato salad", "Mac and cheese"] },
+  { q: "Cooking outdoors, the only correct answer:", opts: ["Charcoal", "Gas"] },
+  { q: "Ketchup on a hot dog is:", opts: ["Perfectly fine", "A felony"] },
+  { q: "The better long weekend:", opts: ["Memorial Day", "Labor Day"] },
+  { q: "Where are you spending the day?", opts: ["Pool", "Lake"] },
+  { q: "Toilet paper hangs:", opts: ["Over", "Under"] },
+  { q: "Is cereal a soup?", opts: ["Yes, technically", "Absolutely not"] },
+  { q: "Is a Pop-Tart a ravioli?", opts: ["Structurally, yes", "Get out"] },
+  { q: "Do you rinse dishes before the dishwasher?", opts: ["Always rinse", "That's what it's for"] },
+  { q: "Shoes on inside the house:", opts: ["Fine", "Absolutely not"] },
+  { q: "Better breakfast:", opts: ["Pancakes", "Waffles"] },
+  { q: "The one true tea:", opts: ["Sweet", "Unsweet"] },
+  { q: "A straw has:", opts: ["One hole", "Two holes"] },
+  { q: "Better road trip role:", opts: ["Driver", "Passenger with aux"] },
+  { q: "Socks in bed:", opts: ["Yes", "Never"] },
+  { q: "Is Die Hard a Christmas movie?", opts: ["Yes", "No"] },
+  { q: "Better to watch live:", opts: ["Football", "Baseball"] },
+  { q: "The superior chip:", opts: ["Doritos", "Lay's"] },
+  { q: "Vacation of choice:", opts: ["Beach", "Mountains"] },
+  { q: "Better condiment:", opts: ["Mayo", "Mustard"] },
+  { q: "Correct pizza technique:", opts: ["Fold it", "Keep it flat"] },
+  { q: "Participation trophies for kids:", opts: ["Fine, they're kids", "Absolutely not"] },
+  { q: "Cutting the grass:", opts: ["Weirdly therapeutic", "A chore and nothing more"] },
+  { q: "Better seat on a plane:", opts: ["Window", "Aisle"] },
+  { q: "The better summer drink:", opts: ["Cold beer", "Hard seltzer"] },
+  { q: "Camping means:", opts: ["A tent", "A camper with air conditioning"] },
+  { q: "Is water wet?", opts: ["Yes", "No, it makes things wet"] },
+  { q: "Best way to cook a burger:", opts: ["Smashed thin", "Thick and juicy"] },
+  { q: "Fireworks:", opts: ["Never gets old", "Loud and overrated"] },
+  { q: "Better dog:", opts: ["Big dog", "Small dog"] },
+  { q: "When the alarm goes off:", opts: ["Up immediately", "Snooze is a lifestyle"] },
+  { q: "Group texts:", opts: ["Love them", "Mute them instantly"] }
+];
+
+const HOT_SEAT = [
+  { q: "Who in this room falls asleep first tonight?" },
+  { q: "Who is most likely to lose their phone this weekend?" },
+  { q: "Who is the best cook in this room?" },
+  { q: "Who survives longest in a zombie apocalypse?" },
+  { q: "Who is the most competitive person here — and won't admit it?" },
+  { q: "Who tells the longest stories?" },
+  { q: "Who is most likely to get pulled over on the drive home?" },
+  { q: "Who is the funniest person in this room?" },
+  { q: "Who gives the best advice?" },
+  { q: "Who is the worst driver here?" },
+  { q: "Who is most likely to start their own business?" },
+  { q: "Who would make the best president?" },
+  { q: "Who takes the longest to text back?" },
+  { q: "Who is most likely to cry at a movie?" },
+  { q: "Who spends the most money on things they do not need?" },
+  { q: "Who is the pickiest eater?" },
+  { q: "Who do you want in your corner in a genuine emergency?" },
+  { q: "Who is still awake at three in the morning?" },
+  { q: "Who has the best taste in music?" },
+  { q: "Who is most likely to forget somebody's birthday?" },
+  { q: "Who is the most organized person here?" },
+  { q: "Who would be the worst roommate?" },
+  { q: "Who wins this entire game tonight?" },
+  { q: "Who takes the longest to get ready to leave?" },
+  { q: "Who is the most likely to plan the next trip?" },
+  { q: "Who has never once lost an argument in this group?" },
+  { q: "Who would last the longest without their phone?" },
+  { q: "Who is most likely to bring up politics before the night is over?", spice: "party" },
+  { q: "Who is the biggest lightweight in this room?", spice: "party" },
+  { q: "Who has a story from this group's history they still haven't told?", spice: "party" }
+];
+
+const DUELS = [
+  { t: "Thumb War", d: "Best of three. One, two, three, four — declare a thumb war." },
+  { t: "Rochambeau", d: "Rock, paper, scissors. Best of five. No shooting late." },
+  { t: "The Stare", d: "Staring contest. First to blink or laugh loses." },
+  { t: "Arm Wrestle", d: "Find a table. Elbows down. One round." },
+  { t: "Deep Breath", d: "Both hold your breath. Last one breathing wins." },
+  { t: "Wall Sit Duel", d: "Both against the wall, thighs parallel. Last one up wins." },
+  { t: "Plank Duel", d: "Both plank. Last one holding wins." },
+  { t: "Push-Up Duel", d: "Twenty seconds. Most clean push-ups wins.", timer: 20 },
+  { t: "Flamingo Duel", d: "Both on one foot, eyes closed. Last one balanced wins." },
+  { t: "Franchise Volley", d: "Alternate naming NFL teams. First to stall or repeat loses." },
+  { t: "State Volley", d: "Alternate naming U.S. states. First to stall or repeat loses." },
+  { t: "Topping Volley", d: "Alternate naming pizza toppings. First to stall or repeat loses." },
+  { t: "Mouse House Volley", d: "Alternate naming Disney movies. First to stall or repeat loses." },
+  { t: "Tap Room Volley", d: "Alternate naming beer brands. First to stall or repeat loses." },
+  { t: "Hero Volley", d: "Alternate naming Marvel characters. First to stall or repeat loses." },
+  { t: "Backwards Race", d: "Both say the alphabet backwards. First one through, cleanly, wins.", timer: 45 },
+  { t: "Call It", d: "Coin flip, called in the air. Best of three." },
+  { t: "Split The Difference", d: "The host picks a number between 1 and 100. Closest guess wins. One guess each." },
+  { t: "Sudden Death", d: "The host reads one trivia question. First correct answer wins it." },
+  { t: "Scavenger Sprint", d: "Both go find something red, then something metal, then something older than you are. First one back wins.", timer: 60 },
+  { t: "Weather Check", d: "Both unlock your phone and open the weather app. First to read the current temperature out loud wins." },
+  { t: "Battery Roulette", d: "Both hold up your phone. Lower battery percentage wins. Pure fate." },
+  { t: "Middle Names", d: "Alternate naming middle names of people in this room. First to stall loses." },
+  { t: "Silent Treatment", d: "Both try to make the other laugh. No touching. First to crack loses.", timer: 60 }
+];
+
+const FINAL_SHOWDOWN = [
+  { cat: "American Geography", q: "Four U.S. state capitals are named after U.S. presidents. Name three of them.", a: "Jackson MS, Jefferson City MO, Lincoln NE, Madison WI" },
+  { cat: "Movies", q: "Only three films have won all five major Academy Awards — Picture, Director, Actor, Actress, and Screenplay. Name any two.", a: "It Happened One Night (1934), One Flew Over the Cuckoo's Nest (1975), The Silence of the Lambs (1991)" },
+  { cat: "Sports", q: "Only one team in the four major North American leagues is publicly owned by its fans. Name the team.", a: "The Green Bay Packers" },
+  { cat: "Food & Drink", q: "Bourbon has a legal definition in the United States. Name any two of its requirements.", a: "At least 51% corn; aged in new charred oak containers; distilled to no more than 160 proof; barreled at no more than 125 proof; made in the USA" },
+  { cat: "History", q: "Three U.S. presidents have died on the Fourth of July. Name two of them.", a: "John Adams and Thomas Jefferson (both 1826), James Monroe (1831)" },
+  { cat: "Science", q: "Name the four fundamental forces of physics.", a: "Gravity, electromagnetism, the strong nuclear force, the weak nuclear force" },
+  { cat: "Music", q: "Only one artist has had a number one single in each of the last four decades in the United States. Who?", a: "Mariah Carey" },
+  { cat: "The Great Outdoors", q: "What is the most-visited national park in the United States, by a wide margin?", a: "Great Smoky Mountains National Park" },
+  { cat: "Florida", q: "Florida has two land borders. Name both states, and name the body of water on its western coast.", a: "Georgia and Alabama; the Gulf of Mexico" },
+  { cat: "Labor Day", q: "Labor Day became a federal holiday in the United States in what decade, and it is observed on which specific day?", a: "The 1890s (1894) — the first Monday in September" },
+  { cat: "Television", q: "Name the four main characters in Seinfeld's core cast.", a: "Jerry, George, Elaine, and Kramer" },
+  { cat: "The Military", q: "Name all six branches of the United States Armed Forces.", a: "Army, Marine Corps, Navy, Air Force, Space Force, Coast Guard" }
 ];
 
 // ============================================================
 // WILDCARD EVENTS
+// Unmarked squares that hijack the board. `weight` biases the
+// draw — the live-action events show up more often than the
+// plain point swings, because watching your friend attempt a
+// wall sit is the entire reason we're here.
 // ============================================================
 const WILDCARD_EVENTS = [
   {
-    key: "lucky",
-    label: "🍀 Lucky Break",
-    needsTarget: false,
-    describe: (v) => `Instant windfall! The picking team banks a bonus +${v * 2} points — no question needed.`,
+    key: "challenge", label: "🔥 Challenge Accepted", weight: 5, kind: "challenge",
+    blurb: "Put the phone down. You're doing something."
+  },
+  {
+    key: "duel", label: "⚔️ Duel", weight: 4, kind: "duel",
+    blurb: "Pick an opponent. Only one of you walks away with points."
+  },
+  {
+    key: "vote", label: "🗳️ The People's Court", weight: 4, kind: "vote",
+    blurb: "The room votes. The majority gets paid."
+  },
+  {
+    key: "hotseat", label: "🪑 Hot Seat", weight: 4, kind: "hotseat",
+    blurb: "A question about you. Guess how the room answers it."
+  },
+  {
+    key: "crowdsave", label: "📣 Crowd Save", weight: 2, kind: "bonusq",
+    describe: () => `Free-for-all — this one is open to EVERY team. First correct answer shouted out takes it.`
+  },
+  {
+    key: "doubledown", label: "🎲 Double Down", weight: 2, kind: "bonusq", penalize: true,
+    describe: (v) => `High stakes. Right answer pays double. If nobody gets it, the picking team eats ${v}.`
+  },
+  {
+    key: "lucky", label: "🍀 Lucky Break", weight: 2, kind: "instant",
+    describe: (v) => `Pure windfall. You bank a bonus +${v * 2}, and you didn't have to do a thing.`,
     apply: (state, team, v) => { team.score += v * 2; }
   },
   {
-    key: "tab",
-    label: "🍻 Bar Tab",
-    needsTarget: false,
-    describe: (v) => `Ouch. Someone's buying a round — the picking team loses ${v} points.`,
+    key: "tab", label: "🍻 Bar Tab", weight: 2, kind: "instant",
+    describe: (v) => `Somebody's buying a round, and it's you. Down ${v}.`,
     apply: (state, team, v) => { team.score -= v; }
   },
   {
-    key: "robinhood",
-    label: "🏹 Robin Hood",
-    needsTarget: false,
+    key: "robinhood", label: "🏹 Robin Hood", weight: 2, kind: "instant",
     describe: (v, state, team) => {
       const leader = getLeader(state, team);
-      if (!leader) return `No one to steal from — the picking team takes a flat +${v} instead.`;
-      return `Steal ${v} points from the current leader, ${leader.name}!`;
+      if (!leader) return `Nobody worth robbing. Take a flat +${v} and move along.`;
+      return `Take ${v} points straight off the leader, ${leader.name}. No appeal.`;
     },
     apply: (state, team, v) => {
       const leader = getLeader(state, team);
@@ -764,22 +1194,36 @@ const WILDCARD_EVENTS = [
     }
   },
   {
-    key: "crowdsave",
-    label: "📣 Crowd Save",
-    needsTarget: false,
-    isBonusQuestion: true,
-    describe: () => `Free-for-all! This question is open to EVERY team — whoever shouts the right answer first wins the points.`,
-    apply: () => {}
+    key: "tax", label: "💸 Everybody Pays", weight: 2, kind: "instant",
+    describe: (v) => `You're exempt. Every OTHER team loses ${Math.round(v / 2)}.`,
+    apply: (state, team, v) => {
+      const cut = Math.round(v / 2);
+      state.teams.forEach(t => { if (t !== team) t.score -= cut; });
+    }
   },
   {
-    key: "doubledown",
-    label: "🎲 Double Down",
-    needsTarget: false,
-    isBonusQuestion: true,
-    describe: (v) => `High stakes: get it right for +${v * 2}, or the picking team loses ${v} if nobody gets it.`,
-    apply: () => {}
+    key: "swap", label: "🔄 Swap Meet", weight: 2, kind: "instant", needsTarget: true,
+    describe: () => `Choose any team and trade scores with them. Choose carefully. Choose cruelly.`,
+    apply: (state, team, v, target) => {
+      if (!target) return;
+      const tmp = team.score; team.score = target.score; target.score = tmp;
+    }
+  },
+  {
+    key: "insurance", label: "🛡️ Insurance Policy", weight: 2, kind: "instant",
+    describe: () => `A shield. The next time this team would lose points — a blown Daily Double, a failed dare, anything — it costs you nothing. One use.`,
+    apply: (state, team) => { team.shield = true; }
   }
 ];
+
+// Weighted draw so the live-action events dominate the deck.
+function drawWildcardEvent() {
+  const pool = [];
+  WILDCARD_EVENTS.forEach(e => {
+    for (let i = 0; i < (e.weight || 1); i++) pool.push(e);
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 function getLeader(state, excludeTeam) {
   const others = state.teams.filter(t => t !== excludeTeam);
@@ -856,14 +1300,23 @@ function playDailyDouble() {
 /* ============================================================
    STATE
 ============================================================ */
-let state = {
-  teams: [],       // { id, name, score, wildcardGain, biggestSwing, maxStreak, currentStreak }
-  used: {},        // "Category|Value" -> true
-  screen: "setup",  // setup | roundselect | board | winner
-  roundIndex: 0,
-  readerIndex: 0,  // index into state.teams — whose turn it is to pick & read
-  lastCorrectTeamId: null
-};
+function freshState() {
+  return {
+    teams: [],          // { id, name, score, wildcardGain, biggestSwing, maxStreak, currentStreak, challengesWon, shield }
+    used: {},           // "Category|Value" -> true
+    screen: "setup",    // setup | roundselect | board | winner
+    roundIndex: 0,
+    readerIndex: 0,     // whose turn it is to pick & read
+    lastCorrectTeamId: null,
+    spice: "family",    // family | party
+    drawn: {},          // deckName -> indices already used this game
+    history: [],        // undo snapshots
+    finalDone: false,
+    finalWagers: {}
+  };
+}
+
+let state = freshState();
 
 function currentRound() {
   return ROUNDS[state.roundIndex];
@@ -895,9 +1348,15 @@ function resetTeamStats(team) {
 // Records a scoring event on a team and updates streak/wildcard/swing stats
 // used for the end-of-game superlatives. opts: { isAnswer, isWildcard }
 function scoreEvent(team, delta, opts = {}) {
+  // An Insurance Policy eats exactly one negative swing, then burns out.
+  if (delta < 0 && team.shield) {
+    team.shield = false;
+    delta = 0;
+  }
   team.score += delta;
   if (delta > (team.biggestSwing || 0)) team.biggestSwing = delta;
   if (opts.isWildcard) team.wildcardGain = (team.wildcardGain || 0) + delta;
+  if (opts.isChallenge && delta > 0) team.challengesWon = (team.challengesWon || 0) + 1;
   if (opts.isAnswer && delta > 0) {
     if (state.lastCorrectTeamId === team.id) team.currentStreak = (team.currentStreak || 0) + 1;
     else team.currentStreak = 1;
@@ -913,11 +1372,13 @@ const $main = document.getElementById('main');
 const $scoreboard = document.getElementById('scoreboard');
 
 function render() {
+  stopTimer();
   renderScoreboard();
   if (state.screen === 'setup') renderSetup();
   else if (state.screen === 'roundselect') renderRoundSelect();
   else if (state.screen === 'board') renderBoard();
   else if (state.screen === 'winner') renderWinner();
+  saveGame();
 }
 
 function renderScoreboard() {
@@ -943,22 +1404,61 @@ function escapeHtml(str) {
 
 /* ---------- Setup screen ---------- */
 function renderSetup() {
+  const saved = loadSavedGame();
   $main.innerHTML = `
     <h1 class="title">🏆 Game Night Showdown 🏆</h1>
-    <div class="subtitle">Add every team or player, then hit Start</div>
+    <div class="subtitle">Add every team or player, pick your spice level, then hit Start</div>
     <div class="panel">
+      ${saved ? `
+        <div class="resume-box">
+          <div style="font-weight:900;color:var(--green);margin-bottom:6px;">Game in progress</div>
+          <div style="font-size:.9rem;opacity:.8;margin-bottom:10px;">
+            ${escapeHtml(saved.state.teams.map(t => t.name).join(', '))}
+          </div>
+          <button class="btn-primary btn-full" id="resumeBtn">Resume That Game</button>
+          <button class="btn-secondary btn-full" id="discardBtn">Start Fresh Instead</button>
+        </div>
+      ` : ''}
       <h2>Who's Playing?</h2>
       <div class="team-row">
         <input id="newTeamName" type="text" placeholder="Team or player name" maxlength="24" />
         <button class="btn-primary" id="addTeamBtn">Add</button>
       </div>
+      <button class="btn-secondary btn-full" id="randomNameBtn" style="margin-bottom:10px;">🎲 Can't Decide? Generate a Team Name</button>
       <div id="teamList"></div>
+
+      <h2 style="margin-top:22px;">Spice Level</h2>
+      <div class="spice-toggle">
+        <button class="spice-opt ${state.spice !== 'party' ? 'on' : ''}" data-spice="family">
+          <span class="st-name">☀️ Family Friendly</span>
+          <span class="st-desc">Kids in the room, grandma on the couch</span>
+        </button>
+        <button class="spice-opt ${state.spice === 'party' ? 'on' : ''}" data-spice="party">
+          <span class="st-name">🌙 After Dark</span>
+          <span class="st-desc">Kids in bed. Phones become evidence.</span>
+        </button>
+      </div>
+
       <button class="btn-primary btn-full" id="startBtn" disabled>Start Game</button>
-      <div class="hint">Need at least 2 teams. Works great for couples, squads, or solo players.</div>
+      <div class="hint">Need at least 2 teams. Works for couples, squads, or everyone solo.</div>
     </div>
+    ${weekendStandingsHtml()}
   `;
   const $list = document.getElementById('teamList');
   const $start = document.getElementById('startBtn');
+
+  if (saved) {
+    document.getElementById('resumeBtn').onclick = () => {
+      state = saved.state;
+      nextTeamId = saved.nextTeamId || (Math.max(0, ...state.teams.map(t => t.id)) + 1);
+      render();
+    };
+    document.getElementById('discardBtn').onclick = () => { clearSavedGame(); render(); };
+  }
+
+  document.querySelectorAll('[data-spice]').forEach(btn => {
+    btn.onclick = () => { state.spice = btn.dataset.spice; render(); };
+  });
 
   function refreshList() {
     $list.innerHTML = state.teams.map(t => `
@@ -976,17 +1476,20 @@ function renderSetup() {
     });
   }
 
-  function addTeam() {
+  function addTeam(preset) {
     const input = document.getElementById('newTeamName');
-    const name = input.value.trim();
+    const name = (preset || input.value).trim();
     if (!name) return;
-    state.teams.push({ id: nextTeamId++, name, score: 0, wildcardGain: 0, biggestSwing: 0, maxStreak: 0, currentStreak: 0 });
+    state.teams.push({ id: nextTeamId++, name, score: 0, wildcardGain: 0, biggestSwing: 0, maxStreak: 0, currentStreak: 0, challengesWon: 0 });
     input.value = '';
     input.focus();
     refreshList();
   }
 
-  document.getElementById('addTeamBtn').onclick = addTeam;
+  document.getElementById('addTeamBtn').onclick = () => addTeam();
+  document.getElementById('randomNameBtn').onclick = () => {
+    document.getElementById('newTeamName').value = randomTeamName();
+  };
   document.getElementById('newTeamName').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') addTeam();
   });
@@ -1004,17 +1507,24 @@ function renderSetup() {
 function renderRoundSelect() {
   $main.innerHTML = `
     <h1 class="title">🏆 Game Night Showdown 🏆</h1>
-    <div class="subtitle">Pick tonight's board</div>
-    <div class="panel" style="max-width:640px;">
+    <div class="subtitle">Pick tonight's board — ${state.spice === 'party' ? '🌙 After Dark' : '☀️ Family Friendly'}</div>
+    <div class="panel" style="max-width:680px;">
       <h2>Choose a Round</h2>
       <div id="roundList" style="display:flex;flex-direction:column;gap:12px;"></div>
-      <div class="hint" style="margin-top:14px;">Each round is a full, separate board — play one tonight, save the others for next time.</div>
+      <div class="hint" style="margin-top:14px;">
+        Every board hides eight unmarked wildcard squares — challenges, duels, dares and public votes.
+        Clear the board and it ends in a Final Showdown.
+      </div>
+      <button class="btn-secondary btn-full" id="backSetupBtn" style="margin-top:14px;">← Back to Players</button>
     </div>
+    ${weekendStandingsHtml()}
   `;
   const $list = document.getElementById('roundList');
   $list.innerHTML = ROUNDS.map((r, i) => `
     <button class="btn-secondary" data-round="${i}" style="text-align:left;padding:16px 18px;">
-      <div style="font-size:1.1rem;font-weight:900;color:var(--gold);">${escapeHtml(r.name)}</div>
+      <div style="font-size:1.1rem;font-weight:900;color:var(--gold);">
+        ${escapeHtml(r.name)}${r.type === 'gauntlet' ? '<span class="gauntlet-badge">NO TRIVIA</span>' : ''}
+      </div>
       <div style="opacity:.75;font-size:.9rem;margin-top:4px;">${escapeHtml(r.tagline)}</div>
     </button>
   `).join('');
@@ -1023,10 +1533,13 @@ function renderRoundSelect() {
       state.roundIndex = parseInt(btn.dataset.round, 10);
       state.used = {};
       state.readerIndex = 0;
+      state.history = [];
+      state.finalDone = false;
       state.screen = 'board';
       render();
     };
   });
+  document.getElementById('backSetupBtn').onclick = () => { state.screen = 'setup'; render(); };
 }
 
 /* ---------- Board screen ---------- */
@@ -1034,8 +1547,16 @@ function renderBoard() {
   const round = currentRound();
   const usedCount = Object.keys(state.used).length;
   const totalCells = totalCellsForRound();
-  const cats = round.categories.map(c => `<div class="cat-header">${escapeHtml(c)}</div>`).join('');
 
+  // Board cleared — go to the Final Showdown before crowning anyone.
+  if (usedCount === totalCells && totalCells > 0) {
+    if (!state.finalDone && state.teams.length > 0) { startFinalShowdown(); return; }
+    state.screen = 'winner';
+    render();
+    return;
+  }
+
+  const cats = round.categories.map(c => `<div class="cat-header">${escapeHtml(c)}</div>`).join('');
   const rows = VALUES.map(v => {
     return round.categories.map(cat => {
       const key = cat + '|' + v;
@@ -1046,31 +1567,51 @@ function renderBoard() {
   }).join('');
 
   const reader = currentReader();
+  const canUndo = state.history && state.history.length > 0;
 
   $main.innerHTML = `
     <h1 class="title" style="margin-top:4px;">🏆 ${escapeHtml(round.name)} 🏆</h1>
     ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong>'s turn to pick &amp; read — anyone can still answer!</div>` : ''}
     <div id="board">${cats}${rows}</div>
+    <div class="host-bar">
+      <button class="btn-primary" id="sideQuestBtn">🎯 Side Quest</button>
+      <button class="btn-secondary" id="randomBtn">🎲 Random Square</button>
+      <button class="btn-secondary" id="editScoreBtn">✏️ Scores</button>
+      <button class="btn-secondary" id="undoBtn" ${canUndo ? '' : 'disabled'}>↩ Undo</button>
+    </div>
     <div id="boardControls">
-      <button class="btn-secondary" id="resetBtn">Reset Game</button>
       <button class="btn-secondary" id="changeRoundBtn">Change Round</button>
+      <button class="btn-secondary" id="resetBtn">Reset Game</button>
       <span class="hint" style="align-self:center;">${usedCount} / ${totalCells} squares revealed</span>
     </div>
   `;
 
   $main.querySelectorAll('.cell.clickable').forEach(cell => {
-    cell.onclick = () => {
-      const cat = cell.dataset.cat;
-      const val = parseInt(cell.dataset.val, 10);
-      openSquare(cat, val);
-    };
+    cell.onclick = () => openSquare(cell.dataset.cat, parseInt(cell.dataset.val, 10));
   });
+
+  document.getElementById('sideQuestBtn').onclick = openSideQuest;
+  document.getElementById('editScoreBtn').onclick = openScoreEditor;
+  document.getElementById('undoBtn').onclick = () => {
+    if (undoLast()) render();
+  };
+  document.getElementById('randomBtn').onclick = () => {
+    const open = [];
+    round.categories.forEach(cat => VALUES.forEach(v => {
+      if (!state.used[cat + '|' + v]) open.push([cat, v]);
+    }));
+    if (open.length === 0) return;
+    const [cat, v] = open[Math.floor(Math.random() * open.length)];
+    openSquare(cat, v);
+  };
 
   document.getElementById('resetBtn').onclick = () => {
     if (confirm('Reset this round? Scores and revealed squares will be cleared.')) {
       state.used = {};
       state.readerIndex = 0;
       state.lastCorrectTeamId = null;
+      state.history = [];
+      state.finalDone = false;
       state.teams.forEach(resetTeamStats);
       render();
     }
@@ -1080,24 +1621,34 @@ function renderBoard() {
     if (confirm('Switch to a different round? This round\'s progress will be cleared (scores stay).')) {
       state.used = {};
       state.readerIndex = 0;
+      state.finalDone = false;
       state.screen = 'roundselect';
       render();
     }
   };
-
-  if (usedCount === totalCells && totalCells > 0) {
-    state.screen = 'winner';
-    render();
-  }
 }
 
 /* ---------- Question / Wildcard overlay ---------- */
 function openSquare(cat, val) {
+  pushHistory();
   const round = currentRound();
+
+  // Gauntlet boards have no trivia at all — every square draws live.
+  if (round.type === 'gauntlet') {
+    const spec = round.deckFor[cat];
+    const team = currentReader();
+    openOverlayCard();
+    const ctx = { cat, val, team, done: () => markUsedAndReturn(cat, val) };
+    if (spec.deck === 'duel') runDuel(ctx);
+    else if (spec.deck === 'vote') runVote(ctx);
+    else if (spec.deck === 'hotseat') runHotSeat(ctx);
+    else runChallenge(ctx, spec.type);
+    return;
+  }
+
   const dd = round.dailyDouble;
   if (dd && dd.category === cat && dd.value === val) { openDailyDouble(cat, val); return; }
-  const isWild = round.wildcardSlots[cat] === val;
-  if (isWild) openWildcard(cat, val);
+  if (round.wildcardSlots && round.wildcardSlots[cat] === val) openWildcard(cat, val);
   else openQuestion(cat, val);
 }
 
@@ -1222,120 +1773,45 @@ function openDailyDouble(cat, val) {
   };
 }
 
-function openWildcard(cat, val) {
+function openOverlayCard(inner) {
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
-  overlay.innerHTML = `
-    <div class="card">
-      <div class="tag wild">★ Wildcard — ${escapeHtml(cat)} (${val} pts) ★</div>
-      <div class="catval">Who picked this square?</div>
-      ${teamButtonsHtml('picker')}
-    </div>
-  `;
+  overlay.innerHTML = `<div class="card">${inner || ''}</div>`;
   document.body.appendChild(overlay);
-
-  document.querySelectorAll('[data-prefix="picker"]').forEach(btn => {
-    btn.onclick = () => {
-      const team = state.teams.find(t => t.id == btn.dataset.team);
-      runWildcardSpin(cat, val, team);
-    };
-  });
+  return overlay;
 }
 
-function runWildcardSpin(cat, val, team) {
-  const card = document.querySelector('#overlay .card');
-  card.innerHTML = `
-    <div class="tag wild">★ Wildcard ★</div>
+function openWildcard(cat, val) {
+  const team = currentReader();
+  openOverlayCard(`
+    <div class="tag wild">★ WILDCARD ★</div>
+    <div class="who-line"><strong>${escapeHtml(team.name)}</strong> landed on it. Let's find out what it costs them.</div>
     <div class="wild-desc"><span class="spin-text" id="spinText">Spinning...</span></div>
-  `;
+  `);
   playWildcardSpin();
   const spinEl = document.getElementById('spinText');
   let i = 0;
   const spinInterval = setInterval(() => {
     spinEl.textContent = WILDCARD_EVENTS[i % WILDCARD_EVENTS.length].label;
     i++;
-  }, 120);
+  }, 110);
 
   setTimeout(() => {
     clearInterval(spinInterval);
-    const event = WILDCARD_EVENTS[Math.floor(Math.random() * WILDCARD_EVENTS.length)];
-    showWildcardResult(cat, val, team, event);
-  }, 1400);
-}
-
-function showWildcardResult(cat, val, team, event) {
-  playWildcardReveal();
-  const card = document.querySelector('#overlay .card');
-  const descText = event.describe(val, state, team);
-
-  if (event.isBonusQuestion) {
-    const bonus = BONUS_QUESTIONS[Math.floor(Math.random() * BONUS_QUESTIONS.length)];
+    const event = drawWildcardEvent();
+    const card = document.querySelector('#overlay .card');
+    if (!card) return;
+    // Beat of anticipation on the reveal before the runner takes over.
     card.innerHTML = `
       <div class="tag wild">${event.label}</div>
-      <div class="wild-desc">${escapeHtml(descText)}</div>
-      <div class="qtext">${escapeHtml(bonus.q)}</div>
-      <button class="btn-primary" id="revealBonusBtn">Reveal Answer</button>
-      <div id="bonusAnswerArea"></div>
+      ${event.blurb ? `<div class="wild-desc">${escapeHtml(event.blurb)}</div>` : ''}
+      <button class="btn-primary" id="wildGoBtn">Let's See It</button>
     `;
-    document.getElementById('revealBonusBtn').onclick = () => {
-      document.getElementById('revealBonusBtn').remove();
-      document.getElementById('bonusAnswerArea').innerHTML = `
-        <div class="atext">${escapeHtml(bonus.a)}</div>
-        <div>Who got it right?</div>
-        ${teamButtonsHtml('bonusaward')}
-        <button class="btn-secondary none-btn" id="bonusNoneBtn">Nobody Got It</button>
-      `;
-      document.querySelectorAll('[data-prefix="bonusaward"]').forEach(btn => {
-        btn.onclick = () => {
-          const winner = state.teams.find(t => t.id == btn.dataset.team);
-          scoreEvent(winner, val * 2, { isAnswer: true, isWildcard: true });
-          playCorrect();
-          markUsedAndReturn(cat, val);
-        };
-      });
-      document.getElementById('bonusNoneBtn').onclick = () => {
-        if (event.key === 'doubledown') scoreEvent(team, -val, { isWildcard: true });
-        playWrong();
-        markUsedAndReturn(cat, val);
-      };
+    playWildcardReveal();
+    document.getElementById('wildGoBtn').onclick = () => {
+      runEvent(event, { cat, val, team, done: () => markUsedAndReturn(cat, val) });
     };
-    return;
-  }
-
-  if (event.needsTarget) {
-    const others = state.teams.filter(t => t !== team);
-    card.innerHTML = `
-      <div class="tag wild">${event.label}</div>
-      <div class="wild-desc">${escapeHtml(descText)}</div>
-      <div class="team-btn-grid">${others.map(t =>
-        `<button class="team-btn" data-target="${t.id}">${escapeHtml(t.name)}</button>`
-      ).join('')}</div>
-    `;
-    card.querySelectorAll('[data-target]').forEach(btn => {
-      btn.onclick = () => {
-        const targetTeam = state.teams.find(t => t.id == btn.dataset.target);
-        const before = team.score;
-        event.apply(state, team, val, targetTeam);
-        team.wildcardGain = (team.wildcardGain || 0) + (team.score - before);
-        team.biggestSwing = Math.max(team.biggestSwing || 0, team.score - before);
-        markUsedAndReturn(cat, val);
-      };
-    });
-    return;
-  }
-
-  // Instant effect, no target needed
-  const scoreBefore = team.score;
-  event.apply(state, team, val);
-  const instantDelta = team.score - scoreBefore;
-  team.wildcardGain = (team.wildcardGain || 0) + instantDelta;
-  team.biggestSwing = Math.max(team.biggestSwing || 0, instantDelta);
-  card.innerHTML = `
-    <div class="tag wild">${event.label}</div>
-    <div class="wild-desc">${escapeHtml(descText)}</div>
-    <button class="btn-primary" id="continueBtn">Continue</button>
-  `;
-  document.getElementById('continueBtn').onclick = () => markUsedAndReturn(cat, val);
+  }, 1500);
 }
 
 /* ---------- Superlatives (end-of-game awards) ---------- */
@@ -1346,17 +1822,28 @@ function computeSuperlatives() {
 
   const byBiggestSwing = [...teams].sort((a, b) => (b.biggestSwing || 0) - (a.biggestSwing || 0))[0];
   if (byBiggestSwing && byBiggestSwing.biggestSwing > 0) {
-    awards.push({ label: '💥 Comeback Kid (biggest single-question swing)', team: byBiggestSwing, detail: `+${byBiggestSwing.biggestSwing} in one shot` });
+    awards.push({ label: '💥 Comeback Kid (biggest single swing)', team: byBiggestSwing, detail: `+${byBiggestSwing.biggestSwing} in one shot` });
   }
 
   const byWildcard = [...teams].sort((a, b) => (b.wildcardGain || 0) - (a.wildcardGain || 0))[0];
   if (byWildcard && (byWildcard.wildcardGain || 0) > 0) {
-    awards.push({ label: '🍀 Wildcard Whisperer (luckiest with wildcards)', team: byWildcard, detail: `net +${byWildcard.wildcardGain} from wildcards` });
+    awards.push({ label: '🍀 Wildcard Whisperer (luckiest on the unmarked squares)', team: byWildcard, detail: `net +${byWildcard.wildcardGain} from wildcards` });
   }
 
   const byStreak = [...teams].sort((a, b) => (b.maxStreak || 0) - (a.maxStreak || 0))[0];
   if (byStreak && (byStreak.maxStreak || 0) >= 2) {
     awards.push({ label: '🧊 Ice in Their Veins (longest correct streak)', team: byStreak, detail: `${byStreak.maxStreak} correct in a row` });
+  }
+
+  const byChallenge = [...teams].sort((a, b) => (b.challengesWon || 0) - (a.challengesWon || 0))[0];
+  if (byChallenge && (byChallenge.challengesWon || 0) > 0) {
+    awards.push({ label: '💪 Did The Thing (most challenges completed)', team: byChallenge, detail: `${byChallenge.challengesWon} challenge${byChallenge.challengesWon === 1 ? '' : 's'} survived` });
+  }
+
+  const sorted = [...teams].sort((a, b) => b.score - a.score);
+  if (sorted.length > 1) {
+    const last = sorted[sorted.length - 1];
+    awards.push({ label: '🪑 Gracious in Defeat (last place, still showed up)', team: last, detail: `${last.score} points and a lot of heart` });
   }
 
   return awards;
@@ -1393,16 +1880,28 @@ function renderWinner() {
           `).join('')}
         </div>
       ` : ''}
-      <button class="btn-primary btn-full" id="playAgainBtn">Play Again (Same Round)</button>
+      <button class="btn-primary btn-full" id="bankBtn">🏅 Bank This Game to the Weekend Board</button>
       <button class="btn-secondary btn-full" id="newRoundBtn">Play a Different Round</button>
+      <button class="btn-secondary btn-full" id="playAgainBtn">Replay This Round</button>
       <button class="btn-secondary btn-full" id="newGameBtn">New Game (Reset Everyone)</button>
     </div>
+    <div id="weekendSlot">${weekendStandingsHtml()}</div>
   `;
   launchConfetti();
+  playFanfare();
+
+  document.getElementById('bankBtn').onclick = (e) => {
+    bankGameToWeekend();
+    e.target.disabled = true;
+    e.target.textContent = '✅ Banked to the Weekend Board';
+    document.getElementById('weekendSlot').innerHTML = weekendStandingsHtml();
+  };
   document.getElementById('playAgainBtn').onclick = () => {
     state.used = {};
     state.readerIndex = 0;
     state.lastCorrectTeamId = null;
+    state.history = [];
+    state.finalDone = false;
     state.teams.forEach(resetTeamStats);
     state.screen = 'board';
     render();
@@ -1410,11 +1909,15 @@ function renderWinner() {
   document.getElementById('newRoundBtn').onclick = () => {
     state.used = {};
     state.readerIndex = 0;
+    state.history = [];
+    state.finalDone = false;
     state.screen = 'roundselect';
     render();
   };
   document.getElementById('newGameBtn').onclick = () => {
-    state = { teams: [], used: {}, screen: 'setup', roundIndex: 0, readerIndex: 0 };
+    if (!confirm('Reset every team and score? The weekend board is kept.')) return;
+    clearSavedGame();
+    state = freshState();
     render();
   };
 }
@@ -1435,7 +1938,640 @@ function launchConfetti() {
   setTimeout(() => { wrap.innerHTML = ''; }, 5000);
 }
 
-render();
+/* ============================================================
+   DECK DRAWING
+   Every live-action deck is filtered by the current spice level
+   and drawn without repeats until the deck is exhausted, so you
+   don't get the same dare twice in one night.
+============================================================ */
+function spiceOk(item) {
+  return state.spice === 'party' || item.spice !== 'party';
+}
+
+function drawFrom(pool, deckName, filterFn) {
+  if (!state.drawn) state.drawn = {};
+  const used = state.drawn[deckName] || (state.drawn[deckName] = []);
+  let candidates = pool
+    .map((it, i) => ({ it, i }))
+    .filter(x => spiceOk(x.it) && (!filterFn || filterFn(x.it)));
+  if (candidates.length === 0) {
+    // Spice filter emptied the deck — fall back to the unfiltered pool.
+    candidates = pool.map((it, i) => ({ it, i })).filter(x => !filterFn || filterFn(x.it));
+  }
+  let fresh = candidates.filter(x => used.indexOf(x.i) === -1);
+  if (fresh.length === 0) { // deck exhausted, reshuffle
+    state.drawn[deckName] = [];
+    fresh = candidates;
+  }
+  const pick = fresh[Math.floor(Math.random() * fresh.length)];
+  state.drawn[deckName].push(pick.i);
+  return pick.it;
+}
+
+/* ============================================================
+   COUNTDOWN TIMER
+============================================================ */
+let activeTimer = null;
+
+function stopTimer() {
+  if (activeTimer) { clearInterval(activeTimer); activeTimer = null; }
+}
+
+function timerHtml(seconds) {
+  return `
+    <div class="timer-wrap" id="timerWrap">
+      <div class="timer-num" id="timerNum">${seconds}</div>
+      <div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+      <button class="btn-secondary timer-btn" id="timerStartBtn">▶ Start the Clock</button>
+    </div>
+  `;
+}
+
+function wireTimer(seconds) {
+  const btn = document.getElementById('timerStartBtn');
+  if (!btn) return;
+  btn.onclick = () => {
+    btn.remove();
+    let left = seconds;
+    const $num = document.getElementById('timerNum');
+    const $fill = document.getElementById('timerFill');
+    stopTimer();
+    activeTimer = setInterval(() => {
+      left--;
+      if ($num) $num.textContent = left;
+      if ($fill) $fill.style.width = (left / seconds * 100) + '%';
+      if (left <= 5 && left > 0) { playTick(); if ($num) $num.classList.add('urgent'); }
+      if (left <= 0) {
+        stopTimer();
+        playBuzzer();
+        if ($num) { $num.textContent = "TIME"; $num.classList.add('done'); }
+      }
+    }, 1000);
+  };
+}
+
+/* ============================================================
+   LIVE-ACTION RUNNERS
+   Each takes the square context and owns the overlay card until
+   it calls done(), which marks the square used and returns to
+   the board.
+============================================================ */
+
+// Shared scoring footer: award the points, or don't.
+function judgeHtml(val, yesLabel, noLabel) {
+  return `
+    <div class="row-gap judge-row">
+      <button class="btn-primary" id="passBtn">${yesLabel} (+${val})</button>
+      <button class="btn-secondary" id="failBtn">${noLabel}</button>
+    </div>
+  `;
+}
+
+function wireJudge(team, val, done, opts = {}) {
+  document.getElementById('passBtn').onclick = () => {
+    scoreEvent(team, val, { isAnswer: true, isChallenge: true });
+    playCorrect();
+    done();
+  };
+  document.getElementById('failBtn').onclick = () => {
+    if (opts.penalty) scoreEvent(team, -opts.penalty, { isChallenge: true });
+    playWrong();
+    done();
+  };
+}
+
+function whoLabel(who, team) {
+  if (who === 'room') return 'EVERYBODY PLAYS — the winner scores for their team';
+  if (who === 'team') return `${team.name} — as a team`;
+  return `${team.name} — pick one person`;
+}
+
+function runChallenge(ctx, filterType) {
+  const { val, team, done } = ctx;
+  const ch = drawFrom(CHALLENGES, 'challenge', filterType ? (c => c.type === filterType) : null);
+  const card = document.querySelector('#overlay .card');
+  card.innerHTML = `
+    <div class="tag wild">🔥 ${escapeHtml(ch.t)}</div>
+    <div class="who-line">${escapeHtml(whoLabel(ch.who, team))}</div>
+    <div class="qtext task">${escapeHtml(ch.d)}</div>
+    ${ch.timer ? timerHtml(ch.timer) : ''}
+    ${judgeHtml(val, 'They Did It', 'They Choked')}
+  `;
+  if (ch.timer) wireTimer(ch.timer);
+  wireJudge(team, val, done);
+}
+
+function runDuel(ctx) {
+  const { val, team, done } = ctx;
+  const card = document.querySelector('#overlay .card');
+  const others = state.teams.filter(t => t !== team);
+  if (others.length === 0) { runChallenge(ctx); return; }
+  card.innerHTML = `
+    <div class="tag wild">⚔️ DUEL</div>
+    <div class="who-line">${escapeHtml(team.name)} — call out your challenger.</div>
+    <div class="team-btn-grid">${others.map(t =>
+      `<button class="team-btn" data-rival="${t.id}">${escapeHtml(t.name)}</button>`
+    ).join('')}</div>
+  `;
+  card.querySelectorAll('[data-rival]').forEach(btn => {
+    btn.onclick = () => {
+      const rival = state.teams.find(t => t.id == btn.dataset.rival);
+      const duel = drawFrom(DUELS, 'duel');
+      card.innerHTML = `
+        <div class="tag wild">⚔️ ${escapeHtml(duel.t)}</div>
+        <div class="who-line">${escapeHtml(team.name)} vs ${escapeHtml(rival.name)} — winner takes ${val}, loser drops ${Math.round(val / 2)}.</div>
+        <div class="qtext task">${escapeHtml(duel.d)}</div>
+        ${duel.timer ? timerHtml(duel.timer) : ''}
+        <div class="who-line" style="margin-top:14px;">Who won?</div>
+        <div class="team-btn-grid">
+          <button class="team-btn" data-win="${team.id}" data-lose="${rival.id}">${escapeHtml(team.name)}</button>
+          <button class="team-btn" data-win="${rival.id}" data-lose="${team.id}">${escapeHtml(rival.name)}</button>
+        </div>
+        <button class="btn-secondary none-btn" id="drawBtn">Called It a Draw</button>
+      `;
+      if (duel.timer) wireTimer(duel.timer);
+      card.querySelectorAll('[data-win]').forEach(b => {
+        b.onclick = () => {
+          const winner = state.teams.find(t => t.id == b.dataset.win);
+          const loser = state.teams.find(t => t.id == b.dataset.lose);
+          scoreEvent(winner, val, { isAnswer: true, isChallenge: true });
+          scoreEvent(loser, -Math.round(val / 2), { isChallenge: true });
+          playCorrect();
+          done();
+        };
+      });
+      document.getElementById('drawBtn').onclick = () => { playWrong(); done(); };
+    };
+  });
+}
+
+function runVote(ctx) {
+  const { val, team, done } = ctx;
+  const v = drawFrom(GROUP_VOTES, 'vote');
+  const card = document.querySelector('#overlay .card');
+  card.innerHTML = `
+    <div class="tag wild">🗳️ THE PEOPLE'S COURT</div>
+    <div class="qtext">${escapeHtml(v.q)}</div>
+    <div class="who-line">Everybody votes out loud, right now. Hands up. Then tap the side that won — every team who voted with the majority scores ${val}.</div>
+    <div class="team-btn-grid vote-grid">
+      ${v.opts.map((o, i) => `<button class="team-btn vote-opt" data-opt="${i}">${escapeHtml(o)}</button>`).join('')}
+    </div>
+  `;
+  card.querySelectorAll('[data-opt]').forEach(btn => {
+    btn.onclick = () => {
+      const winning = v.opts[parseInt(btn.dataset.opt, 10)];
+      card.innerHTML = `
+        <div class="tag wild">🗳️ THE ROOM HAS SPOKEN</div>
+        <div class="atext">${escapeHtml(winning)}</div>
+        <div class="who-line">Tap every team that voted with the majority. They each bank ${val}.</div>
+        ${teamButtonsHtml('voteaward')}
+        <button class="btn-primary btn-full" id="voteDoneBtn" style="margin-top:14px;">Done — Next Square</button>
+      `;
+      const awarded = {};
+      card.querySelectorAll('[data-prefix="voteaward"]').forEach(b => {
+        b.onclick = () => {
+          const t = state.teams.find(x => x.id == b.dataset.team);
+          if (awarded[t.id]) return;
+          awarded[t.id] = true;
+          scoreEvent(t, val, { isAnswer: true });
+          b.classList.add('awarded');
+          b.textContent = t.name + ' ✓';
+          playCorrect();
+          renderScoreboard();
+        };
+      });
+      document.getElementById('voteDoneBtn').onclick = done;
+    };
+  });
+}
+
+function runHotSeat(ctx) {
+  const { val, team, done } = ctx;
+  const h = drawFrom(HOT_SEAT, 'hotseat');
+  const card = document.querySelector('#overlay .card');
+  card.innerHTML = `
+    <div class="tag wild">🪑 HOT SEAT</div>
+    <div class="qtext">${escapeHtml(h.q)}</div>
+    <div class="who-line">
+      <strong>${escapeHtml(team.name)}</strong> answers FIRST and out loud — you're predicting the room.
+      Then everybody else answers on the count of three.
+      Match the most common answer in the room and you take ${val}. Miss it and you drop ${Math.round(val / 2)}.
+    </div>
+    ${judgeHtml(val, 'They Read the Room', 'They Missed It')}
+  `;
+  wireJudge(team, val, done, { penalty: Math.round(val / 2) });
+}
+
+function runBonusQuestion(ctx, event) {
+  const { val, team, done } = ctx;
+  const bonus = drawFrom(BONUS_QUESTIONS, 'bonus');
+  const card = document.querySelector('#overlay .card');
+  card.innerHTML = `
+    <div class="tag wild">${event.label}</div>
+    <div class="wild-desc">${escapeHtml(event.describe(val, state, team))}</div>
+    <div class="qtext">${escapeHtml(bonus.q)}</div>
+    <button class="btn-primary" id="revealBonusBtn">Reveal Answer</button>
+    <div id="bonusAnswerArea"></div>
+  `;
+  document.getElementById('revealBonusBtn').onclick = () => {
+    document.getElementById('revealBonusBtn').remove();
+    document.getElementById('bonusAnswerArea').innerHTML = `
+      <div class="atext">${escapeHtml(bonus.a)}</div>
+      <div class="who-line">Who got it?</div>
+      ${teamButtonsHtml('bonusaward')}
+      <button class="btn-secondary none-btn" id="bonusNoneBtn">Nobody Got It</button>
+    `;
+    document.querySelectorAll('[data-prefix="bonusaward"]').forEach(btn => {
+      btn.onclick = () => {
+        const winner = state.teams.find(t => t.id == btn.dataset.team);
+        scoreEvent(winner, val * 2, { isAnswer: true, isWildcard: true });
+        playCorrect();
+        done();
+      };
+    });
+    document.getElementById('bonusNoneBtn').onclick = () => {
+      if (event.penalize) scoreEvent(team, -val, { isWildcard: true });
+      playWrong();
+      done();
+    };
+  };
+}
+
+function runInstant(ctx, event) {
+  const { val, team, done } = ctx;
+  const card = document.querySelector('#overlay .card');
+  const descText = event.describe(val, state, team);
+
+  if (event.needsTarget) {
+    const others = state.teams.filter(t => t !== team);
+    card.innerHTML = `
+      <div class="tag wild">${event.label}</div>
+      <div class="wild-desc">${escapeHtml(descText)}</div>
+      <div class="team-btn-grid">${others.map(t =>
+        `<button class="team-btn" data-target="${t.id}">${escapeHtml(t.name)}</button>`
+      ).join('')}</div>
+    `;
+    card.querySelectorAll('[data-target]').forEach(btn => {
+      btn.onclick = () => {
+        const targetTeam = state.teams.find(t => t.id == btn.dataset.target);
+        const before = team.score;
+        event.apply(state, team, val, targetTeam);
+        team.wildcardGain = (team.wildcardGain || 0) + (team.score - before);
+        team.biggestSwing = Math.max(team.biggestSwing || 0, team.score - before);
+        done();
+      };
+    });
+    return;
+  }
+
+  const scoreBefore = team.score;
+  event.apply(state, team, val);
+  const delta = team.score - scoreBefore;
+  team.wildcardGain = (team.wildcardGain || 0) + delta;
+  team.biggestSwing = Math.max(team.biggestSwing || 0, delta);
+  card.innerHTML = `
+    <div class="tag wild">${event.label}</div>
+    <div class="wild-desc">${escapeHtml(descText)}</div>
+    <button class="btn-primary" id="continueBtn">Continue</button>
+  `;
+  document.getElementById('continueBtn').onclick = done;
+}
+
+/* Dispatch a drawn wildcard event to its runner. */
+function runEvent(event, ctx) {
+  playWildcardReveal();
+  if (event.kind === 'challenge') return runChallenge(ctx);
+  if (event.kind === 'duel') return runDuel(ctx);
+  if (event.kind === 'vote') return runVote(ctx);
+  if (event.kind === 'hotseat') return runHotSeat(ctx);
+  if (event.kind === 'bonusq') return runBonusQuestion(ctx, event);
+  return runInstant(ctx, event);
+}
+
+/* ============================================================
+   EXTRA SOUNDS
+============================================================ */
+function playTick() {
+  const ctx = getAudioCtx();
+  tone(1200, ctx.currentTime, 0.06, { type: 'square', volume: 0.12 });
+}
+function playBuzzer() {
+  const ctx = getAudioCtx();
+  const t0 = ctx.currentTime;
+  tone(160, t0, 0.5, { type: 'sawtooth', volume: 0.22 });
+  tone(120, t0, 0.5, { type: 'sawtooth', volume: 0.22 });
+}
+function playFanfare() {
+  const ctx = getAudioCtx();
+  const t0 = ctx.currentTime;
+  [523, 659, 784, 1047].forEach((f, i) => tone(f, t0 + i * 0.11, 0.4, { volume: 0.18 }));
+}
+
+/* ============================================================
+   SAVE / RESUME
+   Someone always closes the tab. This is a three-day weekend.
+============================================================ */
+const SAVE_KEY = 'gns.save.v1';
+const WEEKEND_KEY = 'gns.weekend.v1';
+
+function saveGame() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ state, nextTeamId }));
+  } catch (e) { /* private browsing, quota, whatever — never break the game over it */ }
+}
+
+function loadSavedGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.state || !Array.isArray(data.state.teams)) return null;
+    if (data.state.teams.length === 0) return null;
+    if (data.state.screen === 'setup') return null;
+    return data;
+  } catch (e) { return null; }
+}
+
+function clearSavedGame() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+}
+
+function loadWeekend() {
+  try {
+    const raw = localStorage.getItem(WEEKEND_KEY);
+    const data = raw ? JSON.parse(raw) : null;
+    if (!data || !Array.isArray(data.games)) return { games: [], totals: {} };
+    return data;
+  } catch (e) { return { games: [], totals: {} }; }
+}
+
+function saveWeekend(w) {
+  try { localStorage.setItem(WEEKEND_KEY, JSON.stringify(w)); } catch (e) {}
+}
+
+// Fold a finished game's scores into the running weekend totals.
+function bankGameToWeekend() {
+  const w = loadWeekend();
+  const sorted = [...state.teams].sort((a, b) => b.score - a.score);
+  w.games.push({
+    round: currentRound().name,
+    when: new Date().toLocaleString(),
+    results: sorted.map(t => ({ name: t.name, score: t.score }))
+  });
+  sorted.forEach((t, i) => {
+    if (!w.totals[t.name]) w.totals[t.name] = { points: 0, wins: 0, games: 0 };
+    w.totals[t.name].points += t.score;
+    w.totals[t.name].games += 1;
+    if (i === 0) w.totals[t.name].wins += 1;
+  });
+  saveWeekend(w);
+  return w;
+}
+
+function weekendStandingsHtml() {
+  const w = loadWeekend();
+  const names = Object.keys(w.totals);
+  if (names.length === 0) return '';
+  const rows = names
+    .map(n => ({ name: n, ...w.totals[n] }))
+    .sort((a, b) => b.points - a.points);
+  return `
+    <div class="weekend-box">
+      <div class="weekend-title">🏅 Weekend Standings — ${w.games.length} game${w.games.length === 1 ? '' : 's'} banked</div>
+      ${rows.map((r, i) => `
+        <div class="superlative-row">
+          <span class="label">${i === 0 ? '👑 ' : (i + 1) + '. '}${escapeHtml(r.name)}</span>
+          <span class="winner">${r.points} pts <span style="opacity:.6;font-weight:400;">(${r.wins} win${r.wins === 1 ? '' : 's'} / ${r.games})</span></span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* ============================================================
+   UNDO
+   Snapshot before every square resolves. The host always
+   mis-taps at least once a night.
+============================================================ */
+function pushHistory() {
+  if (!state.history) state.history = [];
+  state.history.push(JSON.stringify({
+    teams: state.teams,
+    used: state.used,
+    readerIndex: state.readerIndex,
+    lastCorrectTeamId: state.lastCorrectTeamId,
+    drawn: state.drawn
+  }));
+  if (state.history.length > 25) state.history.shift();
+}
+
+function undoLast() {
+  if (!state.history || state.history.length === 0) return false;
+  const snap = JSON.parse(state.history.pop());
+  state.teams = snap.teams;
+  state.used = snap.used;
+  state.readerIndex = snap.readerIndex;
+  state.lastCorrectTeamId = snap.lastCorrectTeamId;
+  state.drawn = snap.drawn;
+  if (state.screen === 'winner') state.screen = 'board';
+  return true;
+}
+
+/* ============================================================
+   SCORE EDITOR — for when real life overrules the app
+============================================================ */
+function openScoreEditor() {
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  overlay.innerHTML = `
+    <div class="card">
+      <div class="tag">Adjust Scores</div>
+      <div class="who-line">Nudge anybody's total. Rulings on the field are final, but the app isn't.</div>
+      <div id="editRows"></div>
+      <button class="btn-primary btn-full" id="closeEditBtn" style="margin-top:16px;">Done</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  function draw() {
+    document.getElementById('editRows').innerHTML = state.teams.map(t => `
+      <div class="edit-row">
+        <span class="edit-name">${escapeHtml(t.name)}</span>
+        <button class="btn-secondary edit-btn" data-adj="-100" data-t="${t.id}">−100</button>
+        <span class="edit-score">${t.score}</span>
+        <button class="btn-secondary edit-btn" data-adj="100" data-t="${t.id}">+100</button>
+      </div>
+    `).join('');
+    document.querySelectorAll('[data-adj]').forEach(b => {
+      b.onclick = () => {
+        const t = state.teams.find(x => x.id == b.dataset.t);
+        t.score += parseInt(b.dataset.adj, 10);
+        draw();
+        renderScoreboard();
+      };
+    });
+  }
+  draw();
+  document.getElementById('closeEditBtn').onclick = () => { closeOverlay(); render(); };
+}
+
+/* ============================================================
+   SIDE QUEST — pull a challenge out of thin air, any time
+============================================================ */
+function openSideQuest() {
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  overlay.innerHTML = `
+    <div class="card">
+      <div class="tag wild">🎯 SIDE QUEST</div>
+      <div class="who-line">Off the board, no square burned. Worth 200. Who's taking it?</div>
+      ${teamButtonsHtml('sq')}
+      <button class="btn-secondary none-btn" id="sqCancel">Never Mind</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.querySelectorAll('[data-prefix="sq"]').forEach(btn => {
+    btn.onclick = () => {
+      pushHistory();
+      const team = state.teams.find(t => t.id == btn.dataset.team);
+      runChallenge({
+        val: 200, team,
+        done: () => { closeOverlay(); render(); }
+      });
+    };
+  });
+  document.getElementById('sqCancel').onclick = closeOverlay;
+}
+
+/* ============================================================
+   FINAL SHOWDOWN
+   The board clearing used to just... end. Now it ends like this:
+   category revealed, everybody wagers blind, one question, chaos.
+============================================================ */
+function startFinalShowdown() {
+  const item = drawFrom(FINAL_SHOWDOWN, 'final');
+  state.finalWagers = {};
+  const eligible = state.teams.filter(t => t.score > 0);
+  const players = eligible.length > 0 ? eligible : state.teams;
+  let idx = 0;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  document.body.appendChild(overlay);
+  playDailyDouble();
+
+  function wagerStep() {
+    if (idx >= players.length) return questionStep();
+    const t = players[idx];
+    const max = Math.max(t.score, 0);
+    overlay.innerHTML = `
+      <div class="card">
+        <div class="tag dd">🏁 THE FINAL SHOWDOWN 🏁</div>
+        <div class="catval">Category: ${escapeHtml(item.cat)}</div>
+        <div class="who-line"><strong>${escapeHtml(t.name)}</strong> — wager anything from 0 up to your whole score. Everybody else, look away. This is binding.</div>
+        <div style="margin:16px 0;">
+          <input type="number" id="fWager" min="0" max="${max}" value="${Math.min(500, max)}"
+            style="width:160px;padding:12px;border-radius:8px;border:none;font-size:1.3rem;text-align:center;">
+        </div>
+        <div class="row-gap">
+          <button class="btn-secondary" data-fw="0">Nothing</button>
+          <button class="btn-secondary" data-fw="${Math.floor(max / 2)}">Half</button>
+          <button class="btn-secondary" data-fw="${max}">EVERYTHING</button>
+        </div>
+        <button class="btn-primary btn-full" id="lockF" style="margin-top:16px;">Lock It In</button>
+        <div class="hint" style="margin-top:8px;">${idx + 1} of ${players.length}</div>
+      </div>
+    `;
+    const $w = document.getElementById('fWager');
+    overlay.querySelectorAll('[data-fw]').forEach(b => { b.onclick = () => { $w.value = b.dataset.fw; }; });
+    document.getElementById('lockF').onclick = () => {
+      let w = parseInt($w.value, 10);
+      if (isNaN(w) || w < 0) w = 0;
+      if (w > max) w = max;
+      state.finalWagers[t.id] = w;
+      idx++;
+      wagerStep();
+    };
+  }
+
+  function questionStep() {
+    overlay.innerHTML = `
+      <div class="card">
+        <div class="tag dd">🏁 ${escapeHtml(item.cat)} 🏁</div>
+        <div class="qtext">${escapeHtml(item.q)}</div>
+        <div class="who-line">Everybody writes their answer down. No shouting. When every pen is down, reveal.</div>
+        ${timerHtml(60)}
+        <button class="btn-primary btn-full" id="revealF" style="margin-top:14px;">Reveal the Answer</button>
+      </div>
+    `;
+    wireTimer(60);
+    document.getElementById('revealF').onclick = () => {
+      stopTimer();
+      overlay.innerHTML = `
+        <div class="card">
+          <div class="tag dd">🏁 THE ANSWER 🏁</div>
+          <div class="atext">${escapeHtml(item.a)}</div>
+          <div class="who-line">Tap each team that got it. Tap again to flip them back.</div>
+          <div id="finalJudge"></div>
+          <button class="btn-primary btn-full" id="finishF" style="margin-top:16px;">Settle Up</button>
+        </div>
+      `;
+      const verdict = {};
+      function drawJudge() {
+        document.getElementById('finalJudge').innerHTML = players.map(t => `
+          <div class="edit-row">
+            <span class="edit-name">${escapeHtml(t.name)}</span>
+            <span class="edit-score">${verdict[t.id] ? '+' : '−'}${state.finalWagers[t.id]}</span>
+            <button class="btn-secondary edit-btn ${verdict[t.id] ? 'awarded' : ''}" data-fj="${t.id}">
+              ${verdict[t.id] ? 'Correct ✓' : 'Wrong ✗'}
+            </button>
+          </div>
+        `).join('');
+        document.querySelectorAll('[data-fj]').forEach(b => {
+          b.onclick = () => { verdict[b.dataset.fj] = !verdict[b.dataset.fj]; drawJudge(); };
+        });
+      }
+      drawJudge();
+      document.getElementById('finishF').onclick = () => {
+        players.forEach(t => {
+          const w = state.finalWagers[t.id] || 0;
+          if (verdict[t.id]) scoreEvent(t, w, { isAnswer: true });
+          else scoreEvent(t, -w, {});
+        });
+        state.finalDone = true;
+        closeOverlay();
+        playFanfare();
+        state.screen = 'winner';
+        render();
+      };
+    };
+  }
+
+  wagerStep();
+}
+
+/* ============================================================
+   TEAM NAME GENERATOR — for the group that can't decide
+============================================================ */
+const NAME_LEFT = ["Feral", "Undefeated", "Mildly", "Certified", "Emotional", "Reigning", "Suspiciously", "Off-Brand", "Semi-Pro", "Discount", "Unhinged", "Tactical", "Barely", "Regrettable", "Fully Committed"];
+const NAME_RIGHT = ["Golden Retrievers", "Lawn Chairs", "Cornhole Champions", "Cooler Guys", "Pool Noodles", "Sunburns", "Charcoal Enthusiasts", "Dad Shoes", "Beach Towels", "Bug Spray", "Fire Ants", "Boat Shoes", "Potato Salads", "Yard Games", "Screen Doors"];
+
+function randomTeamName() {
+  const l = NAME_LEFT[Math.floor(Math.random() * NAME_LEFT.length)];
+  const r = NAME_RIGHT[Math.floor(Math.random() * NAME_RIGHT.length)];
+  return `${l} ${r}`;
+}
+
+/* ============================================================
+   BOOT
+============================================================ */
+(function boot() {
+  const saved = loadSavedGame();
+  if (saved && saved.state) {
+    // Keep the saved game around but land on setup so the host chooses.
+    state.spice = saved.state.spice || 'family';
+  }
+  render();
+})();
 </script>
 </body>
 </html>
