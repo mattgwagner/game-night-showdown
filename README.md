@@ -16,7 +16,7 @@ python3 -m http.server 8934
 ## How it plays
 
 - **Setup**: add 2–10 teams or individual players.
-- **Round select**: pick one of several full trivia boards (categories vary by round — beer, firearms, Disney, AI, sports, college football, movies, music, baseball, parenting, Florida living, and more).
+- **Round select**: pick one of six full trivia boards (categories vary by round — beer, firearms, Disney, AI, sports, college football, movies, music, baseball, parenting, Florida living, cartoons, sitcoms, Marvel, hunting, NFL, NASCAR, cocktails, and more).
 - **Board**: an 8-category × 5-value grid, Jeopardy-style. Turn to pick & read rotates automatically after every square, so no single person is stuck operating the board all night — anyone can still shout out the answer.
 - **Wildcard squares**: a handful of squares (not visually marked in advance) trigger a random chance event instead of a normal question — bonus points, a point penalty, a steal from the leader, or a free-for-all bonus question.
 - **Scoreboard**: always visible at the top, with the current leader highlighted.
