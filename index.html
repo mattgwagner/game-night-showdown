@@ -172,6 +172,11 @@
     letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase;
   }
   .card .tag.wild { background: var(--purple); color: white; }
+  .card .tag.dd { background: var(--red); color: white; animation: pulse .5s infinite alternate; }
+  .superlatives { margin: 18px 0; text-align: left; }
+  .superlative-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); border: 1px solid var(--gold-dim); border-radius: 8px; padding: 8px 14px; margin-bottom: 8px; }
+  .superlative-row .label { font-size: .9rem; opacity: .85; }
+  .superlative-row .winner { font-weight: 900; color: var(--gold); }
   .card .catval { opacity: .75; margin-bottom: 6px; font-size: .95rem; letter-spacing: 1px; text-transform: uppercase; }
   .card .qtext { font-size: clamp(1.2rem, 3vw, 1.7rem); font-weight: 700; margin: 14px 0 22px; line-height: 1.4; }
   .card .atext {
@@ -231,6 +236,7 @@ const ROUNDS = [
       "90s/2000s Nostalgia": 400,
       "Dad Jokes & Pop Culture": 200
     },
+    dailyDouble: { category: "Artificial Intelligence", value: 300 },
     questions: {
       "Beer": {
         100: { q: "This Belgian brewing tradition produces beers like Chimay and Westmalle — what religious order brews them?", a: "Trappist monks" },
@@ -300,6 +306,7 @@ const ROUNDS = [
       "Space & Science": 200,
       "Geography & Travel": 300
     },
+    dailyDouble: { category: "Space & Science", value: 400 },
     questions: {
       "Movies & TV": {
         200: { q: "What 1994 Quentin Tarantino film centers on a mysterious glowing briefcase?", a: "Pulp Fiction" },
@@ -369,6 +376,7 @@ const ROUNDS = [
       "Holidays & Traditions": 500,
       "Internet & Memes": 100
     },
+    dailyDouble: { category: "History", value: 400 },
     questions: {
       "Classic Rock & 80s": {
         100: { q: "What British rock band recorded 'Bohemian Rhapsody'?", a: "Queen" },
@@ -438,6 +446,7 @@ const ROUNDS = [
       "Marriage & Couples Life": 300,
       "Florida Living": 400
     },
+    dailyDouble: { category: "Board Games & Cards", value: 400 },
     questions: {
       "Baseball": {
         100: { q: "How many players from one team are on the field defensively at a time in baseball?", a: "9" },
@@ -507,6 +516,7 @@ const ROUNDS = [
       "Action Movies": 400,
       "Reality TV": 100
     },
+    dailyDouble: { category: "Classic Sitcoms", value: 300 },
     questions: {
       "90s/2000s Cartoons": {
         100: { q: "What cartoon family lives at 742 Evergreen Terrace in Springfield?", a: "The Simpsons" },
@@ -576,6 +586,7 @@ const ROUNDS = [
       "Craft Cocktails & Spirits": 500,
       "Tech & Gadgets": 100
     },
+    dailyDouble: { category: "NFL", value: 400 },
     questions: {
       "Classic Video Game Consoles": {
         100: { q: "What Nintendo handheld, released in 1989, was the first widely popular portable video game system?", a: "The Game Boy" },
@@ -624,6 +635,76 @@ const ROUNDS = [
         300: { q: "What kind of wearable device, popularized by Fitbit and later the Apple Watch, tracks steps and heart rate?", a: "A fitness tracker (smartwatch)" },
         400: { q: "What Amazon smart home device responds to the wake word 'Alexa'?", a: "The Amazon Echo" },
         500: { q: "What company, formerly known as Facebook, owns Instagram and WhatsApp?", a: "Meta" }
+      }
+    }
+  },
+  {
+    id: "r7",
+    name: "Round 7: The Crew",
+    tagline: "A little bit about this actual friend group",
+    categories: [
+      "Meet The Crew", "Coaching Little League", "Construction & Skilled Trades", "Law Enforcement & Public Safety",
+      "Air Force & Military Aviation", "Gym & Fitness Culture", "Cruise Ship Life", "Central Florida Trivia"
+    ],
+    wildcardSlots: {
+      "Meet The Crew": 300,
+      "Coaching Little League": 400,
+      "Construction & Skilled Trades": 300,
+      "Law Enforcement & Public Safety": 200,
+      "Air Force & Military Aviation": 400,
+      "Gym & Fitness Culture": 300,
+      "Cruise Ship Life": 200,
+      "Central Florida Trivia": 300
+    },
+    dailyDouble: { category: "Air Force & Military Aviation", value: 100 },
+    questions: {
+      "Meet The Crew": {
+        100: { q: "What nickname does this crew use for the guy who goes all-in on cruise drink packages, deck parties, trivia night, and dress-up nights?", a: "\"Casino Mike\" (Mike Odom)" },
+        200: { q: "Which member of the crew coaches Little League baseball, including a semi-travel squad, up in the Lutz area?", a: "Will Cherry" },
+        400: { q: "Which member of the group is a Lieutenant Colonel in the U.S. Air Force, currently stationed overseas?", a: "Jared Bowen" },
+        500: { q: "Which member of the group is a Lieutenant with the Polk County Sheriff's Office?", a: "James Prue" }
+      },
+      "Coaching Little League": {
+        100: { q: "What term describes the lineup order a coach sets for how players will bat during a game?", a: "The batting order" },
+        200: { q: "What safety rule limits how many pitches a young pitcher can throw in a game, to protect their arm?", a: "A pitch count limit" },
+        300: { q: "What organization runs the world's most famous youth baseball tournament, held every August in Williamsport, PA?", a: "Little League Baseball (the Little League World Series)" },
+        500: { q: "What's the term for a lineup where every rostered player bats during the game, regardless of who's in the field?", a: "A continuous batting order (\"everybody bats\")" }
+      },
+      "Construction & Skilled Trades": {
+        100: { q: "What's the term for the detailed drawings architects and engineers use to guide a construction project?", a: "Blueprints" },
+        200: { q: "What heavy piece of equipment is commonly used to dig foundations and move earth on a job site?", a: "An excavator" },
+        400: { q: "What's the name for the rough wooden skeleton of a building, built before drywall goes up?", a: "Framing" },
+        500: { q: "What government inspection must most construction projects pass before the building can legally be occupied?", a: "A final building inspection (Certificate of Occupancy)" }
+      },
+      "Law Enforcement & Public Safety": {
+        100: { q: "What's the common term for the vehicle a patrol officer primarily drives while on duty?", a: "A patrol car (cruiser)" },
+        300: { q: "What Florida county, home to Lakeland, has a Sheriff's Office that many local officers serve on?", a: "Polk County" },
+        400: { q: "What three-digit number do you call in the U.S. for a police, fire, or medical emergency?", a: "911" },
+        500: { q: "In most sheriff's offices, what rank typically commands a shift or unit — above sergeant, below captain?", a: "Lieutenant" }
+      },
+      "Air Force & Military Aviation": {
+        100: { q: "What U.S. military branch operates the F-22 Raptor and F-35 Lightning II fighter jets?", a: "The Air Force" },
+        200: { q: "What U.S. service academy commissions officers alongside ROTC and Officer Training School?", a: "The U.S. Air Force Academy" },
+        300: { q: "What NATO country is home to Aviano Air Base, a major U.S. Air Force installation in Europe?", a: "Italy" },
+        500: { q: "What's the standard rank after Major in the Air Force officer structure — the rank held by a typical squadron's senior leadership?", a: "Lieutenant Colonel" }
+      },
+      "Gym & Fitness Culture": {
+        100: { q: "What term describes lifting weights in a structured plan to build strength over time?", a: "Strength training (resistance training)" },
+        200: { q: "What high-intensity workout style mixes short bursts of intense effort with rest periods, popularized by CrossFit-style gyms?", a: "HIIT (High-Intensity Interval Training)" },
+        400: { q: "What's the term for a workout partner who holds you accountable to show up and pushes you through your reps?", a: "An accountability partner (gym buddy / spotter)" },
+        500: { q: "About how many times per week do most fitness experts recommend strength training for general health?", a: "About 2–4 times per week" }
+      },
+      "Cruise Ship Life": {
+        100: { q: "What's the term for the massive multi-story open area often found at the center of a cruise ship, ringed by balconies?", a: "The atrium" },
+        300: { q: "What's the name for the casual self-serve dining hall found on nearly every cruise ship, usually near the pool deck?", a: "The buffet (Lido deck)" },
+        400: { q: "What Caribbean cruise line is known for its private island destinations, including CocoCay?", a: "Royal Caribbean" },
+        500: { q: "What's the maritime term for the daily fee automatically added to a cruise bill to tip the crew?", a: "Gratuities (the service charge)" }
+      },
+      "Central Florida Trivia": {
+        100: { q: "What lake-filled Central Florida city, home to Florida Southern College, is known for its many Frank Lloyd Wright buildings?", a: "Lakeland" },
+        200: { q: "What Lakeland-based grocery chain, founded in 1930, is famous for its 'Where Shopping is a Pleasure' slogan?", a: "Publix" },
+        400: { q: "What Major League Baseball team holds its spring training in Lakeland every year?", a: "The Detroit Tigers" },
+        500: { q: "What Polk County city near Lakeland is home to LEGOLAND Florida?", a: "Winter Haven" }
       }
     }
   }
@@ -707,14 +788,81 @@ function getLeader(state, excludeTeam) {
 }
 
 /* ============================================================
+   SOUND ENGINE (Web Audio API — no audio files needed)
+============================================================ */
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function tone(freq, startTime, duration, opts = {}) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = opts.type || 'sine';
+  osc.frequency.setValueAtTime(freq, startTime);
+  if (opts.slideTo) osc.frequency.linearRampToValueAtTime(opts.slideTo, startTime + duration);
+  const peak = opts.volume !== undefined ? opts.volume : 0.2;
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(peak, startTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.02);
+}
+
+function playCorrect() {
+  const ctx = getAudioCtx();
+  const t0 = ctx.currentTime;
+  tone(523.25, t0, 0.12, { type: 'triangle' });
+  tone(659.25, t0 + 0.1, 0.12, { type: 'triangle' });
+  tone(783.99, t0 + 0.2, 0.22, { type: 'triangle' });
+}
+
+function playWrong() {
+  const ctx = getAudioCtx();
+  const t0 = ctx.currentTime;
+  tone(180, t0, 0.28, { type: 'sawtooth', slideTo: 90, volume: 0.18 });
+}
+
+function playWildcardSpin() {
+  const ctx = getAudioCtx();
+  const t0 = ctx.currentTime;
+  for (let i = 0; i < 6; i++) {
+    tone(300 + i * 60, t0 + i * 0.09, 0.08, { type: 'square', volume: 0.1 });
+  }
+}
+
+function playWildcardReveal() {
+  const ctx = getAudioCtx();
+  const t0 = ctx.currentTime;
+  tone(392, t0, 0.15, { type: 'sawtooth', volume: 0.15 });
+  tone(523.25, t0 + 0.13, 0.15, { type: 'sawtooth', volume: 0.15 });
+  tone(659.25, t0 + 0.26, 0.3, { type: 'sawtooth', volume: 0.18 });
+}
+
+function playDailyDouble() {
+  const ctx = getAudioCtx();
+  const t0 = ctx.currentTime;
+  tone(220, t0, 0.5, { type: 'sawtooth', slideTo: 440, volume: 0.2 });
+  tone(220, t0 + 0.5, 0.5, { type: 'sawtooth', slideTo: 880, volume: 0.22 });
+}
+
+/* ============================================================
    STATE
 ============================================================ */
 let state = {
-  teams: [],       // { id, name, score }
+  teams: [],       // { id, name, score, wildcardGain, biggestSwing, maxStreak, currentStreak }
   used: {},        // "Category|Value" -> true
   screen: "setup",  // setup | roundselect | board | winner
   roundIndex: 0,
-  readerIndex: 0   // index into state.teams — whose turn it is to pick & read
+  readerIndex: 0,  // index into state.teams — whose turn it is to pick & read
+  lastCorrectTeamId: null
 };
 
 function currentRound() {
@@ -735,6 +883,28 @@ function advanceReader() {
   state.readerIndex = (state.readerIndex + 1) % state.teams.length;
 }
 let nextTeamId = 1;
+
+function resetTeamStats(team) {
+  team.score = 0;
+  team.wildcardGain = 0;
+  team.biggestSwing = 0;
+  team.maxStreak = 0;
+  team.currentStreak = 0;
+}
+
+// Records a scoring event on a team and updates streak/wildcard/swing stats
+// used for the end-of-game superlatives. opts: { isAnswer, isWildcard }
+function scoreEvent(team, delta, opts = {}) {
+  team.score += delta;
+  if (delta > (team.biggestSwing || 0)) team.biggestSwing = delta;
+  if (opts.isWildcard) team.wildcardGain = (team.wildcardGain || 0) + delta;
+  if (opts.isAnswer && delta > 0) {
+    if (state.lastCorrectTeamId === team.id) team.currentStreak = (team.currentStreak || 0) + 1;
+    else team.currentStreak = 1;
+    state.lastCorrectTeamId = team.id;
+    team.maxStreak = Math.max(team.maxStreak || 0, team.currentStreak);
+  }
+}
 
 /* ============================================================
    RENDER HELPERS
@@ -810,7 +980,7 @@ function renderSetup() {
     const input = document.getElementById('newTeamName');
     const name = input.value.trim();
     if (!name) return;
-    state.teams.push({ id: nextTeamId++, name, score: 0 });
+    state.teams.push({ id: nextTeamId++, name, score: 0, wildcardGain: 0, biggestSwing: 0, maxStreak: 0, currentStreak: 0 });
     input.value = '';
     input.focus();
     refreshList();
@@ -900,7 +1070,8 @@ function renderBoard() {
     if (confirm('Reset this round? Scores and revealed squares will be cleared.')) {
       state.used = {};
       state.readerIndex = 0;
-      state.teams.forEach(t => t.score = 0);
+      state.lastCorrectTeamId = null;
+      state.teams.forEach(resetTeamStats);
       render();
     }
   };
@@ -922,7 +1093,10 @@ function renderBoard() {
 
 /* ---------- Question / Wildcard overlay ---------- */
 function openSquare(cat, val) {
-  const isWild = currentRound().wildcardSlots[cat] === val;
+  const round = currentRound();
+  const dd = round.dailyDouble;
+  if (dd && dd.category === cat && dd.value === val) { openDailyDouble(cat, val); return; }
+  const isWild = round.wildcardSlots[cat] === val;
   if (isWild) openWildcard(cat, val);
   else openQuestion(cat, val);
 }
@@ -970,11 +1144,81 @@ function openQuestion(cat, val) {
     document.querySelectorAll('[data-prefix="award"]').forEach(btn => {
       btn.onclick = () => {
         const team = state.teams.find(t => t.id == btn.dataset.team);
-        team.score += val;
+        scoreEvent(team, val, { isAnswer: true });
+        playCorrect();
         markUsedAndReturn(cat, val);
       };
     });
-    document.getElementById('noneBtn').onclick = () => markUsedAndReturn(cat, val);
+    document.getElementById('noneBtn').onclick = () => {
+      playWrong();
+      markUsedAndReturn(cat, val);
+    };
+  };
+}
+
+/* ---------- Daily Double ---------- */
+function openDailyDouble(cat, val) {
+  const item = currentRound().questions[cat][val];
+  const reader = currentReader();
+  const maxWager = Math.max(reader.score, 500);
+  playDailyDouble();
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  overlay.innerHTML = `
+    <div class="card">
+      <div class="tag dd">🎯 DAILY DOUBLE! 🎯</div>
+      <div class="catval">${escapeHtml(cat)}</div>
+      <div class="wild-desc"><strong>${escapeHtml(reader.name)}</strong>, you picked it — you wager, you answer. No steals.</div>
+      <div style="margin:16px 0;">
+        <input type="number" id="wagerInput" min="0" max="${maxWager}" value="${Math.min(reader.score || 200, 500) || 200}" style="width:140px;padding:10px;border-radius:8px;border:none;font-size:1.2rem;text-align:center;">
+      </div>
+      <div class="row-gap">
+        <button class="btn-secondary" data-wager="100">100</button>
+        <button class="btn-secondary" data-wager="300">300</button>
+        <button class="btn-secondary" data-wager="500">500</button>
+        <button class="btn-secondary" data-wager="${Math.max(reader.score, 100)}">ALL IN</button>
+      </div>
+      <button class="btn-primary" id="lockWagerBtn" style="margin-top:16px;">Lock In Wager</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const $input = document.getElementById('wagerInput');
+  document.querySelectorAll('[data-wager]').forEach(btn => {
+    btn.onclick = () => { $input.value = btn.dataset.wager; };
+  });
+
+  document.getElementById('lockWagerBtn').onclick = () => {
+    let wager = parseInt($input.value, 10);
+    if (isNaN(wager) || wager < 0) wager = 0;
+    if (wager > maxWager) wager = maxWager;
+    const card = document.querySelector('#overlay .card');
+    card.innerHTML = `
+      <div class="tag dd">🎯 DAILY DOUBLE — ${wager} PTS 🎯</div>
+      <div class="qtext">${escapeHtml(item.q)}</div>
+      <button class="btn-primary" id="revealDDBtn">Reveal Answer</button>
+      <div id="ddAnswerArea"></div>
+    `;
+    document.getElementById('revealDDBtn').onclick = () => {
+      document.getElementById('revealDDBtn').remove();
+      document.getElementById('ddAnswerArea').innerHTML = `
+        <div class="atext">${escapeHtml(item.a)}</div>
+        <div class="row-gap">
+          <button class="btn-primary" id="ddRightBtn">Got It Right (+${wager})</button>
+          <button class="btn-secondary" id="ddWrongBtn">Got It Wrong (−${wager})</button>
+        </div>
+      `;
+      document.getElementById('ddRightBtn').onclick = () => {
+        scoreEvent(reader, wager, { isAnswer: true });
+        playCorrect();
+        markUsedAndReturn(cat, val);
+      };
+      document.getElementById('ddWrongBtn').onclick = () => {
+        scoreEvent(reader, -wager, { isAnswer: false });
+        playWrong();
+        markUsedAndReturn(cat, val);
+      };
+    };
   };
 }
 
@@ -1004,6 +1248,7 @@ function runWildcardSpin(cat, val, team) {
     <div class="tag wild">★ Wildcard ★</div>
     <div class="wild-desc"><span class="spin-text" id="spinText">Spinning...</span></div>
   `;
+  playWildcardSpin();
   const spinEl = document.getElementById('spinText');
   let i = 0;
   const spinInterval = setInterval(() => {
@@ -1019,6 +1264,7 @@ function runWildcardSpin(cat, val, team) {
 }
 
 function showWildcardResult(cat, val, team, event) {
+  playWildcardReveal();
   const card = document.querySelector('#overlay .card');
   const descText = event.describe(val, state, team);
 
@@ -1042,12 +1288,14 @@ function showWildcardResult(cat, val, team, event) {
       document.querySelectorAll('[data-prefix="bonusaward"]').forEach(btn => {
         btn.onclick = () => {
           const winner = state.teams.find(t => t.id == btn.dataset.team);
-          winner.score += val * 2;
+          scoreEvent(winner, val * 2, { isAnswer: true, isWildcard: true });
+          playCorrect();
           markUsedAndReturn(cat, val);
         };
       });
       document.getElementById('bonusNoneBtn').onclick = () => {
-        if (event.key === 'doubledown') team.score -= val;
+        if (event.key === 'doubledown') scoreEvent(team, -val, { isWildcard: true });
+        playWrong();
         markUsedAndReturn(cat, val);
       };
     };
@@ -1066,7 +1314,10 @@ function showWildcardResult(cat, val, team, event) {
     card.querySelectorAll('[data-target]').forEach(btn => {
       btn.onclick = () => {
         const targetTeam = state.teams.find(t => t.id == btn.dataset.target);
+        const before = team.score;
         event.apply(state, team, val, targetTeam);
+        team.wildcardGain = (team.wildcardGain || 0) + (team.score - before);
+        team.biggestSwing = Math.max(team.biggestSwing || 0, team.score - before);
         markUsedAndReturn(cat, val);
       };
     });
@@ -1074,7 +1325,11 @@ function showWildcardResult(cat, val, team, event) {
   }
 
   // Instant effect, no target needed
+  const scoreBefore = team.score;
   event.apply(state, team, val);
+  const instantDelta = team.score - scoreBefore;
+  team.wildcardGain = (team.wildcardGain || 0) + instantDelta;
+  team.biggestSwing = Math.max(team.biggestSwing || 0, instantDelta);
   card.innerHTML = `
     <div class="tag wild">${event.label}</div>
     <div class="wild-desc">${escapeHtml(descText)}</div>
@@ -1083,10 +1338,35 @@ function showWildcardResult(cat, val, team, event) {
   document.getElementById('continueBtn').onclick = () => markUsedAndReturn(cat, val);
 }
 
+/* ---------- Superlatives (end-of-game awards) ---------- */
+function computeSuperlatives() {
+  const teams = state.teams;
+  const awards = [];
+  if (teams.length === 0) return awards;
+
+  const byBiggestSwing = [...teams].sort((a, b) => (b.biggestSwing || 0) - (a.biggestSwing || 0))[0];
+  if (byBiggestSwing && byBiggestSwing.biggestSwing > 0) {
+    awards.push({ label: '💥 Comeback Kid (biggest single-question swing)', team: byBiggestSwing, detail: `+${byBiggestSwing.biggestSwing} in one shot` });
+  }
+
+  const byWildcard = [...teams].sort((a, b) => (b.wildcardGain || 0) - (a.wildcardGain || 0))[0];
+  if (byWildcard && (byWildcard.wildcardGain || 0) > 0) {
+    awards.push({ label: '🍀 Wildcard Whisperer (luckiest with wildcards)', team: byWildcard, detail: `net +${byWildcard.wildcardGain} from wildcards` });
+  }
+
+  const byStreak = [...teams].sort((a, b) => (b.maxStreak || 0) - (a.maxStreak || 0))[0];
+  if (byStreak && (byStreak.maxStreak || 0) >= 2) {
+    awards.push({ label: '🧊 Ice in Their Veins (longest correct streak)', team: byStreak, detail: `${byStreak.maxStreak} correct in a row` });
+  }
+
+  return awards;
+}
+
 /* ---------- Winner screen ---------- */
 function renderWinner() {
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
   const top = sorted[0];
+  const awards = computeSuperlatives();
   $main.innerHTML = `
     <h1 class="title">🎉 Game Over! 🎉</h1>
     <div class="panel" style="text-align:center;">
@@ -1102,6 +1382,17 @@ function renderWinner() {
           </div>
         `).join('')}
       </div>
+      ${awards.length > 0 ? `
+        <div class="superlatives">
+          <div style="text-align:center;color:var(--gold);font-weight:900;margin-bottom:10px;">🎖️ Awards of the Night 🎖️</div>
+          ${awards.map(a => `
+            <div class="superlative-row">
+              <span class="label">${escapeHtml(a.label)}</span>
+              <span class="winner">${escapeHtml(a.team.name)} <span style="opacity:.7;font-weight:400;">(${escapeHtml(a.detail)})</span></span>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
       <button class="btn-primary btn-full" id="playAgainBtn">Play Again (Same Round)</button>
       <button class="btn-secondary btn-full" id="newRoundBtn">Play a Different Round</button>
       <button class="btn-secondary btn-full" id="newGameBtn">New Game (Reset Everyone)</button>
@@ -1111,7 +1402,8 @@ function renderWinner() {
   document.getElementById('playAgainBtn').onclick = () => {
     state.used = {};
     state.readerIndex = 0;
-    state.teams.forEach(t => t.score = 0);
+    state.lastCorrectTeamId = null;
+    state.teams.forEach(resetTeamStats);
     state.screen = 'board';
     render();
   };
