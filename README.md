@@ -36,9 +36,10 @@ never marks you out — and it's usually funnier than the sip.
 
 Both switches filter every deck in the game, so the same app works at 4pm and at 11pm.
 
-**Pick a board size** — Quick (4 categories, ~20 min), Standard (6, ~35 min) or
+**Pick a board size** — Quick (4 categories, ~20 min, the default), Standard (6, ~35 min) or
 Marathon (8, ~50 min). Categories are drawn fresh from the round every time, so playing
-the same round twice never gives you the same board.
+the same round twice never gives you the same board. There's a Surprise Me button if
+nobody can agree.
 
 **Or skip the board entirely** — three formats that aren't Jeopardy at all:
 
@@ -48,7 +49,7 @@ the same round twice never gives you the same board.
 | 🎯 **Last Team Standing** | One question each around the room. Miss and you're out. Survive alone, take 1000. |
 | 🥔 **Hot Potato** | One category, teams alternate naming things. Stall or repeat and you're eliminated. |
 
-**Pick a board** — fourteen boards of 8 categories each. Thirteen are
+**Pick a board** — fourteen boards, listed in a fresh order every session. Thirteen are
 trivia, spanning 104 categories: beer, firearms, Disney, AI, college football, grilling,
 boats, Labor Day, NBA, golf, soccer, the Olympics, Star Wars, horror, dinosaurs, sharks,
 bourbon, presidents, Field Artillery, and a lot more. One board is nothing but formats
