@@ -356,13 +356,13 @@ const ROUNDS = [
     questions: {
       "Beer": {
         100: { q: "This Belgian brewing tradition produces beers like Chimay and Westmalle — what religious order brews them?", a: "Trappist monks" },
-        200: { q: "What's the term for the foamy layer on top of a freshly poured beer?", a: "The head" },
+        200: { q: "What's the foamy stuff on top of a poured beer called?", a: "The head" },
         400: { q: "India Pale Ales were originally brewed extra hoppy and boozy for what historical reason?", a: "To survive the long sea voyage from England to India without spoiling" },
         500: { q: "What is the world's most-copied beer style — pale, crisp, and named after the Czech city where it was invented?", a: "Pilsner (from Plzeň)" }
       },
       "Firearms": {
         100: { q: "What does the 'AR' in AR-15 actually stand for? (Hint: it's not 'assault rifle')", a: "ArmaLite — the company that originally designed it" },
-        200: { q: "What's the general term for the device on top of a firearm's barrel used to aim it?", a: "A sight (or scope)" },
+        200: { q: "Iron sights or a scope — what's the thing on top of a barrel that you aim with?", a: "A sight" },
         300: { q: "The .45 ACP cartridge, still popular in 1911-pattern pistols, shares its name with what year it was adopted by the US military?", a: "1911" },
         500: { q: "What Israeli weapons designer created the Uzi submachine gun — and named it after himself?", a: "Uziel 'Uzi' Gal" }
       },
@@ -376,7 +376,7 @@ const ROUNDS = [
         100: { q: "What does the 'GPT' in ChatGPT stand for?", a: "Generative Pre-trained Transformer" },
         200: { q: "What AI company makes the chatbot Claude?", a: "Anthropic" },
         300: { q: "In 1997, what IBM computer famously beat world chess champion Garry Kasparov?", a: "Deep Blue" },
-        400: { q: "What's the term for when an AI confidently states false information as if it were fact?", a: "Hallucination" }
+        400: { q: "When an AI makes something up and says it like it's true, what's that called?", a: "Hallucination" }
       },
       "Sports": {
         200: { q: "How many players from one team are on the field at a time in American football?", a: "11" },
@@ -449,7 +449,7 @@ const ROUNDS = [
         500: { q: "What corn chip snack, introduced by Frito-Lay in 1964, comes in Original, Cool Ranch, and Nacho Cheese?", a: "Doritos" }
       },
       "Grilling & BBQ": {
-        100: { q: "What's the term for cooking meat low and slow over indirect heat — a Southern barbecue tradition?", a: "Smoking" },
+        100: { q: "Low and slow, smoke, not a grill flame. What's that called?", a: "Smoking" },
         200: { q: "Kansas City, Texas, and the Carolinas are each famous for their own distinct style of what?", a: "Barbecue" },
         300: { q: "What's the ideal internal temperature, roughly, for a medium-rare steak?", a: "About 130–135°F" },
         400: { q: "What type of wood is a classic choice for smoking brisket, Texas-style?", a: "Post oak" }
@@ -463,7 +463,7 @@ const ROUNDS = [
       "Space & Science": {
         100: { q: "What's the closest planet to the sun?", a: "Mercury" },
         300: { q: "What NASA rover landed on Mars in 2021 to search for signs of ancient microbial life?", a: "Perseverance" },
-        400: { q: "How many people have walked on the moon? Closest guess takes it.", a: "Twelve" },
+        400: { q: "How many people have walked on the moon?", a: "Twelve", hint: "Closest guess wins." },
         500: { q: "What private aerospace company, founded by Elon Musk, was the first to launch a reusable orbital-class rocket?", a: "SpaceX" }
       },
       "Geography & Travel": {
@@ -501,13 +501,13 @@ const ROUNDS = [
         500: { q: "What 1985 film has Michael J. Fox traveling through time in a modified DeLorean?", a: "Back to the Future" }
       },
       "True Crime & Mysteries": {
-        100: { q: "What's the basic forensic tool — a brush plus fine powder — used to lift fingerprints at a crime scene?", a: "Fingerprint powder" },
+        100: { q: "What do detectives dust a crime scene with to make fingerprints show up?", a: "Fingerprint powder" },
         200: { q: "What security guard was wrongly suspected in the 1996 Atlanta Olympics bombing before the real bomber was identified years later?", a: "Richard Jewell" },
-        300: { q: "What term describes an unsolved crime, often reopened decades later using new DNA evidence?", a: "A cold case" },
+        300: { q: "What do cops call a murder that sat unsolved for years, then got reopened?", a: "A cold case" },
         400: { q: "Hijacker D.B. Cooper parachuted from a plane in 1971 after receiving how much in ransom cash?", a: "$200,000" }
       },
       "Wordplay & Etymology": {
-        200: { q: "What's the term for a word or phrase that reads the same forward and backward, like 'level'?", a: "A palindrome" },
+        200: { q: "A word that reads the same forwards and backwards, like level. What's that called?", a: "A palindrome" },
         300: { q: "The word 'salary' comes from the Latin word for what commodity Roman soldiers were once partly paid in?", a: "Salt" },
         400: { q: "What figure of speech compares two unlike things using 'like' or 'as'?", a: "A simile" },
         500: { q: "What's a word that sounds like the thing it describes — 'buzz,' 'sizzle,' 'boom'?", a: "Onomatopoeia" },
@@ -568,31 +568,31 @@ const ROUNDS = [
         100: { q: "How many players from one team are on the field defensively at a time in baseball?", a: "9" },
         300: { q: "What's it called when a batter hits the ball over the outfield fence in fair territory?", a: "A home run" },
         400: { q: "What Yankees legend, nicknamed 'The Sultan of Swat,' held the career home run record for decades?", a: "Babe Ruth" },
-        500: { q: "What's the term for a pitcher completing an entire game without allowing a single hit?", a: "A no-hitter" }
+        500: { q: "A pitcher throws a whole game and nobody gets a hit. What's that?", a: "A no-hitter" }
       },
       "Parenting & Family Life": {
-        100: { q: "What children's show features a family of anthropomorphic pigs, including Peppa and George?", a: "Peppa Pig" },
-        200: { q: "What's the 2 a.m. parenting move of putting a baby in the car and driving until they finally pass out?", a: "A sleep drive (car nap / driveway sleep)" },
-        400: { q: "What type of vehicle became the iconic 'mom-mobile' of the 1990s and 2000s, popularized by Dodge and Chrysler?", a: "The minivan" },
-        500: { q: "What's the common term for the sleep-deprived early weeks after bringing home a newborn?", a: "The \"newborn fog\" (new-parent sleep deprivation)" }
+        100: { q: "What kids' show stars a family of pigs named Peppa and George?", a: "Peppa Pig" },
+        200: { q: "What do new parents call the nuclear option of letting a baby cry until they fall asleep?", a: "Cry it out" },
+        400: { q: "What vehicle became the official mom-mobile of the '90s — sliding doors, captain's chairs, DVD player in the ceiling?", a: "The minivan" },
+        500: { q: "What do parents call the first three months after birth, when nobody in the house is sleeping?", a: "The fourth trimester" }
       },
       "Fishing & Outdoors": {
-        100: { q: "What's the general term for the line, hooks, and bait setup used to catch fish?", a: "Tackle" },
+        100: { q: "Rod, reel, hooks, bait — what's the whole pile of gear called?", a: "Tackle" },
         200: { q: "What hard-fighting Florida saltwater game fish is nicknamed the 'silver king'?", a: "Tarpon" },
         300: { q: "What's it called when an angler releases a caught fish back into the water unharmed?", a: "Catch and release" },
         500: { q: "What Florida Keys town brands itself the 'Sportfishing Capital of the World'?", a: "Islamorada" }
       },
       "Home Improvement & DIY": {
-        100: { q: "What power tool do you always have the wrong bit for, and that is definitely still in the truck?", a: "A drill" },
-        200: { q: "What's the term for a wall built to hold back soil and support a slope?", a: "A retaining wall" },
+        100: { q: "What power tool do you always have the wrong bit for?", a: "A drill" },
+        200: { q: "What do you call a wall built just to hold a hill back?", a: "A retaining wall" },
         300: { q: "What home improvement cable network, launched in 1994, is known for shows like Fixer Upper?", a: "HGTV" },
         400: { q: "In most U.S. homes, wall studs are typically spaced how many inches apart, center to center?", a: "16 inches" }
       },
       "Cookouts & Camping": {
-        200: { q: "What gooey campfire treat is roasted on a stick before going between two graham crackers with chocolate?", a: "A marshmallow (for s'mores)" },
-        300: { q: "Name all three layers of a s'more, in any order.", a: "Graham cracker, chocolate, and a roasted marshmallow" },
+        200: { q: "What do pitmasters call the dark, crunchy crust on the outside of a smoked brisket?", a: "The bark" },
+        300: { q: "Name the three layers of a s'more.", a: "Graham cracker, chocolate, marshmallow" },
         400: { q: "What rugged cooler brand, based in Austin, Texas, became a favorite of hunters, campers, and tailgaters?", a: "YETI" },
-        500: { q: "What's the term for sleeping outdoors without a tent, directly under the stars?", a: "\"Cowboy camping\"" }
+        500: { q: "Sleeping outside with no tent, just a bag under the stars. What's that called?", a: "\"Cowboy camping\"" }
       },
       "Board Games & Cards": {
         100: { q: "What classic board game involves buying and trading properties like Boardwalk and Park Place?", a: "Monopoly" },
@@ -602,14 +602,14 @@ const ROUNDS = [
       },
       "Marriage & Couples Life": {
         100: { q: "What's the traditional material gift theme for a couple's 1st wedding anniversary?", a: "Paper" },
-        200: { q: "What's the tradition of the groom not seeing the bride in her dress until she starts down the aisle?", a: "The 'first look' ban (not seeing the bride before the ceremony)" },
+        200: { q: "It's supposed to be bad luck for the groom to see the bride in her dress before what?", a: "The wedding / the ceremony" },
         400: { q: "What's the traditional gift material for a 25th wedding anniversary?", a: "Silver" },
         500: { q: "What wedding reception tradition has the bride tossing her bouquet to a group of single guests?", a: "The bouquet toss" }
       },
       "Florida Living": {
         100: { q: "What's Florida's official state nickname, tied to its citrus and warm weather?", a: "The Sunshine State" },
         200: { q: "What massive subtropical wetland covers much of South Florida?", a: "The Everglades" },
-        300: { q: "What invasive lizard, originally a pet-trade escapee, now suns itself on pretty much every Central Florida fence?", a: "The Cuban knight anole — or the green iguana. Either's right; they're both everywhere." },
+        300: { q: "What giant lizard, sold as a pet and then dumped in canals, now suns itself on Florida banks and gets rounded up by trappers?", a: "The green iguana" },
         500: { q: "What invasive, dangerous reptile has overrun the Everglades after being released as pets?", a: "The Burmese python" }
       }
     }
@@ -641,10 +641,10 @@ const ROUNDS = [
         500: { q: "What Cartoon Network show follows a boy genius with a secret underground laboratory?", a: "Dexter's Laboratory" }
       },
       "Classic Sitcoms": {
-        100: { q: "What NBC sitcom follows six friends living in New York, including Ross, Rachel, and Joey?", a: "Friends" },
+        100: { q: "Ross, Rachel, Joey, Central Perk. Name the show.", a: "Friends" },
         200: { q: "What sitcom, set in a Boston bar, has the theme song 'Where Everybody Knows Your Name'?", a: "Cheers" },
         300: { q: "What sitcom famously billed itself as being 'about nothing,' starring Jerry, George, Elaine, and Kramer?", a: "Seinfeld" },
-        500: { q: "What mockumentary-style sitcom is set at the fictional Dunder Mifflin paper company in Scranton, PA?", a: "The Office" }
+        500: { q: "What sitcom is set at a paper company in Scranton called Dunder Mifflin?", a: "The Office" }
       },
       "Marvel & Superhero Movies": {
         200: { q: "What's the name of Tony Stark's AI assistant in the Iron Man films?", a: "JARVIS" },
@@ -656,16 +656,16 @@ const ROUNDS = [
         100: { q: "What one-pot Louisiana dish starts with a dark roux and usually involves sausage, chicken, or seafood?", a: "Gumbo" },
         200: { q: "What leafy green, often slow-cooked with ham hocks, is a Southern soul food staple?", a: "Collard greens" },
         300: { q: "What cornmeal-based dish, popular across the South, is often served alongside shrimp?", a: "Grits" },
-        400: { q: "What dessert layers pastry or biscuit topping with sweet fruit, and is a Southern summer classic when made with peaches?", a: "Peach cobbler" }
+        400: { q: "Peaches, biscuit topping, baked until it bubbles. What's that dessert?", a: "Peach cobbler" }
       },
       "Hunting & The Outdoors": {
-        100: { q: "In Florida, what document do you need before you can legally hunt deer?", a: "A hunting license (plus a deer permit / management area permit)" },
-        300: { q: "What term describes the raised platform hunters sit in while waiting for game?", a: "A tree stand" },
+        100: { q: "What do you need from the state before you can legally hunt deer in Florida?", a: "A hunting license" },
+        300: { q: "What's the platform up a tree that hunters sit in?", a: "A tree stand" },
         400: { q: "What loud, distinctive call do turkey hunters use to attract gobblers?", a: "A turkey call" },
-        500: { q: "What's it called when the wind is blowing your scent straight at the animal you're hunting?", a: "Being winded (or a bad wind / busted scent)" }
+        500: { q: "If the wind is blowing from you toward the deer, they already know you're there. What did you give them?", a: "Your scent" }
       },
       "Concerts & Live Music": {
-        100: { q: "What's the term for the act that performs right before the headliner at a concert?", a: "The opening act (opener)" },
+        100: { q: "What's the band that plays before the headliner called?", a: "The opener" },
         200: { q: "What's the nickname for the cheap seats at the very back of an arena?", a: "The nosebleeds" },
         400: { q: "What free 1969 music festival in upstate New York became a symbol of the counterculture movement?", a: "Woodstock" },
         500: { q: "What do concertgoers traditionally hold up and wave during a slow song, once literally a flame?", a: "A lighter" }
@@ -717,10 +717,10 @@ const ROUNDS = [
         400: { q: "What classic string-spun toy 'sleeps' and does tricks when flicked correctly, seeing a big craze in the mid-90s?", a: "The yo-yo" }
       },
       "Award Shows & Pop Culture Moments": {
-        200: { q: "What annual award show is Hollywood's biggest night for film, handing out statuettes nicknamed 'Oscar'?", a: "The Academy Awards" },
-        300: { q: "What MTV award show hands out a trophy shaped like an astronaut on the moon?", a: "The MTV Video Music Awards (VMAs)" },
-        400: { q: "What annual award, given by the Recording Academy, is music's highest honor, including Album of the Year?", a: "The Grammy Award" },
-        500: { q: "What annual award honors the best in American primetime television?", a: "The Emmy Award" }
+        200: { q: "What award did Will Smith win the same night he slapped Chris Rock?", a: "An Oscar" },
+        300: { q: "What award show gave us Britney kissing Madonna, and Kanye grabbing the mic from Taylor Swift?", a: "The VMAs" },
+        400: { q: "What music award is shaped like a tiny gramophone?", a: "A Grammy" },
+        500: { q: "What TV award comes in two flavors — primetime and daytime?", a: "An Emmy" }
       },
       "NFL": {
         100: { q: "How many points is a touchdown worth, before the extra point or two-point conversion?", a: "6" },
@@ -736,7 +736,7 @@ const ROUNDS = [
       },
       "Beach & Boating Life": {
         100: { q: "A double-red flag on a Florida beach means what, exactly?", a: "Water closed — no swimming. The current or surf is too dangerous." },
-        200: { q: "What device do boaters drop to keep a boat from drifting away when not underway?", a: "An anchor" },
+        200: { q: "What do you throw off a boat so it stops drifting?", a: "An anchor" },
         300: { q: "What piece of safety gear is legally required for every person aboard a boat in most states?", a: "A life jacket (PFD)" },
         500: { q: "What Florida event, held every February in Miami, is one of the largest boat shows in the world?", a: "The Miami International Boat Show" }
       },
@@ -781,16 +781,16 @@ const ROUNDS = [
         500: { q: "Which member of the group is a Lieutenant with the Polk County Sheriff's Office?", a: "James Prue" }
       },
       "Coaching Little League": {
-        100: { q: "What term describes the lineup order a coach sets for how players will bat during a game?", a: "The batting order" },
+        100: { q: "What's the list that tells kids who bats first, second, third?", a: "The batting order" },
         200: { q: "What safety rule limits how many pitches a young pitcher can throw in a game, to protect their arm?", a: "A pitch count limit" },
         300: { q: "What organization runs the world's most famous youth baseball tournament, held every August in Williamsport, PA?", a: "Little League Baseball (the Little League World Series)" },
-        500: { q: "What's the term for a lineup where every rostered player bats during the game, regardless of who's in the field?", a: "A continuous batting order (\"everybody bats\")" }
+        500: { q: "What's it called when every kid on the roster bats, even the ones sitting in the field?", a: "A continuous batting order — everybody bats" }
       },
       "Construction & Skilled Trades": {
-        100: { q: "What's the term for the detailed drawings architects and engineers use to guide a construction project?", a: "Blueprints" },
+        100: { q: "What do builders call the drawings they actually build from?", a: "Blueprints" },
         200: { q: "What heavy piece of equipment is commonly used to dig foundations and move earth on a job site?", a: "An excavator" },
         400: { q: "What's the name for the rough wooden skeleton of a building, built before drywall goes up?", a: "Framing" },
-        500: { q: "What government inspection must most construction projects pass before the building can legally be occupied?", a: "A final building inspection (Certificate of Occupancy)" }
+        500: { q: "What's the piece of paper that says a new house is legal to move into?", a: "A certificate of occupancy" }
       },
       "Law Enforcement & Public Safety": {
         100: { q: "On a police radio, what does 'BOLO' stand for?", a: "Be On the Lookout" },
@@ -800,18 +800,18 @@ const ROUNDS = [
       },
       "Air Force & Military Aviation": {
         100: { q: "What U.S. military branch operates the F-22 Raptor and F-35 Lightning II fighter jets?", a: "The Air Force" },
-        200: { q: "What U.S. service academy commissions officers alongside ROTC and Officer Training School?", a: "The U.S. Air Force Academy" },
+        200: { q: "Besides ROTC and officer training school, where do Air Force officers come from?", a: "The Air Force Academy" },
         300: { q: "What NATO country is home to Aviano Air Base, a major U.S. Air Force installation in Europe?", a: "Italy" },
-        500: { q: "What's the standard rank after Major in the Air Force officer structure — the rank held by a typical squadron's senior leadership?", a: "Lieutenant Colonel" }
+        500: { q: "In the Air Force, what rank comes right after Major?", a: "Lieutenant Colonel" }
       },
       "Gym & Fitness Culture": {
-        100: { q: "What term describes lifting weights in a structured plan to build strength over time?", a: "Strength training (resistance training)" },
-        200: { q: "What high-intensity workout style mixes short bursts of intense effort with rest periods, popularized by CrossFit-style gyms?", a: "HIIT (High-Intensity Interval Training)" },
-        400: { q: "What's the term for a workout partner who holds you accountable to show up and pushes you through your reps?", a: "An accountability partner (gym buddy / spotter)" },
-        500: { q: "What's the gym-bro name for the last ugly rep you barely finish, usually with someone yelling at you?", a: "Failure (or a PR — personal record — if it was a new max)" },
+        100: { q: "What's the person standing behind the bar so you don't drop it on your chest called?", a: "A spotter" },
+        200: { q: "What's the workout where you go hard for 30 seconds, rest, then do it again — and CrossFit people will not shut up about it?", a: "HIIT" },
+        400: { q: "What's a PR in the gym?", a: "A personal record" },
+        500: { q: "What's the last ugly rep you barely finish, usually with someone yelling at you?", a: "Failure" },
       },
       "Cruise Ship Life": {
-        100: { q: "What's the term for the massive multi-story open area often found at the center of a cruise ship, ringed by balconies?", a: "The atrium" },
+        100: { q: "What's the giant open lobby in the middle of a cruise ship called?", a: "The atrium" },
         300: { q: "What's the name for the casual self-serve dining hall found on nearly every cruise ship, usually near the pool deck?", a: "The buffet (Lido deck)" },
         400: { q: "What Caribbean cruise line is known for its private island destinations, including CocoCay?", a: "Royal Caribbean" },
         500: { q: "What's the maritime term for the daily fee automatically added to a cruise bill to tip the crew?", a: "Gratuities (the service charge)" }
@@ -845,7 +845,7 @@ const ROUNDS = [
     dailyDouble: { category: "Labor Day", value: 400 },
     questions: {
       "Cookouts & Grilling": {
-        100: { q: "What's the term for cooking with the heat source directly under the food versus off to the side?", a: "Direct heat (versus indirect heat)" },
+        100: { q: "Burgers over the flame, not off to the side. What's that called?", a: "Direct heat" },
         200: { q: "What cut of beef, notoriously tough and full of connective tissue, becomes the centerpiece of Texas barbecue after 12+ hours of smoke?", a: "Brisket" },
         400: { q: "What's the name for the pink ring just under the surface of properly smoked meat — the one that proves you did it right?", a: "The smoke ring" },
         500: { q: "The four classic American barbecue regions are Texas, Memphis, Kansas City, and this state known for whole-hog and a vinegar-based sauce.", a: "North Carolina" }
@@ -882,15 +882,15 @@ const ROUNDS = [
       },
       "Labor Day": {
         100: { q: "Labor Day is observed on which day of the year in the United States?", a: "The first Monday in September" },
-        200: { q: "Most of the world celebrates workers on May 1st. What do Americans call that day instead?", a: "May Day (International Workers' Day) — we moved ours to September" },
+        200: { q: "Most of the world celebrates workers on May 1st. What do Americans call that day?", a: "May Day" },
         300: { q: "What outdated fashion rule is traditionally said to take effect the day after Labor Day?", a: "No wearing white" },
         500: { q: "President Grover Cleveland signed Labor Day into federal law in 1894, just days after federal troops broke up what massive railroad strike?", a: "The Pullman Strike" }
       },
       "Backyard Games": {
         100: { q: "In cornhole, how many points is it worth to sink a bag through the hole?", a: "Three points" },
-        200: { q: "What lawn game involves tossing horseshoes at a stake in the ground — and what's it called when you circle the stake?", a: "Horseshoes — a 'ringer'" },
+        200: { q: "In horseshoes, what's it called when your shoe lands around the stake?", a: "A ringer" },
         300: { q: "In the yard game commonly called ladder toss, what are the two connected balls on a string called?", a: "Bolas" },
-        400: { q: "What Scandinavian lawn game involves throwing wooden batons at numbered pins to reach exactly 50 points?", a: "Kubb (or Mölkky, for the numbered-pin version — either accepted)" }
+        400: { q: "What Finnish lawn game uses numbered wooden pins and you're trying to hit exactly 50?", a: "Mölkky" }
       }
     }
   },
@@ -938,10 +938,10 @@ const ROUNDS = [
         500: { q: "'Take On Me,' with its famous pencil-sketch music video, belongs to what Norwegian band?", a: "a-ha" }
       },
       "Name The Movie": {
-        100: { q: "A great white shark terrorizes a beach town, and the police chief decides he needs a bigger boat.", a: "Jaws" },
-        300: { q: "A boy is accidentally left behind at Christmas and defends his house from two burglars.", a: "Home Alone" },
-        400: { q: "A thief who steals secrets from dreams assembles a team to plant an idea in a businessman's mind instead.", a: "Inception" },
-        500: { q: "A cop and a mobster's mole spend the movie hunting each other inside Boston's underworld.", a: "The Departed" }
+        100: { q: "A shark eats tourists. The sheriff says he's gonna need a bigger boat.", a: "Jaws" },
+        300: { q: "A kid gets left at home at Christmas and fights two burglars with paint cans.", a: "Home Alone" },
+        400: { q: "They sneak into dreams to steal secrets — then try planting an idea instead.", a: "Inception" },
+        500: { q: "A cop and a mob mole hunt each other through Boston. Leonardo DiCaprio, Jack Nicholson.", a: "The Departed" }
       },
       "Slogans & Brands": {
         100: { q: "'Just Do It' belongs to what brand?", a: "Nike" },
@@ -957,10 +957,10 @@ const ROUNDS = [
       },
       "Before & After": {
         // The Jeopardy classic: the end of the first answer is the start of the second.
-        100: { q: "The Will Smith sitcom set in Beverly Hills, run into the appliance that cools your house.", a: "The Fresh Prince of Bel-Air Conditioner" },
-        200: { q: "The Spielberg movie with cloned dinosaurs, run into the person who patrols a national park.", a: "Jurassic Park Ranger" },
-        300: { q: "The Pixar movie about Woody and Buzz, run into what a parent announces at bedtime.", a: "Toy Story Time" },
-        500: { q: "The sitcom about a Boston bar, run into the stuff you put on nachos.", a: "Cheers Cheese" },
+        100: { q: "Will Smith's Beverly Hills sitcom + the thing that cools your house.", a: "The Fresh Prince of Bel-Air Conditioner" },
+        200: { q: "The Spielberg movie with cloned dinosaurs + the person who patrols a national park.", a: "Jurassic Park Ranger" },
+        300: { q: "The Pixar movie about Woody and Buzz + what a parent announces at bedtime.", a: "Toy Story Time" },
+        500: { q: "The sitcom set in a Boston bar + the stuff you put on nachos.", a: "Cheers Cheese" },
       },
       "Odd One Out": {
         200: { q: "Which does not belong: Jupiter, Saturn, Mercury, Neptune?", a: "Mercury — the others are gas or ice giants, Mercury is a rocky planet" },
@@ -976,10 +976,10 @@ const ROUNDS = [
       },
       "How Many?": {
         // Closest guess takes it — nobody needs to be exact.
-        100: { q: "How many squares are on a standard chessboard?", a: "64" },
-        200: { q: "How many bones are in the adult human body?", a: "206" },
-        400: { q: "How many countries are on the continent of Africa?", a: "54" },
-        500: { q: "How many total dots are on a pair of standard six-sided dice?", a: "42 — 21 per die" }
+        100: { q: "How many squares on a chessboard?", a: "64" },
+        200: { q: "How many bones in an adult human?", a: "206" },
+        400: { q: "How many countries in Africa?", a: "54" },
+        500: { q: "How many dots on a pair of dice, total?", a: "42" }
       }
     }
   },
@@ -1070,16 +1070,16 @@ const ROUNDS = [
         500: { q: "Who holds the NBA record for most points in a single game, with 100?", a: "Wilt Chamberlain" }
       },
       "Golf": {
-        100: { q: "What's the term for finishing a hole two strokes under par?", a: "An eagle" },
+        100: { q: "Two under par on one hole. What's that?", a: "An eagle" },
         200: { q: "What green jacket-awarding tournament is played at Augusta National every April?", a: "The Masters" },
         300: { q: "How many holes are played in a standard round of golf?", a: "Eighteen" },
-        500: { q: "What's the term for a score of one on a par-three hole?", a: "A hole-in-one (also an ace)" }
+        500: { q: "You hole it from the tee on a par three. What's that called?", a: "A hole-in-one (also an ace)" }
       },
       "Soccer & The World Cup": {
         100: { q: "What's it called when a tied soccer game is decided by kicks from 12 yards?", a: "A penalty shootout" },
         200: { q: "How often is the FIFA World Cup held?", a: "Every four years" },
         400: { q: "What Argentine player, wearing number 10, won the 2022 World Cup?", a: "Lionel Messi" },
-        500: { q: "What's the term for scoring three goals in a single match?", a: "A hat trick" }
+        500: { q: "Three goals in one game. What's that called?", a: "A hat trick" }
       },
       "The Olympics": {
         200: { q: "How many rings are on the Olympic flag?", a: "Five" },
@@ -1096,12 +1096,12 @@ const ROUNDS = [
       "Tennis": {
         100: { q: "What does a score of zero get called in tennis?", a: "Love" },
         200: { q: "What surface is Wimbledon played on?", a: "Grass" },
-        300: { q: "What's the term for a serve the opponent doesn't touch at all?", a: "An ace" },
+        300: { q: "A serve nobody even touches. What's that called?", a: "An ace" },
         500: { q: "How many Grand Slam tournaments are there in a year?", a: "Four" }
       },
       "Sports Nicknames": {
         100: { q: "What Boston basketball arena is nicknamed 'The Garden'?", a: "TD Garden (Boston Garden)" },
-        300: { q: "What NFL quarterback is nicknamed 'Captain Comeback'?", a: "John Elway — or Tom Brady, if they fight you on it. Either's fine." },
+        300: { q: "What Broncos quarterback was nicknamed Captain Comeback?", a: "John Elway" },
         400: { q: "What NFL team is nicknamed 'America's Team'?", a: "The Dallas Cowboys" },
         500: { q: "What college football stadium is known as 'The Swamp'?", a: "Ben Hill Griffin Stadium, University of Florida" }
       },
@@ -1137,7 +1137,7 @@ const ROUNDS = [
       "Dogs & Pets": {
         100: { q: "What's the most popular dog breed in the United States, by registrations?", a: "The Labrador Retriever" },
         300: { q: "How many teeth does an adult dog normally have?", a: "42" },
-        400: { q: "What's the term for a cat's ability to always land on its feet?", a: "The righting reflex" },
+        400: { q: "Cats always land on their feet. What's that called?", a: "The righting reflex" },
         500: { q: "What breed is the smallest dog breed in the world?", a: "The Chihuahua" }
       },
       "Sharks & The Ocean": {
@@ -1149,7 +1149,7 @@ const ROUNDS = [
       "Dinosaurs": {
         200: { q: "What does 'Tyrannosaurus Rex' roughly translate to?", a: "Tyrant lizard king" },
         300: { q: "What dinosaur had a distinctive double row of plates along its back and spikes on its tail?", a: "Stegosaurus" },
-        400: { q: "What era are dinosaurs most associated with, spanning the Triassic, Jurassic, and Cretaceous?", a: "The Mesozoic Era" },
+        400: { q: "Jurassic is the middle one. What do you call the whole age of dinosaurs?", a: "The Mesozoic" },
         500: { q: "What's the leading scientific explanation for the dinosaurs' extinction about 66 million years ago?", a: "An asteroid impact (the Chicxulub impactor)" }
       },
       "The Human Body": {
@@ -1161,17 +1161,17 @@ const ROUNDS = [
       "Weather & Disasters": {
         100: { q: "What scale is used to rate hurricane strength from 1 to 5?", a: "The Saffir-Simpson scale" },
         200: { q: "What scale rates tornado intensity in the United States today?", a: "The Enhanced Fujita (EF) scale" },
-        300: { q: "What's the term for a hurricane that forms in the western Pacific?", a: "A typhoon" },
+        300: { q: "A hurricane in the western Pacific has a different name. What is it?", a: "A typhoon" },
         500: { q: "What instrument measures atmospheric pressure and helps predict storms?", a: "A barometer" }
       },
       "Bugs & Creepy Crawlies": {
-        100: { q: "How many legs does an insect have?", a: "Six" },
+        100: { q: "How many legs on a bug that actually counts as an insect?", a: "Six" },
         300: { q: "What's the only bee in a hive that lays eggs?", a: "The queen" },
         400: { q: "How many eyes do most spiders have?", a: "Eight" },
         500: { q: "What insect is responsible for more human deaths per year than any other animal?", a: "The mosquito" }
       },
       "Trees & Plants": {
-        100: { q: "What process do plants use to convert sunlight into energy?", a: "Photosynthesis" },
+        100: { q: "Plants eat sunlight. What's that process called?", a: "Photosynthesis" },
         200: { q: "What's the tallest tree species in the world?", a: "The coast redwood" },
         300: { q: "How can you estimate a tree's age from its trunk?", a: "Count the growth rings" },
         500: { q: "What's the state tree of Florida, and the source of a well-known heart of palm?", a: "The sabal palm (cabbage palm)" }
@@ -1196,7 +1196,7 @@ const ROUNDS = [
       "U.S. Presidents": {
         100: { q: "Who was the only U.S. president to serve more than two terms?", a: "Franklin D. Roosevelt" },
         200: { q: "Which president is on the $50 bill?", a: "Ulysses S. Grant" },
-        300: { q: "Who was the youngest person ever elected president?", a: "John F. Kennedy — Theodore Roosevelt was younger when he took office, but wasn't elected to it" },
+        300: { q: "Who is the youngest person ever elected president — not the youngest to serve, the youngest elected?", a: "John F. Kennedy" },
         500: { q: "Which two presidents were father and son, both named for the same family line, serving in the 1700s-1800s?", a: "John Adams and John Quincy Adams" }
       },
       "Flags & Capitals": {
@@ -1226,7 +1226,7 @@ const ROUNDS = [
       "Aviation": {
         100: { q: "What brothers made the first powered airplane flight in 1903?", a: "The Wright brothers, Orville and Wilbur" },
         200: { q: "What's the common name for an aircraft's flight data recorder?", a: "The black box — which is actually orange" },
-        400: { q: "What's the term for exceeding the speed of sound?", a: "Going supersonic (breaking the sound barrier)" },
+        400: { q: "Faster than the speed of sound. What's that called?", a: "Going supersonic (breaking the sound barrier)" },
         500: { q: "What supersonic passenger jet flew commercially until 2003?", a: "The Concorde" }
       },
       "Field Artillery": {
@@ -1249,7 +1249,7 @@ const ROUNDS = [
 const BONUS_QUESTIONS = [
   { q: "What's the only U.S. state that grows coffee commercially?", a: "Hawaii" },
   { q: "What planet currently has the most moons in our solar system?", a: "Saturn" },
-  { q: "What's the tallest dog breed in the world?", a: "The Great Dane (or Irish Wolfhound, for height at the shoulder — either accepted)" },
+  { q: "What's the tallest dog breed in the world?", a: "The Great Dane" },
   { q: "What's the most stolen food in the world, according to food-crime reports?", a: "Cheese" },
   { q: "What instrument has 88 keys?", a: "The piano" },
   { q: "What country invented golf?", a: "Scotland" },
@@ -1264,7 +1264,7 @@ const BONUS_QUESTIONS = [
   { q: "What's the only U.S. state whose name is one syllable?", a: "Maine" },
   { q: "What year did the Titanic sink?", a: "1912" },
   { q: "What's the only letter that doesn't appear in any U.S. state name?", a: "Q" },
-  { q: "What's the largest desert in the world?", a: "Antarctica — it's a cold desert" },
+  { q: "What's the largest desert in the world? It's a trick.", a: "Antarctica" },
   { q: "How many time zones does Russia span?", a: "Eleven" },
   { q: "What's the chemical symbol for gold?", a: "Au" },
   { q: "What's the loudest animal on Earth?", a: "The sperm whale" },
@@ -1283,12 +1283,12 @@ const BONUS_QUESTIONS = [
   { q: "What's the hottest planet in our solar system?", a: "Venus" },
   { q: "How many stripes are on the American flag?", a: "Thirteen" },
   { q: "What's the strongest muscle in the human body, by weight?", a: "The masseter — the jaw" },
-  { q: "What's the longest river in the world?", a: "The Nile or the Amazon — scientists still fight about it. Either's fine." },
+  { q: "What's the longest river in the world? Nile or Amazon — pick one and defend it.", a: "The Nile. The Amazon people will argue. Give it to either." },
   { q: "What do you call a group of flamingos?", a: "A flamboyance" },
   { q: "Which planet rotates on its side?", a: "Uranus" },
-  { q: "What fruit is botanically a berry, even though nobody treats it like one?", a: "A banana (or a tomato, or a watermelon — any of those)" },
+  { q: "A banana is botanically what kind of fruit?", a: "A berry" },
   { q: "What's a baby goat called?", a: "A kid" },
-  { q: "How many dimples on a standard golf ball, give or take 50?", a: "About 300 to 400 — 336 is a common number" },
+  { q: "How many dimples on a golf ball, give or take fifty?", a: "About 336" },
   { q: "What condiment started life in the 1830s as a medicine?", a: "Ketchup" },
   { q: "What's the only U.S. state with a two-sided flag?", a: "Oregon" },
   { q: "What fast-food chain has a star on its wrapper because it was founded in Texas?", a: "Whataburger" },
@@ -1307,16 +1307,16 @@ const BONUS_QUESTIONS = [
   { q: "What nut is used to make marzipan?", a: "Almonds" },
   { q: "What's the only letter that doesn't appear in the periodic table?", a: "J" },
   { q: "How many time zones does China officially use?", a: "One" },
-  { q: "What do you call a wine snob's favorite sound, made by swirling and sniffing?", a: "Nosing (or aeration — either's fine)" },
+  { q: "What do wine people call it when they swirl the glass and sniff?", a: "Nosing" },
   { q: "What board game asks you to accuse Colonel Mustard in the library with the candlestick?", a: "Clue (Cluedo)" },
   { q: "What drawing toy is a gray screen you shake to erase?", a: "Etch A Sketch" },
   { q: "What U.S. president is on the penny?", a: "Abraham Lincoln" },
   { q: "What's a group of owls called?", a: "A parliament" },
-  { q: "What sea creature has blue blood?", a: "A horseshoe crab (or a lobster / octopus — copper-based blood. Any of those.)" },
+  { q: "What sea creature has blue blood?", a: "A horseshoe crab" },
   { q: "How many minutes in a football game, NFL regulation, before overtime?", a: "Sixty" },
-  { q: "What's the only U.S. state whose name starts with two vowels in a row?", a: "Iowa (or Hawaii, if they argue — both work)" },
+  { q: "What's the only U.S. state whose name starts with two vowels?", a: "Iowa" },
   { q: "What breakfast meat is just a thin-sliced smoked pork belly?", a: "Bacon" },
-  { q: "What's the term for a word created by smashing two words together, like brunch?", a: "A portmanteau" },
+  { q: "Brunch is breakfast plus lunch. What do you call a smash-together word like that?", a: "A portmanteau" },
   { q: "What planet is named after the Roman god of war?", a: "Mars" },
   { q: "How many items in a baker's dozen?", a: "Thirteen" },
   { q: "What's the only continent with no bees?", a: "Antarctica" },
@@ -1324,26 +1324,26 @@ const BONUS_QUESTIONS = [
   { q: "What animal can sleep standing up but can only dream lying down?", a: "A horse" },
   { q: "What's the most common blood type in the world?", a: "O positive" },
   { q: "What toy was originally invented as wallpaper cleaner?", a: "Play-Doh" },
-  { q: "What's the only U.S. state you can type using one row of a QWERTY keyboard?", a: "Alaska (or Texas — A-L-A-S-K-A is the top row. Texas is not. Alaska.)" },
+  { q: "What's the only U.S. state you can type on the top row of a keyboard?", a: "Alaska" },
   { q: "How many wings does a bee have?", a: "Four" },
   { q: "What do you call the leftover holes in Swiss cheese?", a: "Eyes" },
   { q: "What's the first ingredient listed on a can of Coke?", a: "Carbonated water" },
   { q: "What U.S. city is nicknamed 'Beantown'?", a: "Boston" },
   { q: "What's a group of pugs called?", a: "A grumble" },
   { q: "How many holes on a standard bowling ball?", a: "Three" },
-  { q: "What does the 'D' in D-Day stand for?", a: "Day — it just means 'the day.' The D doesn't stand for Disembarkation or anything fancier." },
+  { q: "What does the D in D-Day stand for?", a: "Day. That's it. Just Day." },
   { q: "What's the only number whose letters are in alphabetical order?", a: "Forty" },
-  { q: "What fruit is also a color?", a: "Orange (or lime, or lemon — any of those)" },
+  { q: "What fruit is also a color?", a: "An orange" },
   { q: "How many counties are in Florida?", a: "Sixty-seven" },
   { q: "What's the official state pie of Florida?", a: "Key lime pie" },
   { q: "What do you call a male bee?", a: "A drone" },
-  { q: "What's the opposite of 'flotsam' — the wreckage that sinks — called?", a: "Jetsam (stuff thrown overboard on purpose). Flotsam floats." },
-  { q: "What U.S. holiday did Congress move to Mondays so people would get three-day weekends?", a: "Several — Washington's Birthday, Memorial Day, Columbus Day, Labor Day. Any of those." },
+  { q: "Flotsam floats. What's the wreckage you threw overboard on purpose?", a: "Jetsam" },
+  { q: "Which U.S. holiday did they move to a Monday so everyone gets a three-day weekend in May?", a: "Memorial Day" },
   { q: "What's the only English word that ends in 'mt'?", a: "Dreamt" },
   { q: "How many pockets on a pool table?", a: "Six" },
   { q: "What do you call the plastic tip on the end of a shoelace?", a: "An aglet" },
-  { q: "What's the hottest pepper on the everyday Scoville scale that normal people actually eat — not the lab monsters?", a: "A habanero (or ghost pepper if they're showing off)" },
-  { q: "What animal is on the Florida state flag, besides the flag itself?", a: "None — it's a seal with a steamboat, a cocoa palm, and a Seminole woman. No gator. Sorry." }
+  { q: "What's hotter than a jalapeño, orange, and still something a normal person might eat?", a: "A habanero" },
+  { q: "What animal is on the Florida state flag?", a: "None. No gator. It's a seal with a steamboat." }
 ];
 
 /* ============================================================
@@ -2284,13 +2284,25 @@ function teamButtonsHtml(idPrefix) {
   ).join('')}</div>`;
 }
 
+const CATEGORY_HINTS = {
+  "Before & After": "The end of the first thing is the start of the second. Say it as one phrase.",
+  "How Many?": "Closest guess wins. Nobody has to be exact.",
+  "Name The Movie": "Name the movie.",
+  "Odd One Out": "Which one doesn't belong — and why.",
+  "Emoji Decode": "Name the movie.",
+  "Dad Jokes & Pop Culture": "Shout the punchline.",
+  "One-Hit Wonders": "Name the artist."
+};
+
 function openQuestion(cat, val) {
   const item = currentRound().questions[cat][val];
+  const hint = CATEGORY_HINTS[cat] || item.hint;
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `
     <div class="card">
       <div class="tag">${escapeHtml(cat)} — ${val} pts</div>
+      ${hint ? `<div class="who-line">${escapeHtml(hint)}</div>` : ''}
       <div class="qtext">${escapeHtml(item.q)}</div>
       <button class="btn-primary" id="revealBtn">Reveal Answer</button>
       <div id="answerArea"></div>
