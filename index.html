@@ -276,6 +276,12 @@
     background: rgba(245,197,24,.16); border-color: var(--gold);
     box-shadow: 0 0 12px rgba(245,197,24,.35);
   }
+  .drinks-opt { text-align: center; }
+  .sober-note {
+    margin: 12px auto 0; max-width: 560px; padding: 8px 12px;
+    border-left: 3px solid var(--green); background: rgba(46,204,113,.09);
+    border-radius: 0 8px 8px 0; font-size: .85rem; opacity: .9; text-align: left;
+  }
   .resume-box {
     border: 2px solid var(--green); border-radius: 12px;
     padding: 14px; margin-bottom: 16px; background: rgba(46,204,113,.08);
@@ -878,7 +884,7 @@ const ROUNDS = [
     tagline: "No trivia. Forty squares of tasks, dares, duels and public judgment.",
     categories: [
       "Physical Feats", "Center Stage", "Fast Hands", "Head to Head",
-      "The People Decide", "Hot Seat", "Dares", "All In"
+      "The People Decide", "Dealer's Choice", "Dares", "All In"
     ],
     wildcardSlots: {},
     // Every square draws live from the decks — the board is never the same twice.
@@ -888,8 +894,8 @@ const ROUNDS = [
       "Fast Hands":        { deck: "challenge", type: "speed" },
       "Head to Head":      { deck: "duel" },
       "The People Decide": { deck: "vote" },
-      "Hot Seat":          { deck: "hotseat" },
-      "Dares":             { deck: "challenge", type: "social" },
+      "Dealer's Choice":   { deck: "challenge" },
+      "Dares":             { deck: "challenge", type: ["social", "drink"] },
       "All In":            { deck: "challenge", type: "room" }
     }
   },
@@ -1353,9 +1359,76 @@ const CHALLENGES = [
   { t: "Room-Wide Rochambeau", d: "EVERYBODY. Rock-paper-scissors, single elimination bracket, right now. Winner takes the points for their team.", timer: 0, who: "room", type: "room" },
   { t: "The Long Stare", d: "EVERYBODY. Staring contest, elimination style. Blink and you're out. Last eyes open score.", timer: 0, who: "room", type: "room" },
   { t: "Telephone", d: "EVERYBODY. The host whispers a sentence to one person. It goes around the room. If it survives intact, every team scores.", timer: 0, who: "room", type: "room" },
-  { t: "Closest Guess", d: "EVERYBODY. The host thinks of a number between 1 and 100 and writes it down. Everyone guesses once. Closest wins.", timer: 45, who: "room", type: "room" },
+  { t: "Closest Guess", d: "EVERYBODY. The host writes down a number between 1 and 100. Everyone writes their guess on their phone, face down. Reveal all at once — closest wins. Nobody says a number out loud before the reveal.", timer: 45, who: "room", type: "room" },
   { t: "Human Knot", d: "EVERYBODY. Grab two hands that aren't next to you. Untangle without letting go. Beat the clock and every team scores.", timer: 120, who: "room", type: "room" },
   { t: "Freeze", d: "EVERYBODY. Freeze in place. Nobody moves, nobody laughs. First to break is out, last one frozen scores.", timer: 0, who: "room", type: "room" },
+  /* ---------- more physical ---------- */
+  { t: "Wall Handstand", d: "Kick up into a handstand against the wall and hold it until the buzzer.", timer: 30, who: "one", type: "physical" },
+  { t: "Hollow Hold", d: "On your back, shoulders and heels off the floor, arms overhead. Hold. It is worse than it sounds.", timer: 45, who: "one", type: "physical" },
+  { t: "Bottom of the Squat", d: "Squat all the way down and stay there. Heels flat. No hands.", timer: 60, who: "one", type: "physical" },
+  { t: "Chair Dips", d: "Fifteen dips off the edge of a chair before the buzzer.", timer: 30, who: "one", type: "physical" },
+  { t: "Air Squats", d: "Twenty-five squats before the buzzer. All the way down, all the way up.", timer: 30, who: "one", type: "physical" },
+  { t: "Jumping Jacks", d: "Forty jumping jacks before the buzzer. The room counts.", timer: 30, who: "one", type: "physical" },
+  { t: "Mountain Climbers", d: "Thirty mountain climbers before the buzzer. Knees to chest.", timer: 30, who: "one", type: "physical" },
+  { t: "Sit-Ups", d: "Twenty sit-ups before the buzzer. Somebody can hold your feet.", timer: 30, who: "one", type: "physical" },
+  { t: "Walking Lunges", d: "Lunge one full lap of the room. Back knee touches the floor every single time.", timer: 45, who: "one", type: "physical" },
+  { t: "Crab Walk", d: "Crab walk a lap of the room. Belly up the whole way.", timer: 45, who: "one", type: "physical" },
+  { t: "Bear Crawl", d: "Bear crawl a lap. Knees never touch the ground.", timer: 45, who: "one", type: "physical" },
+  { t: "The Broom Balance", d: "Stand a broom upright on your open palm and keep it there until the buzzer. Walking is allowed. Panicking is expected.", timer: 30, who: "one", type: "physical" },
+  { t: "Dizzy Line", d: "Spin in place ten times, then walk a straight line across the room. Nobody has ever looked good doing this.", timer: 45, who: "one", type: "physical" },
+  { t: "One Foot Round Trip", d: "Hop across the room and back on one foot. Second foot touches down, you're done.", timer: 45, who: "one", type: "physical" },
+  { t: "Farmer Carry", d: "Pick up the two heaviest things you can safely hold and carry them a full lap without setting them down.", timer: 45, who: "one", type: "physical" },
+  { t: "Library Posture", d: "Stack at least three books on your head and walk a lap. They all have to survive.", timer: 45, who: "one", type: "physical" },
+  { t: "Juggle Something", d: "Juggle any three objects for fifteen straight seconds. Fruit, socks, remotes, whatever's close.", timer: 20, who: "one", type: "physical" },
+  { t: "Weighted Plank", d: "Plank with a full cup of water balanced on your back. Spill it and it's over.", timer: 30, who: "one", type: "physical" },
+  { t: "Wheelbarrow Lap", d: "One teammate on their hands, the other holding their ankles. One lap. Nobody eats carpet.", timer: 45, who: "team", type: "physical" },
+  { t: "Dead Hang", d: "Find a pull-up bar or a solid door frame and hang until the buzzer. Feet off the ground.", timer: 30, who: "one", type: "physical" },
+
+  /* ---------- physical, with an audience problem ---------- */
+  { t: "Plank and Publish", d: "Hold a plank while the person on your left reads your three most recent text messages out loud. Break the plank early and you forfeit.", timer: 45, who: "one", type: "physical", spice: "party" },
+  { t: "Wall Sit Interrogation", d: "Wall sit while the room fires questions at you. Every question gets an honest answer. Stand up and it's over.", timer: 45, who: "one", type: "physical", spice: "party" },
+
+  /* ---------- spicier dares ---------- */
+  { t: "Screen Time", d: "Open your weekly screen time report and hold the phone up. No commentary, no excuses.", timer: 30, who: "one", type: "social", spice: "party" },
+  { t: "Recently Played", d: "Show the room the last five songs you actually listened to. The whole list.", timer: 30, who: "one", type: "social", spice: "party" },
+  { t: "Notes App", d: "Open your notes app and read the most recent note out loud, whatever it turns out to be.", timer: 40, who: "one", type: "social", spice: "party" },
+  { t: "Order History", d: "Show the room the last thing you bought online.", timer: 30, who: "one", type: "social", spice: "party" },
+  { t: "Top Emoji", d: "Open your keyboard and show the room your most-used emoji. Then explain yourself.", timer: 30, who: "one", type: "social", spice: "party" },
+  { t: "The Reply Guy", d: "Read out loud the last message you sent to the person you text most.", timer: 30, who: "one", type: "social", spice: "party" },
+  { t: "Ten Seconds", d: "Hand your phone to the person across from you. They get ten seconds in your camera roll and full narration rights.", timer: 20, who: "one", type: "social", spice: "party" },
+  { t: "Cryptic", d: "Send a single unexplained emoji to your largest group chat. Do not answer any follow-up questions for the rest of the round.", timer: 40, who: "one", type: "social", spice: "party" },
+  { t: "Old Voicemail", d: "Find the oldest saved voicemail on your phone and play it for the room.", timer: 60, who: "one", type: "social", spice: "party" },
+  { t: "The Confession", d: "Admit something you have genuinely never told anybody in this room. The room votes on whether it counted.", timer: 60, who: "one", type: "social", spice: "party" },
+  { t: "Worst Purchase", d: "Tell the room about the dumbest thing you have ever spent real money on. Amount included.", timer: 60, who: "one", type: "social", spice: "party" },
+  { t: "Unsent", d: "Describe — no names — the pettiest message you have ever typed out and then deleted without sending.", timer: 60, who: "one", type: "social", spice: "party" },
+
+  /* ---------- drinking games ----------
+     Every one of these is a sip. None of them is a race, a shot, or a
+     finish-your-drink, on purpose. `drinks: true` keeps the whole set behind
+     its own toggle so a room with somebody sober, pregnant or driving can
+     still play everything else. */
+  { t: "Never Have I Ever", d: "Everybody holds up three fingers. Go around the room with a 'never have I ever' — drop a finger and take a sip if you've done it. First person out of fingers loses the square for their team.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Most Likely To", d: "The host reads a 'most likely to.' On three, everybody points. Whoever gets the most fingers takes a sip and owes the room an explanation.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Categories", d: "Picker names a category. Go around the circle naming things in it. Repeat, stall, or blank out and you take a sip.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Rule Master", d: "The picking team invents one rule that binds the entire room until their next turn. Break the rule, take a sip. Choose something petty.", timer: 0, who: "team", type: "drink", drinks: true },
+  { t: "Thumb Master", d: "At any point before your next turn, put your thumb on the table without saying a word. Last person to notice and copy you takes a sip.", timer: 0, who: "one", type: "drink", drinks: true },
+  { t: "Buzz", d: "Count up from one around the room, but every multiple of seven — and every number containing a seven — becomes 'buzz.' Miss it, take a sip.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Fingers", d: "Everybody puts one finger on a cup. Picker calls a number, everyone pulls off or leaves on at the same time. Guess the total right and you're out — last one still touching the cup sips.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Paranoia", d: "Whisper a question about the room to the person on your left. They answer out loud, but nobody else hears the question. Flip a coin — heads, they reveal it. Tails, everybody sips and wonders.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Medusa", d: "Everybody heads down. On three, heads up and stare directly at one person. If you make eye contact with the person staring back, you both sip.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Two Truths and a Lie", d: "Picker tells the room three things about themselves. Host counts down from three and everybody points at the lie at the same time. Wrong guessers sip. If nobody gets it, the picker's team takes the points.", timer: 60, who: "one", type: "drink", drinks: true },
+  { t: "I'm Going on a Picnic", d: "Build the list around the room, each person repeating everything before adding one. First to drop an item takes a sip.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Straight Face", d: "The room does everything short of touching you to make you laugh. Hold out until the buzzer or take a sip.", timer: 45, who: "one", type: "drink", drinks: true },
+  { t: "Quarters", d: "Bounce a coin off the table into a cup. Sink it and you assign a sip to anybody you like. Three attempts.", timer: 0, who: "one", type: "drink", drinks: true },
+  { t: "Cup Flip", d: "Empty cup on the table edge, flip it upright with one finger. Land it and hand out a sip. Three attempts, then it passes left.", timer: 0, who: "one", type: "drink", drinks: true },
+  { t: "Question Master", d: "Until your team's next turn, anybody who answers a direct question from you takes a sip. The trick is getting them to forget.", timer: 0, who: "one", type: "drink", drinks: true },
+  { t: "Word Association", d: "Picker says a word. Go around the room, each person saying the first word it makes them think of. Hesitate or repeat, take a sip.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Give Two", d: "Hand out two sips to anybody in the room. You do not have to explain yourself, and you should not.", timer: 0, who: "one", type: "drink", drinks: true },
+  { t: "The Toast", d: "Stand up and give a completely sincere toast to somebody in this room. Anybody who laughs during it takes a sip. If nobody laughs, the whole room drinks to you.", timer: 60, who: "one", type: "drink", drinks: true },
+  { t: "Drink Roulette", d: "On the count of three, everybody points at the person they think is going to win this whole game. Anybody who gets pointed at more than once takes a sip.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "The Interview", d: "Thirty seconds of rapid-fire questions from the room. Every one gets an answer. Hesitate, dodge, or laugh and you take a sip.", timer: 30, who: "one", type: "drink", drinks: true },
+  { t: "Red or Black", d: "Call red or black, then flip over the top card of a deck. Miss it and take a sip. Hit it and hand out two.", timer: 0, who: "one", type: "drink", drinks: true },
+  { t: "Waterfall of Words", d: "Picker starts a story with one sentence. It goes around the room, one sentence each. Anybody who breaks the story or goes silent takes a sip.", timer: 0, who: "room", type: "drink", drinks: true }
 ];
 
 const GROUP_VOTES = [
@@ -1395,39 +1468,6 @@ const GROUP_VOTES = [
   { q: "Group texts:", opts: ["Love them", "Mute them instantly"] }
 ];
 
-const HOT_SEAT = [
-  { q: "Who in this room falls asleep first tonight?" },
-  { q: "Who is most likely to lose their phone this weekend?" },
-  { q: "Who is the best cook in this room?" },
-  { q: "Who survives longest in a zombie apocalypse?" },
-  { q: "Who is the most competitive person here — and won't admit it?" },
-  { q: "Who tells the longest stories?" },
-  { q: "Who is most likely to get pulled over on the drive home?" },
-  { q: "Who is the funniest person in this room?" },
-  { q: "Who gives the best advice?" },
-  { q: "Who is the worst driver here?" },
-  { q: "Who is most likely to start their own business?" },
-  { q: "Who would make the best president?" },
-  { q: "Who takes the longest to text back?" },
-  { q: "Who is most likely to cry at a movie?" },
-  { q: "Who spends the most money on things they do not need?" },
-  { q: "Who is the pickiest eater?" },
-  { q: "Who do you want in your corner in a genuine emergency?" },
-  { q: "Who is still awake at three in the morning?" },
-  { q: "Who has the best taste in music?" },
-  { q: "Who is most likely to forget somebody's birthday?" },
-  { q: "Who is the most organized person here?" },
-  { q: "Who would be the worst roommate?" },
-  { q: "Who wins this entire game tonight?" },
-  { q: "Who takes the longest to get ready to leave?" },
-  { q: "Who is the most likely to plan the next trip?" },
-  { q: "Who has never once lost an argument in this group?" },
-  { q: "Who would last the longest without their phone?" },
-  { q: "Who is most likely to bring up politics before the night is over?", spice: "party" },
-  { q: "Who is the biggest lightweight in this room?", spice: "party" },
-  { q: "Who has a story from this group's history they still haven't told?", spice: "party" }
-];
-
 const DUELS = [
   { t: "Thumb War", d: "Best of three. One, two, three, four — declare a thumb war." },
   { t: "Rochambeau", d: "Rock, paper, scissors. Best of five. No shooting late." },
@@ -1446,7 +1486,7 @@ const DUELS = [
   { t: "Hero Volley", d: "Alternate naming Marvel characters. First to stall or repeat loses." },
   { t: "Backwards Race", d: "Both say the alphabet backwards. First one through, cleanly, wins.", timer: 45 },
   { t: "Call It", d: "Coin flip, called in the air. Best of three." },
-  { t: "Split The Difference", d: "The host picks a number between 1 and 100. Closest guess wins. One guess each." },
+  { t: "Split The Difference", d: "The host writes down a number between 1 and 100. Both duelists write a guess down, then reveal together. Closest wins." },
   { t: "Sudden Death", d: "The host reads one trivia question. First correct answer wins it." },
   { t: "Scavenger Sprint", d: "Both go find something red, then something metal, then something older than you are. First one back wins.", timer: 60 },
   { t: "Weather Check", d: "Both unlock your phone and open the weather app. First to read the current temperature out loud wins." },
@@ -1483,16 +1523,16 @@ const WILDCARD_EVENTS = [
     blurb: "Put the phone down. You're doing something."
   },
   {
+    key: "houserules", label: "🍺 House Rules", weight: 5, kind: "drink", drinks: true,
+    blurb: "Somebody's about to invent a rule everyone regrets."
+  },
+  {
     key: "duel", label: "⚔️ Duel", weight: 4, kind: "duel",
     blurb: "Pick an opponent. Only one of you walks away with points."
   },
   {
     key: "vote", label: "🗳️ The People's Court", weight: 4, kind: "vote",
     blurb: "The room votes. The majority gets paid."
-  },
-  {
-    key: "hotseat", label: "🪑 Hot Seat", weight: 4, kind: "hotseat",
-    blurb: "A question about you. Guess how the room answers it."
   },
   {
     key: "crowdsave", label: "📣 Crowd Save", weight: 2, kind: "bonusq",
@@ -1543,7 +1583,7 @@ const WILDCARD_EVENTS = [
 // Weighted draw so the live-action events dominate the deck.
 function drawWildcardEvent() {
   const pool = [];
-  WILDCARD_EVENTS.forEach(e => {
+  WILDCARD_EVENTS.filter(spiceOk).forEach(e => {
     for (let i = 0; i < (e.weight || 1); i++) pool.push(e);
   });
   return pool[Math.floor(Math.random() * pool.length)];
@@ -1633,6 +1673,7 @@ function freshState() {
     readerIndex: 0,     // whose turn it is to pick & read
     lastCorrectTeamId: null,
     spice: "family",    // family | party
+    drinks: false,      // drinking games are their own opt-in, separate from spice
     drawn: {},          // deckName -> indices already used this game
     history: [],        // undo snapshots
     finalDone: false,
@@ -1800,6 +1841,13 @@ function renderSetup() {
         </button>
       </div>
 
+      <button class="spice-opt drinks-opt ${state.drinks ? 'on' : ''}" id="drinksBtn" style="width:100%;margin-bottom:14px;">
+        <span class="st-name">${state.drinks ? '🍺 Drinking Games: ON' : '🥤 Drinking Games: OFF'}</span>
+        <span class="st-desc">${state.drinks
+          ? 'Sips only, never shots. Non-drinkers get a push-up alternative on every card.'
+          : 'Switch on to add 22 drinking games. Independent of spice level.'}</span>
+      </button>
+
       <button class="btn-primary btn-full" id="startBtn" disabled>Start Game</button>
       <div class="hint">Need at least 2 teams. Works for couples, squads, or everyone solo.</div>
     </div>
@@ -1820,6 +1868,7 @@ function renderSetup() {
   document.querySelectorAll('[data-spice]').forEach(btn => {
     btn.onclick = () => { state.spice = btn.dataset.spice; render(); };
   });
+  document.getElementById('drinksBtn').onclick = () => { state.drinks = !state.drinks; render(); };
 
   function refreshList() {
     $list.innerHTML = state.teams.map(t => `
@@ -1868,7 +1917,7 @@ function renderSetup() {
 function renderRoundSelect() {
   $main.innerHTML = `
     <h1 class="title">🏆 Game Night Showdown 🏆</h1>
-    <div class="subtitle">Pick tonight's board — ${state.spice === 'party' ? '🌙 After Dark' : '☀️ Family Friendly'}</div>
+    <div class="subtitle">Pick tonight's board — ${state.spice === 'party' ? '🌙 After Dark' : '☀️ Family Friendly'}${state.drinks ? ' · 🍺 Drinking games on' : ''}</div>
     <div class="panel" style="max-width:680px;">
       <h2>Choose a Round</h2>
       <div id="roundList" style="display:flex;flex-direction:column;gap:12px;"></div>
@@ -2002,7 +2051,6 @@ function openSquare(cat, val) {
     const ctx = { cat, val, team, done: () => markUsedAndReturn(cat, val) };
     if (spec.deck === 'duel') runDuel(ctx);
     else if (spec.deck === 'vote') runVote(ctx);
-    else if (spec.deck === 'hotseat') runHotSeat(ctx);
     else runChallenge(ctx, spec.type);
     return;
   }
@@ -2158,10 +2206,11 @@ function openWildcard(cat, val) {
     <div class="wild-desc"><span class="spin-text" id="spinText">Spinning...</span></div>
   `);
   playWildcardSpin();
+  const spinPool = WILDCARD_EVENTS.filter(spiceOk);
   const spinEl = document.getElementById('spinText');
   let i = 0;
   const spinInterval = setInterval(() => {
-    spinEl.textContent = WILDCARD_EVENTS[i % WILDCARD_EVENTS.length].label;
+    spinEl.textContent = spinPool[i % spinPool.length].label;
     i++;
   }, 110);
 
@@ -2313,8 +2362,13 @@ function launchConfetti() {
    and drawn without repeats until the deck is exhausted, so you
    don't get the same dare twice in one night.
 ============================================================ */
+// Two independent gates. Spice is about how revealing the content is; drinks is
+// about whether the room is drinking at all. A room with somebody sober, pregnant
+// or driving should still get the full After Dark deck.
 function spiceOk(item) {
-  return state.spice === 'party' || item.spice !== 'party';
+  if (item.spice === 'party' && state.spice !== 'party') return false;
+  if (item.drinks && !state.drinks) return false;
+  return true;
 }
 
 function drawFrom(pool, deckName, filterFn) {
@@ -2417,12 +2471,14 @@ function whoLabel(who, team) {
 
 function runChallenge(ctx, filterType) {
   const { val, team, done } = ctx;
-  const ch = drawFrom(CHALLENGES, 'challenge', filterType ? (c => c.type === filterType) : null);
+  const types = filterType ? [].concat(filterType) : null;
+  const ch = drawFrom(CHALLENGES, 'challenge', types ? (c => types.indexOf(c.type) !== -1) : null);
   const card = document.querySelector('#overlay .card');
   card.innerHTML = `
-    <div class="tag wild">🔥 ${escapeHtml(ch.t)}</div>
+    <div class="tag wild">${ch.type === 'drink' ? '🍺' : '🔥'} ${escapeHtml(ch.t)}</div>
     <div class="who-line">${escapeHtml(whoLabel(ch.who, team))}</div>
     <div class="qtext task">${escapeHtml(ch.d)}</div>
+    ${ch.drinks ? '<div class="sober-note">Not drinking? Take the push-ups instead — five per sip. Nobody has to explain themselves.</div>' : ''}
     ${ch.timer ? timerHtml(ch.timer) : ''}
     ${judgeHtml(val, 'They Did It', 'They Choked')}
   `;
@@ -2481,7 +2537,7 @@ function runVote(ctx) {
   card.innerHTML = `
     <div class="tag wild">🗳️ THE PEOPLE'S COURT</div>
     <div class="qtext">${escapeHtml(v.q)}</div>
-    <div class="who-line">Everybody votes out loud, right now. Hands up. Then tap the side that won — every team who voted with the majority scores ${val}.</div>
+    <div class="who-line">Host counts down from three. Hands go up on ZERO — all at once, no looking around first, no changing once they're up. Then tap the side that won.</div>
     <div class="team-btn-grid vote-grid">
       ${v.opts.map((o, i) => `<button class="team-btn vote-opt" data-opt="${i}">${escapeHtml(o)}</button>`).join('')}
     </div>
@@ -2512,23 +2568,6 @@ function runVote(ctx) {
       document.getElementById('voteDoneBtn').onclick = done;
     };
   });
-}
-
-function runHotSeat(ctx) {
-  const { val, team, done } = ctx;
-  const h = drawFrom(HOT_SEAT, 'hotseat');
-  const card = document.querySelector('#overlay .card');
-  card.innerHTML = `
-    <div class="tag wild">🪑 HOT SEAT</div>
-    <div class="qtext">${escapeHtml(h.q)}</div>
-    <div class="who-line">
-      <strong>${escapeHtml(team.name)}</strong> answers FIRST and out loud — you're predicting the room.
-      Then everybody else answers on the count of three.
-      Match the most common answer in the room and you take ${val}. Miss it and you drop ${Math.round(val / 2)}.
-    </div>
-    ${judgeHtml(val, 'They Read the Room', 'They Missed It')}
-  `;
-  wireJudge(team, val, done, { penalty: Math.round(val / 2) });
 }
 
 function runBonusQuestion(ctx, event) {
@@ -2609,10 +2648,10 @@ function runInstant(ctx, event) {
 /* Dispatch a drawn wildcard event to its runner. */
 function runEvent(event, ctx) {
   playWildcardReveal();
-  if (event.kind === 'challenge') return runChallenge(ctx);
+  if (event.kind === 'challenge') return runChallenge(ctx, ['physical', 'performance', 'speed', 'social', 'room']);
+  if (event.kind === 'drink') return runChallenge(ctx, 'drink');
   if (event.kind === 'duel') return runDuel(ctx);
   if (event.kind === 'vote') return runVote(ctx);
-  if (event.kind === 'hotseat') return runHotSeat(ctx);
   if (event.kind === 'bonusq') return runBonusQuestion(ctx, event);
   return runInstant(ctx, event);
 }
