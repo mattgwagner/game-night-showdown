@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Night Showdown</title>
+<style>
+  :root {
+    --navy: #04125c;
+    --navy-deep: #020a38;
+    --gold: #f5c518;
+    --gold-dim: #b5901a;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --purple: #8e44ad;
+    --text: #f5f7ff;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(circle at top, var(--navy) 0%, var(--navy-deep) 70%);
+    color: var(--text);
+    font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+    overflow-x: hidden;
+  }
+  #app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ---------- Scoreboard ---------- */
+  #scoreboard {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    padding: 10px 14px; background: rgba(0,0,0,0.35);
+    border-bottom: 3px solid var(--gold);
+  }
+  .score-chip {
+    background: rgba(255,255,255,0.06);
+    border: 2px solid var(--gold-dim);
+    border-radius: 10px;
+    padding: 6px 14px;
+    min-width: 110px;
+    text-align: center;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .score-chip.leader {
+    border-color: var(--gold);
+    box-shadow: 0 0 14px rgba(245,197,24,.7);
+    transform: scale(1.05);
+  }
+  .score-chip .name { font-weight: bold; font-size: 0.95rem; letter-spacing: .5px; }
+  .score-chip .pts { font-size: 1.4rem; font-weight: 900; color: var(--gold); }
+
+  h1.title {
+    text-align: center; margin: 14px 0 4px;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    letter-spacing: 2px;
+    text-shadow: 0 0 18px rgba(245,197,24,.6);
+    color: var(--gold);
+  }
+  .subtitle { text-align: center; opacity: .7; margin-bottom: 10px; font-size: .95rem; }
+
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 16px 30px; }
+
+  /* ---------- Setup Screen ---------- */
+  .panel {
+    background: rgba(255,255,255,0.05);
+    border: 2px solid var(--gold-dim);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 560px;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .panel h2 { margin-top: 0; color: var(--gold); text-align: center; }
+  .team-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .team-row input {
+    flex: 1; padding: 10px 12px; border-radius: 8px; border: none;
+    font-size: 1rem; background: rgba(255,255,255,0.9); color: #111;
+  }
+  #teamList { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
+  .team-entry {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,255,255,0.08); padding: 8px 14px; border-radius: 8px;
+  }
+  button {
+    cursor: pointer; border: none; border-radius: 8px;
+    font-family: inherit; font-weight: bold;
+    transition: transform .1s, filter .1s;
+  }
+  button:active { transform: scale(0.96); }
+  .btn-primary { background: var(--gold); color: #1a1400; padding: 12px 20px; font-size: 1.05rem; }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-secondary { background: rgba(255,255,255,0.15); color: var(--text); padding: 10px 16px; }
+  .btn-danger { background: var(--red); color: white; padding: 6px 12px; font-size: .85rem; }
+  .btn-full { width: 100%; margin-top: 10px; padding: 14px; font-size: 1.1rem; }
+  .btn-full:disabled { opacity: .4; cursor: not-allowed; }
+  .hint { font-size: .85rem; opacity: .65; text-align: center; margin-top: 8px; }
+
+  /* ---------- Board ---------- */
+  #board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    width: 100%;
+    max-width: 1400px;
+  }
+  .cat-header {
+    background: linear-gradient(180deg, #0b1f8a, #04125c);
+    border: 2px solid var(--gold-dim);
+    border-radius: 8px;
+    padding: 10px 4px;
+    text-align: center;
+    font-weight: 900;
+    font-size: clamp(0.65rem, 1.1vw, 0.95rem);
+    letter-spacing: .5px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 64px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .cell {
+    background: linear-gradient(180deg, #0b1f8a, #081770);
+    border: 2px solid var(--gold-dim);
+    border-radius: 8px;
+    min-height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+    font-weight: 900;
+    color: var(--gold);
+    transition: transform .12s, box-shadow .12s;
+  }
+  .cell.clickable:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 16px rgba(245,197,24,.55);
+    cursor: pointer;
+  }
+  .cell.used { background: rgba(255,255,255,0.03); color: transparent; border-color: rgba(255,255,255,0.08); }
+  .cell.wildcard-hidden::after { content: ''; }
+
+  #boardControls { margin-top: 16px; display: flex; gap: 10px; }
+
+  .reader-banner {
+    background: rgba(245,197,24,0.12);
+    border: 2px solid var(--gold);
+    border-radius: 999px;
+    padding: 8px 22px;
+    margin-bottom: 14px;
+    text-align: center;
+    font-size: clamp(0.9rem, 1.6vw, 1.1rem);
+  }
+  .reader-banner strong { color: var(--gold); }
+
+  /* ---------- Overlay (question / wildcard) ---------- */
+  #overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; z-index: 50;
+  }
+  .card {
+    background: linear-gradient(180deg, #0d1f8f, #040d54);
+    border: 3px solid var(--gold);
+    border-radius: 18px;
+    padding: 34px 30px;
+    max-width: 760px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(245,197,24,.35);
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .card .tag {
+    display: inline-block; background: var(--gold); color: #1a1400;
+    padding: 4px 14px; border-radius: 999px; font-weight: 900; font-size: .85rem;
+    letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase;
+  }
+  .card .tag.wild { background: var(--purple); color: white; }
+  .card .catval { opacity: .75; margin-bottom: 6px; font-size: .95rem; letter-spacing: 1px; text-transform: uppercase; }
+  .card .qtext { font-size: clamp(1.2rem, 3vw, 1.7rem); font-weight: 700; margin: 14px 0 22px; line-height: 1.4; }
+  .card .atext {
+    font-size: clamp(1.1rem, 2.6vw, 1.4rem); color: var(--gold); font-weight: 900;
+    margin: 10px 0 24px; padding-top: 16px; border-top: 2px dashed rgba(255,255,255,.2);
+  }
+  .team-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 10px; margin-top: 10px; }
+  .team-btn { padding: 12px 8px; background: rgba(255,255,255,0.1); color: var(--text); border: 2px solid var(--gold-dim); border-radius: 10px; font-size: 1rem; }
+  .team-btn:hover { background: var(--green); color: #05330f; border-color: var(--green); }
+  .none-btn { margin-top: 14px; }
+  .wild-desc { font-size: 1.1rem; margin: 16px 0; min-height: 60px; display:flex; align-items:center; justify-content:center; }
+  .spin-text { font-size: 1.6rem; font-weight: 900; color: var(--gold); animation: pulse .3s infinite alternate; }
+  @keyframes pulse { from { opacity: .5; } to { opacity: 1; } }
+  .row-gap { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:10px; }
+
+  /* ---------- Winner screen ---------- */
+  .winner-name { font-size: clamp(2rem,6vw,3.4rem); color: var(--gold); text-shadow: 0 0 24px rgba(245,197,24,.8); margin: 10px 0; }
+  .medal { font-size: 3rem; }
+  #confettiWrap { position: fixed; inset:0; pointer-events:none; overflow:hidden; z-index: 5; }
+  .confetti { position:absolute; top:-10px; width:10px; height:16px; opacity:.9; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+  footer { text-align:center; opacity:.4; font-size:.75rem; padding: 10px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="scoreboard" style="display:none;"></div>
+  <main id="main"></main>
+</div>
+<div id="confettiWrap"></div>
+
+<script>
+/* ============================================================
+   GAME DATA
+============================================================ */
+const VALUES = [100, 200, 300, 400, 500];
+
+// Each round is a full 8-category board. One value per category is a WILDCARD
+// slot instead of a normal question (see WILDCARD_EVENTS below).
+const ROUNDS = [
+  {
+    id: "r1",
+    name: "Round 1: The Classics",
+    tagline: "Beer, guns, Disney, and dad jokes",
+    categories: [
+      "Beer", "Firearms", "Disney", "Artificial Intelligence",
+      "Sports", "College Football", "90s/2000s Nostalgia", "Dad Jokes & Pop Culture"
+    ],
+    wildcardSlots: {
+      "Beer": 300,
+      "Firearms": 400,
+      "Disney": 200,
+      "Artificial Intelligence": 500,
+      "Sports": 100,
+      "College Football": 300,
+      "90s/2000s Nostalgia": 400,
+      "Dad Jokes & Pop Culture": 200
+    },
+    questions: {
+      "Beer": {
+        100: { q: "This Belgian brewing tradition produces beers like Chimay and Westmalle — what religious order brews them?", a: "Trappist monks" },
+        200: { q: "What's the term for the foamy layer on top of a freshly poured beer?", a: "The head" },
+        400: { q: "India Pale Ales were originally brewed extra hoppy and boozy for what historical reason?", a: "To survive the long sea voyage from England to India without spoiling" },
+        500: { q: "What is the world's most-copied beer style — pale, crisp, and named after the Czech city where it was invented?", a: "Pilsner (from Plzeň)" }
+      },
+      "Firearms": {
+        100: { q: "What does the 'AR' in AR-15 actually stand for? (Hint: it's not 'assault rifle')", a: "ArmaLite — the company that originally designed it" },
+        200: { q: "What's the general term for the device on top of a firearm's barrel used to aim it?", a: "A sight (or scope)" },
+        300: { q: "The .45 ACP cartridge, still popular in 1911-pattern pistols, shares its name with what year it was adopted by the US military?", a: "1911" },
+        500: { q: "What Israeli weapons designer created the Uzi submachine gun — and named it after himself?", a: "Uziel 'Uzi' Gal" }
+      },
+      "Disney": {
+        100: { q: "What's the name of the candlestick character in Beauty and the Beast?", a: "Lumière" },
+        300: { q: "In Frozen, what is the name of Elsa and Anna's kingdom?", a: "Arendelle" },
+        400: { q: "Which Disney villain sings 'Poor Unfortunate Souls'?", a: "Ursula (The Little Mermaid)" },
+        500: { q: "What year did Walt Disney World open in Orlando?", a: "1971" }
+      },
+      "Artificial Intelligence": {
+        100: { q: "What does the 'GPT' in ChatGPT stand for?", a: "Generative Pre-trained Transformer" },
+        200: { q: "What AI company makes the chatbot Claude?", a: "Anthropic" },
+        300: { q: "In 1997, what IBM computer famously beat world chess champion Garry Kasparov?", a: "Deep Blue" },
+        400: { q: "What's the term for when an AI confidently states false information as if it were fact?", a: "Hallucination" }
+      },
+      "Sports": {
+        200: { q: "How many players from one team are on the field at a time in American football?", a: "11" },
+        300: { q: "What's the only Grand Slam tennis tournament played on clay courts?", a: "The French Open (Roland Garros)" },
+        400: { q: "In golf, what's the term for finishing a hole one stroke under par?", a: "A birdie" },
+        500: { q: "Which country has won the most FIFA World Cups?", a: "Brazil (5 titles)" }
+      },
+      "College Football": {
+        100: { q: "What trophy is awarded annually to the most outstanding player in college football?", a: "The Heisman Trophy" },
+        200: { q: "What in-state rivalry game is nicknamed 'The World's Largest Outdoor Cocktail Party'?", a: "Florida vs. Georgia" },
+        400: { q: "What does 'SEC' stand for, as in the conference most likely to remind you it's 'just different'?", a: "Southeastern Conference" },
+        500: { q: "Who is the only player to win the Heisman Trophy twice?", a: "Archie Griffin (Ohio State, 1974 & 1975)" }
+      },
+      "90s/2000s Nostalgia": {
+        100: { q: "What boy band sang 'Bye Bye Bye'?", a: "NSYNC" },
+        200: { q: "What virtual pet toy required feeding, sleep, and cleanup — or it would 'die'?", a: "Tamagotchi" },
+        300: { q: "What website let you rank your 'Top 8' friends before Facebook took over social media?", a: "MySpace" },
+        500: { q: "What 1999 movie introduced 'bullet time' and made everyone want round black sunglasses?", a: "The Matrix" }
+      },
+      "Dad Jokes & Pop Culture": {
+        100: { q: "Why don't skeletons fight each other?", a: "They don't have the guts" },
+        300: { q: "What do you call a fish with no eyes?", a: "A fsh (no 'eye')" },
+        400: { q: "What did the ocean say to the beach?", a: "Nothing — it just waved" },
+        500: { q: "Why did the scarecrow win an award?", a: "He was outstanding in his field" }
+      }
+    }
+  },
+  {
+    id: "r2",
+    name: "Round 2: Modern Mix",
+    tagline: "Movies, music, gaming, and grilling",
+    categories: [
+      "Movies & TV", "Music", "Video Games", "Fast Food & Junk Food",
+      "Grilling & BBQ", "U.S. Military", "Space & Science", "Geography & Travel"
+    ],
+    wildcardSlots: {
+      "Movies & TV": 100,
+      "Music": 200,
+      "Video Games": 300,
+      "Fast Food & Junk Food": 400,
+      "Grilling & BBQ": 500,
+      "U.S. Military": 100,
+      "Space & Science": 200,
+      "Geography & Travel": 300
+    },
+    questions: {
+      "Movies & TV": {
+        200: { q: "What 1994 Quentin Tarantino film centers on a mysterious glowing briefcase?", a: "Pulp Fiction" },
+        300: { q: "What HBO series about Baltimore's drug trade is often called the greatest TV show ever made?", a: "The Wire" },
+        400: { q: "Who played the Joker in 2008's The Dark Knight, winning a posthumous Oscar?", a: "Heath Ledger" },
+        500: { q: "What 1997 film became the first ever to gross over $1 billion worldwide?", a: "Titanic" }
+      },
+      "Music": {
+        100: { q: "What instrument does a 'shredder' typically play?", a: "The electric guitar" },
+        300: { q: "What Seattle band, fronted by Kurt Cobain, defined the grunge movement?", a: "Nirvana" },
+        400: { q: "What's the best-selling album of all time, released by Michael Jackson in 1982?", a: "Thriller" },
+        500: { q: "What annual music festival, founded in 1999, takes place in the California desert every spring?", a: "Coachella" }
+      },
+      "Video Games": {
+        100: { q: "What plumber is Nintendo's most famous video game mascot?", a: "Mario" },
+        200: { q: "What 2017 battle royale game popularized the genre alongside Fortnite?", a: "PUBG (PlayerUnknown's Battlegrounds)" },
+        400: { q: "What 2011 open-world game lets you build with blocks and fight off creepers?", a: "Minecraft" },
+        500: { q: "What Sega console, released in 1998, was the company's last home console before it exited hardware?", a: "The Dreamcast" }
+      },
+      "Fast Food & Junk Food": {
+        100: { q: "What fast food chain's mascot is a purple blob named Grimace?", a: "McDonald's" },
+        200: { q: "What burger chain is famous for its 'secret menu,' including Animal Style fries?", a: "In-N-Out Burger" },
+        300: { q: "What chicken sandwich chain is famously closed every Sunday?", a: "Chick-fil-A" },
+        500: { q: "What corn chip snack, introduced by Frito-Lay in 1964, comes in Original, Cool Ranch, and Nacho Cheese?", a: "Doritos" }
+      },
+      "Grilling & BBQ": {
+        100: { q: "What's the term for cooking meat low and slow over indirect heat — a Southern barbecue tradition?", a: "Smoking" },
+        200: { q: "Kansas City, Texas, and the Carolinas are each famous for their own distinct style of what?", a: "Barbecue" },
+        300: { q: "What's the ideal internal temperature, roughly, for a medium-rare steak?", a: "About 130–135°F" },
+        400: { q: "What type of wood is a classic choice for smoking brisket, Texas-style?", a: "Post oak" }
+      },
+      "U.S. Military": {
+        200: { q: "What date is celebrated as the U.S. Army's official birthday, marking its founding in 1775?", a: "June 14" },
+        300: { q: "What does 'NCO' stand for in military rank structure?", a: "Non-Commissioned Officer" },
+        400: { q: "What's the informal nickname for a brand-new second lieutenant fresh out of training?", a: "A \"butter bar\"" },
+        500: { q: "What U.S. military academy, which commissions Army officers, sits on the Hudson River in New York?", a: "West Point (the United States Military Academy)" }
+      },
+      "Space & Science": {
+        100: { q: "What's the closest planet to the sun?", a: "Mercury" },
+        300: { q: "What NASA rover landed on Mars in 2021 to search for signs of ancient microbial life?", a: "Perseverance" },
+        400: { q: "What's the term for the boundary around a black hole beyond which nothing, not even light, can escape?", a: "The event horizon" },
+        500: { q: "What private aerospace company, founded by Elon Musk, was the first to launch a reusable orbital-class rocket?", a: "SpaceX" }
+      },
+      "Geography & Travel": {
+        100: { q: "What's the smallest country in the world by land area?", a: "Vatican City" },
+        200: { q: "What canal, completed in 1914, connects the Atlantic and Pacific Oceans through Central America?", a: "The Panama Canal" },
+        400: { q: "Victoria Falls, one of the world's largest waterfalls, sits on the border of Zambia and what other country?", a: "Zimbabwe" },
+        500: { q: "What U.S. state borders only one other state?", a: "Maine (borders only New Hampshire)" }
+      }
+    }
+  },
+  {
+    id: "r3",
+    name: "Round 3: Pop & History",
+    tagline: "Rock, wrestling, wordplay, and true crime",
+    categories: [
+      "Classic Rock & 80s", "True Crime & Mysteries", "Wordplay & Etymology", "History",
+      "Wrestling & Combat Sports", "Cars & Trucks", "Holidays & Traditions", "Internet & Memes"
+    ],
+    wildcardSlots: {
+      "Classic Rock & 80s": 400,
+      "True Crime & Mysteries": 500,
+      "Wordplay & Etymology": 100,
+      "History": 200,
+      "Wrestling & Combat Sports": 300,
+      "Cars & Trucks": 400,
+      "Holidays & Traditions": 500,
+      "Internet & Memes": 100
+    },
+    questions: {
+      "Classic Rock & 80s": {
+        100: { q: "What British rock band recorded 'Bohemian Rhapsody'?", a: "Queen" },
+        200: { q: "What 1980s action franchise gave us the line 'I'll be back'?", a: "The Terminator" },
+        300: { q: "What legendary guitarist, known for 'Purple Haze,' died in 1970 at age 27?", a: "Jimi Hendrix" },
+        500: { q: "What 1985 film has Michael J. Fox traveling through time in a modified DeLorean?", a: "Back to the Future" }
+      },
+      "True Crime & Mysteries": {
+        100: { q: "What's the basic forensic tool — a brush plus fine powder — used to lift fingerprints at a crime scene?", a: "Fingerprint powder" },
+        200: { q: "What security guard was wrongly suspected in the 1996 Atlanta Olympics bombing before the real bomber was identified years later?", a: "Richard Jewell" },
+        300: { q: "What term describes an unsolved crime, often reopened decades later using new DNA evidence?", a: "A cold case" },
+        400: { q: "Hijacker D.B. Cooper parachuted from a plane in 1971 after receiving how much in ransom cash?", a: "$200,000" }
+      },
+      "Wordplay & Etymology": {
+        200: { q: "What's the term for a word or phrase that reads the same forward and backward, like 'level'?", a: "A palindrome" },
+        300: { q: "The word 'salary' comes from the Latin word for what commodity Roman soldiers were once partly paid in?", a: "Salt" },
+        400: { q: "What figure of speech compares two unlike things using 'like' or 'as'?", a: "A simile" },
+        500: { q: "What's the informal record-holder for longest word in an English dictionary — a 45-letter term for a lung disease caused by fine ash?", a: "Pneumonoultramicroscopicsilicovolcanoconiosis" }
+      },
+      "History": {
+        100: { q: "In what year did the United States declare independence from Britain?", a: "1776" },
+        300: { q: "What wall, built in 1961, divided a European capital until it fell in 1989?", a: "The Berlin Wall" },
+        400: { q: "What ancient wonder — a giant bronze statue standing over a Greek harbor — was destroyed by an earthquake?", a: "The Colossus of Rhodes" },
+        500: { q: "What 1919 treaty officially ended World War I?", a: "The Treaty of Versailles" }
+      },
+      "Wrestling & Combat Sports": {
+        100: { q: "What WWE wrestler, known as 'The Rock,' went on to become a major Hollywood movie star?", a: "Dwayne Johnson" },
+        200: { q: "What legendary boxer famously said 'Float like a butterfly, sting like a bee'?", a: "Muhammad Ali" },
+        400: { q: "What mixed martial arts organization, founded in 1993, is the largest MMA promotion in the world today?", a: "The UFC (Ultimate Fighting Championship)" },
+        500: { q: "What boxer retired in 2017 with a perfect, undefeated record of 50-0?", a: "Floyd Mayweather Jr." }
+      },
+      "Cars & Trucks": {
+        100: { q: "What car company makes the Mustang?", a: "Ford" },
+        200: { q: "What Italian sports car brand is famous for its prancing-horse logo?", a: "Ferrari" },
+        300: { q: "What's the best-selling pickup truck in America, a title it's held for decades?", a: "The Ford F-150" },
+        500: { q: "What electric car company, co-founded and later led by Elon Musk, is named after a famous inventor?", a: "Tesla (Nikola Tesla)" }
+      },
+      "Holidays & Traditions": {
+        100: { q: "What holiday involves carving pumpkins into jack-o'-lanterns?", a: "Halloween" },
+        200: { q: "What eight-night Jewish festival of lights involves lighting a menorah?", a: "Hanukkah" },
+        300: { q: "What U.S. holiday, celebrated the fourth Thursday of November, centers on a turkey dinner?", a: "Thanksgiving" },
+        400: { q: "What's the name of the groundhog that supposedly predicts spring's arrival every February 2nd in Pennsylvania?", a: "Punxsutawney Phil" }
+      },
+      "Internet & Memes": {
+        200: { q: "What popular meme format shows a man looking at another woman while his girlfriend glares at him?", a: "The \"Distracted Boyfriend\" meme" },
+        300: { q: "What short-form video app, launched in 2016, largely took over from Vine?", a: "TikTok" },
+        400: { q: "What term describes online content that spreads rapidly from person to person?", a: "Going viral" },
+        500: { q: "On what video platform, launched in 2005, was the first-ever uploaded video titled 'Me at the zoo'?", a: "YouTube" }
+      }
+    }
+  },
+  {
+    id: "r4",
+    name: "Round 4: Friends, Family & Ballgames",
+    tagline: "Baseball, parenting, fishing, and Florida living",
+    categories: [
+      "Baseball", "Parenting & Family Life", "Fishing & Outdoors", "Home Improvement & DIY",
+      "Cookouts & Camping", "Board Games & Cards", "Marriage & Couples Life", "Florida Living"
+    ],
+    wildcardSlots: {
+      "Baseball": 200,
+      "Parenting & Family Life": 300,
+      "Fishing & Outdoors": 400,
+      "Home Improvement & DIY": 500,
+      "Cookouts & Camping": 100,
+      "Board Games & Cards": 200,
+      "Marriage & Couples Life": 300,
+      "Florida Living": 400
+    },
+    questions: {
+      "Baseball": {
+        100: { q: "How many players from one team are on the field defensively at a time in baseball?", a: "9" },
+        300: { q: "What's it called when a batter hits the ball over the outfield fence in fair territory?", a: "A home run" },
+        400: { q: "What Yankees legend, nicknamed 'The Sultan of Swat,' held the career home run record for decades?", a: "Babe Ruth" },
+        500: { q: "What's the term for a pitcher completing an entire game without allowing a single hit?", a: "A no-hitter" }
+      },
+      "Parenting & Family Life": {
+        100: { q: "What children's show features a family of anthropomorphic pigs, including Peppa and George?", a: "Peppa Pig" },
+        200: { q: "What's the popular term for a toddler's sudden public meltdown, often over something trivial?", a: "A tantrum" },
+        400: { q: "What type of vehicle became the iconic 'mom-mobile' of the 1990s and 2000s, popularized by Dodge and Chrysler?", a: "The minivan" },
+        500: { q: "What's the common term for the sleep-deprived early weeks after bringing home a newborn?", a: "The \"newborn fog\" (new-parent sleep deprivation)" }
+      },
+      "Fishing & Outdoors": {
+        100: { q: "What's the general term for the line, hooks, and bait setup used to catch fish?", a: "Tackle" },
+        200: { q: "What hard-fighting Florida saltwater game fish is nicknamed the 'silver king'?", a: "Tarpon" },
+        300: { q: "What's it called when an angler releases a caught fish back into the water unharmed?", a: "Catch and release" },
+        500: { q: "What Florida Keys town brands itself the 'Sportfishing Capital of the World'?", a: "Islamorada" }
+      },
+      "Home Improvement & DIY": {
+        100: { q: "What basic hand tool is used to drive nails into wood?", a: "A hammer" },
+        200: { q: "What's the term for a wall built to hold back soil and support a slope?", a: "A retaining wall" },
+        300: { q: "What home improvement cable network, launched in 1994, is known for shows like Fixer Upper?", a: "HGTV" },
+        400: { q: "In most U.S. homes, wall studs are typically spaced how many inches apart, center to center?", a: "16 inches" }
+      },
+      "Cookouts & Camping": {
+        200: { q: "What gooey campfire treat is roasted on a stick before going between two graham crackers with chocolate?", a: "A marshmallow (for s'mores)" },
+        300: { q: "What's the classic wood-fueled gathering spot campers sit around at night?", a: "A campfire" },
+        400: { q: "What rugged cooler brand, based in Austin, Texas, became a favorite of hunters, campers, and tailgaters?", a: "YETI" },
+        500: { q: "What's the term for sleeping outdoors without a tent, directly under the stars?", a: "\"Cowboy camping\"" }
+      },
+      "Board Games & Cards": {
+        100: { q: "What classic board game involves buying and trading properties like Boardwalk and Park Place?", a: "Monopoly" },
+        300: { q: "In poker, what's the best possible hand — A-K-Q-J-10, all the same suit?", a: "A royal flush" },
+        400: { q: "What classic word game has players placing lettered tiles on a board to spell words for points?", a: "Scrabble" },
+        500: { q: "What card game has players yell its own name when they're down to one card left?", a: "UNO" }
+      },
+      "Marriage & Couples Life": {
+        100: { q: "What's the traditional material gift theme for a couple's 1st wedding anniversary?", a: "Paper" },
+        200: { q: "What's the trip newlyweds traditionally take right after their wedding called?", a: "A honeymoon" },
+        400: { q: "What's the traditional gift material for a 25th wedding anniversary?", a: "Silver" },
+        500: { q: "What wedding reception tradition has the bride tossing her bouquet to a group of single guests?", a: "The bouquet toss" }
+      },
+      "Florida Living": {
+        100: { q: "What's Florida's official state nickname, tied to its citrus and warm weather?", a: "The Sunshine State" },
+        200: { q: "What massive subtropical wetland covers much of South Florida?", a: "The Everglades" },
+        300: { q: "What Florida city is Walt Disney World located near?", a: "Orlando" },
+        500: { q: "What invasive, dangerous reptile has overrun the Everglades after being released as pets?", a: "The Burmese python" }
+      }
+    }
+  }
+];
+
+// Bonus question pool used by the "Double Down" and "Crowd Save" wildcard events
+const BONUS_QUESTIONS = [
+  { q: "What's the only US state that grows coffee commercially?", a: "Hawaii" },
+  { q: "What planet has the most moons in our solar system?", a: "Saturn" },
+  { q: "What's the tallest breed of dog in the world?", a: "The Great Dane (or Irish Wolfhound, for height at the shoulder — either accepted)" },
+  { q: "In what year did the Berlin Wall fall?", a: "1989" },
+  { q: "What's the most stolen food item in the world, according to food-crime reports?", a: "Cheese" },
+  { q: "What instrument has 88 keys?", a: "The piano" },
+  { q: "What country invented the sport of golf?", a: "Scotland" },
+  { q: "What's the only mammal capable of true flight?", a: "The bat" },
+  { q: "What US city is nicknamed 'The Big Easy'?", a: "New Orleans" },
+  { q: "What's the largest organ in the human body?", a: "The skin" },
+  { q: "What ocean is the largest on Earth?", a: "The Pacific Ocean" },
+  { q: "What metal is liquid at room temperature?", a: "Mercury" },
+  { q: "What's the fastest land animal in the world?", a: "The cheetah" },
+  { q: "How many strings does a standard guitar have?", a: "Six" },
+  { q: "What country gifted the Statue of Liberty to the United States?", a: "France" },
+  { q: "What's the hardest naturally occurring substance on Earth?", a: "Diamond" }
+];
+
+// ============================================================
+// WILDCARD EVENTS
+// ============================================================
+const WILDCARD_EVENTS = [
+  {
+    key: "lucky",
+    label: "🍀 Lucky Break",
+    needsTarget: false,
+    describe: (v) => `Instant windfall! The picking team banks a bonus +${v * 2} points — no question needed.`,
+    apply: (state, team, v) => { team.score += v * 2; }
+  },
+  {
+    key: "tab",
+    label: "🍻 Bar Tab",
+    needsTarget: false,
+    describe: (v) => `Ouch. Someone's buying a round — the picking team loses ${v} points.`,
+    apply: (state, team, v) => { team.score -= v; }
+  },
+  {
+    key: "robinhood",
+    label: "🏹 Robin Hood",
+    needsTarget: false,
+    describe: (v, state, team) => {
+      const leader = getLeader(state, team);
+      if (!leader) return `No one to steal from — the picking team takes a flat +${v} instead.`;
+      return `Steal ${v} points from the current leader, ${leader.name}!`;
+    },
+    apply: (state, team, v) => {
+      const leader = getLeader(state, team);
+      if (leader) { leader.score -= v; team.score += v; }
+      else { team.score += v; }
+    }
+  },
+  {
+    key: "crowdsave",
+    label: "📣 Crowd Save",
+    needsTarget: false,
+    isBonusQuestion: true,
+    describe: () => `Free-for-all! This question is open to EVERY team — whoever shouts the right answer first wins the points.`,
+    apply: () => {}
+  },
+  {
+    key: "doubledown",
+    label: "🎲 Double Down",
+    needsTarget: false,
+    isBonusQuestion: true,
+    describe: (v) => `High stakes: get it right for +${v * 2}, or the picking team loses ${v} if nobody gets it.`,
+    apply: () => {}
+  }
+];
+
+function getLeader(state, excludeTeam) {
+  const others = state.teams.filter(t => t !== excludeTeam);
+  if (others.length === 0) return null;
+  return others.reduce((a, b) => (b.score > a.score ? b : a));
+}
+
+/* ============================================================
+   STATE
+============================================================ */
+let state = {
+  teams: [],       // { id, name, score }
+  used: {},        // "Category|Value" -> true
+  screen: "setup",  // setup | roundselect | board | winner
+  roundIndex: 0,
+  readerIndex: 0   // index into state.teams — whose turn it is to pick & read
+};
+
+function currentRound() {
+  return ROUNDS[state.roundIndex];
+}
+
+function totalCellsForRound() {
+  return currentRound().categories.length * VALUES.length;
+}
+
+function currentReader() {
+  if (state.teams.length === 0) return null;
+  return state.teams[state.readerIndex % state.teams.length];
+}
+
+function advanceReader() {
+  if (state.teams.length === 0) return;
+  state.readerIndex = (state.readerIndex + 1) % state.teams.length;
+}
+let nextTeamId = 1;
+
+/* ============================================================
+   RENDER HELPERS
+============================================================ */
+const $main = document.getElementById('main');
+const $scoreboard = document.getElementById('scoreboard');
+
+function render() {
+  renderScoreboard();
+  if (state.screen === 'setup') renderSetup();
+  else if (state.screen === 'roundselect') renderRoundSelect();
+  else if (state.screen === 'board') renderBoard();
+  else if (state.screen === 'winner') renderWinner();
+}
+
+function renderScoreboard() {
+  if (state.screen === 'setup' || state.screen === 'roundselect' || state.teams.length === 0) {
+    $scoreboard.style.display = 'none';
+    return;
+  }
+  $scoreboard.style.display = 'flex';
+  const maxScore = Math.max(...state.teams.map(t => t.score));
+  $scoreboard.innerHTML = state.teams.map(t => `
+    <div class="score-chip ${t.score === maxScore && maxScore > 0 ? 'leader' : ''}">
+      <div class="name">${escapeHtml(t.name)}</div>
+      <div class="pts">${t.score}</div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* ---------- Setup screen ---------- */
+function renderSetup() {
+  $main.innerHTML = `
+    <h1 class="title">🏆 Game Night Showdown 🏆</h1>
+    <div class="subtitle">Add every team or player, then hit Start</div>
+    <div class="panel">
+      <h2>Who's Playing?</h2>
+      <div class="team-row">
+        <input id="newTeamName" type="text" placeholder="Team or player name" maxlength="24" />
+        <button class="btn-primary" id="addTeamBtn">Add</button>
+      </div>
+      <div id="teamList"></div>
+      <button class="btn-primary btn-full" id="startBtn" disabled>Start Game</button>
+      <div class="hint">Need at least 2 teams. Works great for couples, squads, or solo players.</div>
+    </div>
+  `;
+  const $list = document.getElementById('teamList');
+  const $start = document.getElementById('startBtn');
+
+  function refreshList() {
+    $list.innerHTML = state.teams.map(t => `
+      <div class="team-entry">
+        <span>${escapeHtml(t.name)}</span>
+        <button class="btn-danger" data-remove="${t.id}">Remove</button>
+      </div>
+    `).join('');
+    $start.disabled = state.teams.length < 2;
+    $list.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.onclick = () => {
+        state.teams = state.teams.filter(t => t.id != btn.dataset.remove);
+        refreshList();
+      };
+    });
+  }
+
+  function addTeam() {
+    const input = document.getElementById('newTeamName');
+    const name = input.value.trim();
+    if (!name) return;
+    state.teams.push({ id: nextTeamId++, name, score: 0 });
+    input.value = '';
+    input.focus();
+    refreshList();
+  }
+
+  document.getElementById('addTeamBtn').onclick = addTeam;
+  document.getElementById('newTeamName').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addTeam();
+  });
+  $start.onclick = () => {
+    if (state.teams.length >= 2) {
+      state.readerIndex = 0;
+      state.screen = 'roundselect';
+      render();
+    }
+  };
+  refreshList();
+}
+
+/* ---------- Round select screen ---------- */
+function renderRoundSelect() {
+  $main.innerHTML = `
+    <h1 class="title">🏆 Game Night Showdown 🏆</h1>
+    <div class="subtitle">Pick tonight's board</div>
+    <div class="panel" style="max-width:640px;">
+      <h2>Choose a Round</h2>
+      <div id="roundList" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <div class="hint" style="margin-top:14px;">Each round is a full, separate board — play one tonight, save the others for next time.</div>
+    </div>
+  `;
+  const $list = document.getElementById('roundList');
+  $list.innerHTML = ROUNDS.map((r, i) => `
+    <button class="btn-secondary" data-round="${i}" style="text-align:left;padding:16px 18px;">
+      <div style="font-size:1.1rem;font-weight:900;color:var(--gold);">${escapeHtml(r.name)}</div>
+      <div style="opacity:.75;font-size:.9rem;margin-top:4px;">${escapeHtml(r.tagline)}</div>
+    </button>
+  `).join('');
+  $list.querySelectorAll('[data-round]').forEach(btn => {
+    btn.onclick = () => {
+      state.roundIndex = parseInt(btn.dataset.round, 10);
+      state.used = {};
+      state.readerIndex = 0;
+      state.screen = 'board';
+      render();
+    };
+  });
+}
+
+/* ---------- Board screen ---------- */
+function renderBoard() {
+  const round = currentRound();
+  const usedCount = Object.keys(state.used).length;
+  const totalCells = totalCellsForRound();
+  const cats = round.categories.map(c => `<div class="cat-header">${escapeHtml(c)}</div>`).join('');
+
+  const rows = VALUES.map(v => {
+    return round.categories.map(cat => {
+      const key = cat + '|' + v;
+      const isUsed = !!state.used[key];
+      const label = isUsed ? '' : v;
+      return `<div class="cell ${isUsed ? 'used' : 'clickable'}" data-cat="${escapeHtml(cat)}" data-val="${v}">${label}</div>`;
+    }).join('');
+  }).join('');
+
+  const reader = currentReader();
+
+  $main.innerHTML = `
+    <h1 class="title" style="margin-top:4px;">🏆 ${escapeHtml(round.name)} 🏆</h1>
+    ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong>'s turn to pick &amp; read — anyone can still answer!</div>` : ''}
+    <div id="board">${cats}${rows}</div>
+    <div id="boardControls">
+      <button class="btn-secondary" id="resetBtn">Reset Game</button>
+      <button class="btn-secondary" id="changeRoundBtn">Change Round</button>
+      <span class="hint" style="align-self:center;">${usedCount} / ${totalCells} squares revealed</span>
+    </div>
+  `;
+
+  $main.querySelectorAll('.cell.clickable').forEach(cell => {
+    cell.onclick = () => {
+      const cat = cell.dataset.cat;
+      const val = parseInt(cell.dataset.val, 10);
+      openSquare(cat, val);
+    };
+  });
+
+  document.getElementById('resetBtn').onclick = () => {
+    if (confirm('Reset this round? Scores and revealed squares will be cleared.')) {
+      state.used = {};
+      state.readerIndex = 0;
+      state.teams.forEach(t => t.score = 0);
+      render();
+    }
+  };
+
+  document.getElementById('changeRoundBtn').onclick = () => {
+    if (confirm('Switch to a different round? This round\'s progress will be cleared (scores stay).')) {
+      state.used = {};
+      state.readerIndex = 0;
+      state.screen = 'roundselect';
+      render();
+    }
+  };
+
+  if (usedCount === totalCells && totalCells > 0) {
+    state.screen = 'winner';
+    render();
+  }
+}
+
+/* ---------- Question / Wildcard overlay ---------- */
+function openSquare(cat, val) {
+  const isWild = currentRound().wildcardSlots[cat] === val;
+  if (isWild) openWildcard(cat, val);
+  else openQuestion(cat, val);
+}
+
+function closeOverlay() {
+  const ov = document.getElementById('overlay');
+  if (ov) ov.remove();
+}
+
+function markUsedAndReturn(cat, val) {
+  state.used[cat + '|' + val] = true;
+  advanceReader();
+  closeOverlay();
+  render();
+}
+
+function teamButtonsHtml(idPrefix) {
+  return `<div class="team-btn-grid">${state.teams.map(t =>
+    `<button class="team-btn" data-team="${t.id}" data-prefix="${idPrefix}">${escapeHtml(t.name)}</button>`
+  ).join('')}</div>`;
+}
+
+function openQuestion(cat, val) {
+  const item = currentRound().questions[cat][val];
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  overlay.innerHTML = `
+    <div class="card">
+      <div class="tag">${escapeHtml(cat)} — ${val} pts</div>
+      <div class="qtext">${escapeHtml(item.q)}</div>
+      <button class="btn-primary" id="revealBtn">Reveal Answer</button>
+      <div id="answerArea"></div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.getElementById('revealBtn').onclick = () => {
+    document.getElementById('revealBtn').remove();
+    document.getElementById('answerArea').innerHTML = `
+      <div class="atext">${escapeHtml(item.a)}</div>
+      <div>Who got it right?</div>
+      ${teamButtonsHtml('award')}
+      <button class="btn-secondary none-btn" id="noneBtn">Nobody Scored</button>
+    `;
+    document.querySelectorAll('[data-prefix="award"]').forEach(btn => {
+      btn.onclick = () => {
+        const team = state.teams.find(t => t.id == btn.dataset.team);
+        team.score += val;
+        markUsedAndReturn(cat, val);
+      };
+    });
+    document.getElementById('noneBtn').onclick = () => markUsedAndReturn(cat, val);
+  };
+}
+
+function openWildcard(cat, val) {
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  overlay.innerHTML = `
+    <div class="card">
+      <div class="tag wild">★ Wildcard — ${escapeHtml(cat)} (${val} pts) ★</div>
+      <div class="catval">Who picked this square?</div>
+      ${teamButtonsHtml('picker')}
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.querySelectorAll('[data-prefix="picker"]').forEach(btn => {
+    btn.onclick = () => {
+      const team = state.teams.find(t => t.id == btn.dataset.team);
+      runWildcardSpin(cat, val, team);
+    };
+  });
+}
+
+function runWildcardSpin(cat, val, team) {
+  const card = document.querySelector('#overlay .card');
+  card.innerHTML = `
+    <div class="tag wild">★ Wildcard ★</div>
+    <div class="wild-desc"><span class="spin-text" id="spinText">Spinning...</span></div>
+  `;
+  const spinEl = document.getElementById('spinText');
+  let i = 0;
+  const spinInterval = setInterval(() => {
+    spinEl.textContent = WILDCARD_EVENTS[i % WILDCARD_EVENTS.length].label;
+    i++;
+  }, 120);
+
+  setTimeout(() => {
+    clearInterval(spinInterval);
+    const event = WILDCARD_EVENTS[Math.floor(Math.random() * WILDCARD_EVENTS.length)];
+    showWildcardResult(cat, val, team, event);
+  }, 1400);
+}
+
+function showWildcardResult(cat, val, team, event) {
+  const card = document.querySelector('#overlay .card');
+  const descText = event.describe(val, state, team);
+
+  if (event.isBonusQuestion) {
+    const bonus = BONUS_QUESTIONS[Math.floor(Math.random() * BONUS_QUESTIONS.length)];
+    card.innerHTML = `
+      <div class="tag wild">${event.label}</div>
+      <div class="wild-desc">${escapeHtml(descText)}</div>
+      <div class="qtext">${escapeHtml(bonus.q)}</div>
+      <button class="btn-primary" id="revealBonusBtn">Reveal Answer</button>
+      <div id="bonusAnswerArea"></div>
+    `;
+    document.getElementById('revealBonusBtn').onclick = () => {
+      document.getElementById('revealBonusBtn').remove();
+      document.getElementById('bonusAnswerArea').innerHTML = `
+        <div class="atext">${escapeHtml(bonus.a)}</div>
+        <div>Who got it right?</div>
+        ${teamButtonsHtml('bonusaward')}
+        <button class="btn-secondary none-btn" id="bonusNoneBtn">Nobody Got It</button>
+      `;
+      document.querySelectorAll('[data-prefix="bonusaward"]').forEach(btn => {
+        btn.onclick = () => {
+          const winner = state.teams.find(t => t.id == btn.dataset.team);
+          winner.score += val * 2;
+          markUsedAndReturn(cat, val);
+        };
+      });
+      document.getElementById('bonusNoneBtn').onclick = () => {
+        if (event.key === 'doubledown') team.score -= val;
+        markUsedAndReturn(cat, val);
+      };
+    };
+    return;
+  }
+
+  if (event.needsTarget) {
+    const others = state.teams.filter(t => t !== team);
+    card.innerHTML = `
+      <div class="tag wild">${event.label}</div>
+      <div class="wild-desc">${escapeHtml(descText)}</div>
+      <div class="team-btn-grid">${others.map(t =>
+        `<button class="team-btn" data-target="${t.id}">${escapeHtml(t.name)}</button>`
+      ).join('')}</div>
+    `;
+    card.querySelectorAll('[data-target]').forEach(btn => {
+      btn.onclick = () => {
+        const targetTeam = state.teams.find(t => t.id == btn.dataset.target);
+        event.apply(state, team, val, targetTeam);
+        markUsedAndReturn(cat, val);
+      };
+    });
+    return;
+  }
+
+  // Instant effect, no target needed
+  event.apply(state, team, val);
+  card.innerHTML = `
+    <div class="tag wild">${event.label}</div>
+    <div class="wild-desc">${escapeHtml(descText)}</div>
+    <button class="btn-primary" id="continueBtn">Continue</button>
+  `;
+  document.getElementById('continueBtn').onclick = () => markUsedAndReturn(cat, val);
+}
+
+/* ---------- Winner screen ---------- */
+function renderWinner() {
+  const sorted = [...state.teams].sort((a, b) => b.score - a.score);
+  const top = sorted[0];
+  $main.innerHTML = `
+    <h1 class="title">🎉 Game Over! 🎉</h1>
+    <div class="panel" style="text-align:center;">
+      <div class="medal">🏆</div>
+      <div>Champion</div>
+      <div class="winner-name">${escapeHtml(top.name)}</div>
+      <div style="font-size:1.3rem;color:var(--gold);font-weight:900;">${top.score} points</div>
+      <div style="margin-top:20px;text-align:left;">
+        ${sorted.map((t, i) => `
+          <div class="team-entry" style="margin-bottom:6px;">
+            <span>${i + 1}. ${escapeHtml(t.name)}</span>
+            <span style="font-weight:900;color:var(--gold);">${t.score}</span>
+          </div>
+        `).join('')}
+      </div>
+      <button class="btn-primary btn-full" id="playAgainBtn">Play Again (Same Round)</button>
+      <button class="btn-secondary btn-full" id="newRoundBtn">Play a Different Round</button>
+      <button class="btn-secondary btn-full" id="newGameBtn">New Game (Reset Everyone)</button>
+    </div>
+  `;
+  launchConfetti();
+  document.getElementById('playAgainBtn').onclick = () => {
+    state.used = {};
+    state.readerIndex = 0;
+    state.teams.forEach(t => t.score = 0);
+    state.screen = 'board';
+    render();
+  };
+  document.getElementById('newRoundBtn').onclick = () => {
+    state.used = {};
+    state.readerIndex = 0;
+    state.screen = 'roundselect';
+    render();
+  };
+  document.getElementById('newGameBtn').onclick = () => {
+    state = { teams: [], used: {}, screen: 'setup', roundIndex: 0, readerIndex: 0 };
+    render();
+  };
+}
+
+function launchConfetti() {
+  const wrap = document.getElementById('confettiWrap');
+  wrap.innerHTML = '';
+  const colors = ['#f5c518', '#2ecc71', '#e74c3c', '#3498db', '#8e44ad'];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.animationDuration = (2 + Math.random() * 2) + 's';
+    el.style.animationDelay = (Math.random() * 1.5) + 's';
+    wrap.appendChild(el);
+  }
+  setTimeout(() => { wrap.innerHTML = ''; }, 5000);
+}
+
+render();
+</script>
+</body>
+</html>
