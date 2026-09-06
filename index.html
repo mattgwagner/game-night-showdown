@@ -1654,8 +1654,8 @@ function drawForfeit() {
 // ============================================================
 const WILDCARD_EVENTS = [
   {
-    key: "challenge", label: "🔥 Challenge Accepted", weight: 5, kind: "challenge",
-    blurb: "Put the phone down. You're doing something."
+    key: "challenge", label: "🔥 Challenge Accepted", weight: 7, kind: "challenge",
+    blurb: "Put the phone down. Beat it and the points are yours."
   },
   {
     key: "houserules", label: "🍺 House Rules", weight: 5, kind: "drink", drinks: true,
@@ -2649,33 +2649,10 @@ function wireTimer(seconds) {
    the board.
 ============================================================ */
 
-// Shared scoring footer: award the points, or don't.
-function judgeHtml(val, yesLabel, noLabel) {
-  return `
-    <div class="row-gap judge-row">
-      <button class="btn-primary" id="passBtn">${yesLabel} (+${val})</button>
-      <button class="btn-secondary" id="failBtn">${noLabel}</button>
-    </div>
-  `;
-}
-
-function wireJudge(team, val, done, opts = {}) {
-  document.getElementById('passBtn').onclick = () => {
-    scoreEvent(team, val, { isAnswer: true, isChallenge: true });
-    playCorrect();
-    done();
-  };
-  document.getElementById('failBtn').onclick = () => {
-    if (opts.penalty) scoreEvent(team, -opts.penalty, { isChallenge: true });
-    playWrong();
-    done();
-  };
-}
-
 function whoLabel(who, team) {
-  if (who === 'room') return 'EVERYBODY PLAYS — the winner scores for their team';
-  if (who === 'team') return `${team.name} — as a team`;
-  return `${team.name} — pick one person`;
+  if (who === 'room') return 'EVERYBODY. Last one standing — or first to finish — banks it for their team.';
+  if (who === 'team') return `${team.name} goes as a team. Beat it, or another team can steal.`;
+  return `One person from ${team.name}. They have to beat it. If they choke and someone else finishes, that team steals.`;
 }
 
 function runChallenge(ctx, filterType) {
@@ -2694,7 +2671,11 @@ function runChallenge(ctx, filterType) {
         <button class="btn-secondary forfeit-reroll" id="forfeitReroll">🎲 Different One</button>
       </div>` : ''}
     ${ch.timer ? timerHtml(ch.timer) : ''}
-    ${judgeHtml(val, 'They Did It', 'They Choked')}
+    <div class="who-line" style="margin-top:16px;">
+      Who beat it? ${escapeHtml(team.name)} if they finished — somebody else if they stole it. Winner banks ${val}. Nobody finishes, nobody scores.
+    </div>
+    ${teamButtonsHtml('chalaward')}
+    <button class="btn-secondary none-btn" id="chalNoneBtn">Nobody — no points</button>
   `;
   if (ch.timer) wireTimer(ch.timer);
   const $reroll = document.getElementById('forfeitReroll');
@@ -2704,7 +2685,18 @@ function runChallenge(ctx, filterType) {
       document.getElementById('forfeitText').textContent = drawForfeit().d;
     };
   }
-  wireJudge(team, val, done);
+  document.querySelectorAll('[data-prefix="chalaward"]').forEach(btn => {
+    btn.onclick = () => {
+      const winner = state.teams.find(t => t.id == btn.dataset.team);
+      scoreEvent(winner, val, { isAnswer: true, isChallenge: true });
+      playCorrect();
+      done();
+    };
+  });
+  document.getElementById('chalNoneBtn').onclick = () => {
+    playWrong();
+    done();
+  };
 }
 
 function runDuel(ctx) {
