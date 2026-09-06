@@ -212,6 +212,11 @@
   .judge-row { margin-top: 18px; }
   .vote-grid { grid-template-columns: 1fr 1fr; }
   .vote-opt { font-size: 1.05rem; padding: 18px 12px; }
+  .btn-score {
+    display: block; font-size: 1.25rem; font-weight: 900;
+    color: var(--gold); margin-top: 3px; font-variant-numeric: tabular-nums;
+  }
+  .team-btn.awarded .btn-score { color: var(--green); }
   .team-btn.awarded {
     background: rgba(46,204,113,.25);
     border-color: var(--green);
@@ -887,6 +892,333 @@ const ROUNDS = [
       "Dares":             { deck: "challenge", type: "social" },
       "All In":            { deck: "challenge", type: "room" }
     }
+  },
+  {
+    id: "r10",
+    name: "Round 10: Shout It Out",
+    tagline: "Riddles, emoji, slogans and questions nobody can resist guessing at",
+    categories: [
+      "One-Hit Wonders", "Name The Movie", "Slogans & Brands", "Emoji Decode",
+      "Before & After", "Odd One Out", "Riddles", "How Many?"
+    ],
+    wildcardSlots: {
+      "One-Hit Wonders": 400, "Name The Movie": 200, "Slogans & Brands": 500,
+      "Emoji Decode": 300, "Before & After": 100, "Odd One Out": 400,
+      "Riddles": 200, "How Many?": 300
+    },
+    dailyDouble: { category: "Before & After", value: 400 },
+    questions: {
+      "One-Hit Wonders": {
+        100: { q: "Which band's only major U.S. hit was 'Come On Eileen' in 1982?", a: "Dexys Midnight Runners" },
+        200: { q: "'Macarena' was a global smash in the mid-90s for what Spanish duo?", a: "Los del Río" },
+        300: { q: "What band is behind the 1997 hit 'Tubthumping' — the one about getting knocked down and getting up again?", a: "Chumbawamba" },
+        500: { q: "'Take On Me,' with its famous pencil-sketch music video, belongs to what Norwegian band?", a: "a-ha" }
+      },
+      "Name The Movie": {
+        100: { q: "A great white shark terrorizes a beach town, and the police chief decides he needs a bigger boat.", a: "Jaws" },
+        300: { q: "A boy is accidentally left behind at Christmas and defends his house from two burglars.", a: "Home Alone" },
+        400: { q: "A thief who steals secrets from dreams assembles a team to plant an idea in a businessman's mind instead.", a: "Inception" },
+        500: { q: "A cop and a mobster's mole spend the movie hunting each other inside Boston's underworld.", a: "The Departed" }
+      },
+      "Slogans & Brands": {
+        100: { q: "'Just Do It' belongs to what brand?", a: "Nike" },
+        200: { q: "'Melts in your mouth, not in your hands' sells what candy?", a: "M&M's" },
+        300: { q: "'Finger Lickin' Good' is the long-running slogan of what fast food chain?", a: "KFC" },
+        400: { q: "'The Ultimate Driving Machine' has advertised what carmaker for decades?", a: "BMW" }
+      },
+      "Emoji Decode": {
+        100: { q: "Name the movie: 🦁 👑", a: "The Lion King" },
+        200: { q: "Name the movie: 🕷️ 🕸️ 🦸", a: "Spider-Man" },
+        400: { q: "Name the movie: 🐠 🔍 🌊", a: "Finding Nemo" },
+        500: { q: "Name the movie: 🚢 🧊 💔", a: "Titanic" }
+      },
+      "Before & After": {
+        // The Jeopardy classic: the end of the first answer is the start of the second.
+        100: { q: "The Will Smith sitcom set in Beverly Hills, run into the appliance that cools your house.", a: "The Fresh Prince of Bel-Air Conditioner" },
+        200: { q: "The Spielberg movie with cloned dinosaurs, run into the person who patrols a national park.", a: "Jurassic Park Ranger" },
+        300: { q: "The Pixar movie about Woody and Buzz, run into what a parent announces at bedtime.", a: "Toy Story Time" },
+        500: { q: "The Tom Cruise fighter pilot movie, run into what you call it when someone flexes their biceps.", a: "Top Gun Show" }
+      },
+      "Odd One Out": {
+        200: { q: "Which does not belong: Jupiter, Saturn, Mercury, Neptune?", a: "Mercury — the others are gas or ice giants, Mercury is a rocky planet" },
+        300: { q: "Which does not belong: guitar, violin, trumpet, banjo?", a: "Trumpet — the others are string instruments" },
+        400: { q: "Which does not belong: Florida, Texas, Kansas, California?", a: "Kansas — it's the only one that's landlocked" },
+        500: { q: "Which does not belong: Yankees, Lakers, Celtics, Bulls?", a: "Yankees — the others are NBA teams" }
+      },
+      "Riddles": {
+        100: { q: "What has hands but cannot clap?", a: "A clock" },
+        300: { q: "What gets wetter the more it dries?", a: "A towel" },
+        400: { q: "I have cities but no houses, mountains but no trees, and water but no fish. What am I?", a: "A map" },
+        500: { q: "The more of them you take, the more you leave behind. What are they?", a: "Footsteps" }
+      },
+      "How Many?": {
+        // Closest guess takes it — nobody needs to be exact.
+        100: { q: "How many squares are on a standard chessboard?", a: "64" },
+        200: { q: "How many bones are in the adult human body?", a: "206" },
+        400: { q: "How many countries are on the continent of Africa?", a: "54" },
+        500: { q: "How many total dots are on a pair of standard six-sided dice?", a: "42 — 21 per die" }
+      }
+    }
+  },
+  {
+    id: "r11",
+    name: "Round 11: Fandoms & Franchises",
+    tagline: "Jedi, wizards, slashers, Santa, and the stories everybody already argues about",
+    categories: [
+      "Star Wars & Sci-Fi", "Wizards & Fantasy", "Horror & Halloween", "Christmas Movies",
+      "Books & Literature", "Myths & Legends", "Broadway & Musicals", "Animation Beyond Disney"
+    ],
+    wildcardSlots: {
+      "Star Wars & Sci-Fi": 300, "Wizards & Fantasy": 500, "Horror & Halloween": 200,
+      "Christmas Movies": 400, "Books & Literature": 100, "Myths & Legends": 300,
+      "Broadway & Musicals": 500, "Animation Beyond Disney": 200
+    },
+    dailyDouble: { category: "Star Wars & Sci-Fi", value: 400 },
+    questions: {
+      "Star Wars & Sci-Fi": {
+        100: { q: "What's the name of Han Solo's ship?", a: "The Millennium Falcon" },
+        200: { q: "In Star Trek, what planet is Spock from?", a: "Vulcan" },
+        400: { q: "In Blade Runner, what's the term for the artificial humans the protagonist hunts?", a: "Replicants" },
+        500: { q: "What 1979 film's tagline was 'In space, no one can hear you scream'?", a: "Alien" }
+      },
+      "Wizards & Fantasy": {
+        100: { q: "What are the four houses of Hogwarts?", a: "Gryffindor, Hufflepuff, Ravenclaw, and Slytherin" },
+        200: { q: "In The Lord of the Rings, what is Frodo's last name?", a: "Baggins" },
+        300: { q: "In The Chronicles of Narnia, what piece of furniture is the doorway to Narnia?", a: "A wardrobe" },
+        400: { q: "What's the name of the dragon in The Hobbit?", a: "Smaug" }
+      },
+      "Horror & Halloween": {
+        100: { q: "What's the name of the masked killer in the Halloween film series?", a: "Michael Myers" },
+        300: { q: "In A Nightmare on Elm Street, what's the name of the burned man who attacks people in their dreams?", a: "Freddy Krueger" },
+        400: { q: "What 1973 horror film about a possessed girl was the first horror movie nominated for Best Picture?", a: "The Exorcist" },
+        500: { q: "In Bram Stoker's novel, what Transylvanian count is the title character?", a: "Count Dracula" }
+      },
+      "Christmas Movies": {
+        100: { q: "In Elf, what are the four main food groups according to Buddy?", a: "Candy, candy canes, candy corns, and syrup" },
+        200: { q: "What's the name of the angel who shows George Bailey what life would be like without him in It's a Wonderful Life?", a: "Clarence" },
+        300: { q: "In A Christmas Story, what gift does Ralphie desperately want?", a: "A Red Ryder BB gun" },
+        500: { q: "What's the name of the town where The Nightmare Before Christmas's Jack Skellington is king?", a: "Halloween Town" }
+      },
+      "Books & Literature": {
+        200: { q: "Who wrote 'Pride and Prejudice'?", a: "Jane Austen" },
+        300: { q: "What's the name of the white whale in Herman Melville's novel?", a: "Moby Dick" },
+        400: { q: "In '1984,' what's the name of the all-seeing leader on every poster?", a: "Big Brother" },
+        500: { q: "Who wrote 'To Kill a Mockingbird'?", a: "Harper Lee" }
+      },
+      "Myths & Legends": {
+        100: { q: "In Greek mythology, who is the king of the gods?", a: "Zeus" },
+        200: { q: "What creature has the head of a bull and the body of a man, and lived in a labyrinth?", a: "The Minotaur" },
+        400: { q: "In Norse mythology, what's the name of Thor's hammer?", a: "Mjölnir" },
+        500: { q: "What Greek hero was invulnerable except for one spot on his heel?", a: "Achilles" }
+      },
+      "Broadway & Musicals": {
+        100: { q: "What musical about the first U.S. Treasury Secretary took Broadway apart in 2015?", a: "Hamilton" },
+        200: { q: "What musical features a chandelier crashing down and a masked man beneath an opera house?", a: "The Phantom of the Opera" },
+        300: { q: "What musical is told from the perspective of the witches of Oz?", a: "Wicked" },
+        400: { q: "What Disney stage musical opens with 'Circle of Life' and a parade of puppet animals?", a: "The Lion King" }
+      },
+      "Animation Beyond Disney": {
+        100: { q: "What yellow family has been on television since 1989?", a: "The Simpsons" },
+        300: { q: "What Japanese studio made 'Spirited Away' and 'My Neighbor Totoro'?", a: "Studio Ghibli" },
+        400: { q: "What DreamWorks franchise features an ogre, a donkey, and a dragon?", a: "Shrek" },
+        500: { q: "What animated series features four boys in a Colorado mountain town?", a: "South Park" }
+      }
+    }
+  },
+  {
+    id: "r12",
+    name: "Round 12: The Sporting Life",
+    tagline: "Hoops, links, pitches, ice and the Olympics — everything the other boards skipped",
+    categories: [
+      "NBA & Basketball", "Golf", "Soccer & The World Cup", "The Olympics",
+      "Hockey", "Tennis", "Sports Nicknames", "Records & Streaks"
+    ],
+    wildcardSlots: {
+      "NBA & Basketball": 200, "Golf": 400, "Soccer & The World Cup": 300,
+      "The Olympics": 500, "Hockey": 100, "Tennis": 400,
+      "Sports Nicknames": 200, "Records & Streaks": 300
+    },
+    dailyDouble: { category: "Records & Streaks", value: 500 },
+    questions: {
+      "NBA & Basketball": {
+        100: { q: "How many points is a shot from behind the arc worth?", a: "Three" },
+        300: { q: "What player, wearing 23 for Chicago, won six championships in the 1990s?", a: "Michael Jordan" },
+        400: { q: "How many players from one team are on the court at a time?", a: "Five" },
+        500: { q: "Who holds the NBA record for most points in a single game, with 100?", a: "Wilt Chamberlain" }
+      },
+      "Golf": {
+        100: { q: "What's the term for finishing a hole two strokes under par?", a: "An eagle" },
+        200: { q: "What green jacket-awarding tournament is played at Augusta National every April?", a: "The Masters" },
+        300: { q: "How many holes are played in a standard round of golf?", a: "Eighteen" },
+        500: { q: "What's the term for a score of one on a par-three hole?", a: "A hole-in-one (also an ace)" }
+      },
+      "Soccer & The World Cup": {
+        100: { q: "How many players are on the field per team in soccer?", a: "Eleven" },
+        200: { q: "How often is the FIFA World Cup held?", a: "Every four years" },
+        400: { q: "What Argentine player, wearing number 10, won the 2022 World Cup?", a: "Lionel Messi" },
+        500: { q: "What's the term for scoring three goals in a single match?", a: "A hat trick" }
+      },
+      "The Olympics": {
+        200: { q: "How many rings are on the Olympic flag?", a: "Five" },
+        300: { q: "What swimmer holds the record for most Olympic gold medals of all time?", a: "Michael Phelps" },
+        400: { q: "In what country did the ancient Olympic Games originate?", a: "Greece" },
+        500: { q: "What city hosted the first modern Olympic Games in 1896?", a: "Athens" }
+      },
+      "Hockey": {
+        200: { q: "What trophy is awarded to the NHL champion each year?", a: "The Stanley Cup" },
+        300: { q: "How many players per team are on the ice during even-strength play?", a: "Six, including the goalie" },
+        400: { q: "What Canadian player is nicknamed 'The Great One'?", a: "Wayne Gretzky" },
+        500: { q: "What's the penalty box commonly called?", a: "The sin bin" }
+      },
+      "Tennis": {
+        100: { q: "What does a score of zero get called in tennis?", a: "Love" },
+        200: { q: "What surface is Wimbledon played on?", a: "Grass" },
+        300: { q: "What's the term for a serve the opponent doesn't touch at all?", a: "An ace" },
+        500: { q: "How many Grand Slam tournaments are there in a year?", a: "Four" }
+      },
+      "Sports Nicknames": {
+        100: { q: "What baseball player was known as 'The Sultan of Swat'?", a: "Babe Ruth" },
+        300: { q: "What boxer called himself 'The Greatest'?", a: "Muhammad Ali" },
+        400: { q: "What NFL team is nicknamed 'America's Team'?", a: "The Dallas Cowboys" },
+        500: { q: "What college football stadium is known as 'The Swamp'?", a: "Ben Hill Griffin Stadium, University of Florida" }
+      },
+      "Records & Streaks": {
+        100: { q: "How many games did the 1972 Miami Dolphins lose on their way to the title?", a: "None — they went undefeated" },
+        200: { q: "What's the maximum score in a single game of ten-pin bowling?", a: "300" },
+        300: { q: "In darts, what's the highest score possible with three darts?", a: "180" },
+        400: { q: "What's the fastest a human has ever run 100 meters, to the nearest half second?", a: "9.58 seconds — Usain Bolt, 2009" }
+      }
+    }
+  },
+  {
+    id: "r13",
+    name: "Round 13: Wild Kingdom",
+    tagline: "Animals, weather, dinosaurs and the machine you're currently sitting in",
+    categories: [
+      "Animals & Wildlife", "Dogs & Pets", "Sharks & The Ocean", "Dinosaurs",
+      "The Human Body", "Weather & Disasters", "Bugs & Creepy Crawlies", "Trees & Plants"
+    ],
+    wildcardSlots: {
+      "Animals & Wildlife": 300, "Dogs & Pets": 200, "Sharks & The Ocean": 400,
+      "Dinosaurs": 100, "The Human Body": 500, "Weather & Disasters": 300,
+      "Bugs & Creepy Crawlies": 200, "Trees & Plants": 400
+    },
+    dailyDouble: { category: "Weather & Disasters", value: 400 },
+    questions: {
+      "Animals & Wildlife": {
+        100: { q: "What's the largest land animal on Earth?", a: "The African elephant" },
+        200: { q: "What's the only marsupial native to North America?", a: "The opossum" },
+        400: { q: "What animal has the longest gestation period of any mammal, at about 22 months?", a: "The elephant" },
+        500: { q: "What's a group of lions called?", a: "A pride" }
+      },
+      "Dogs & Pets": {
+        100: { q: "What's the most popular dog breed in the United States, by registrations?", a: "The Labrador Retriever" },
+        300: { q: "How many teeth does an adult dog normally have?", a: "42" },
+        400: { q: "What's the term for a cat's ability to always land on its feet?", a: "The righting reflex" },
+        500: { q: "What breed is the smallest dog breed in the world?", a: "The Chihuahua" }
+      },
+      "Sharks & The Ocean": {
+        100: { q: "What's the largest fish in the ocean?", a: "The whale shark" },
+        200: { q: "How many arms does an octopus have?", a: "Eight" },
+        300: { q: "What percentage of Earth's surface is covered by ocean, roughly?", a: "About 71 percent" },
+        500: { q: "What's the deepest known point in any ocean?", a: "Challenger Deep, in the Mariana Trench" }
+      },
+      "Dinosaurs": {
+        200: { q: "What does 'Tyrannosaurus Rex' roughly translate to?", a: "Tyrant lizard king" },
+        300: { q: "What dinosaur had a distinctive double row of plates along its back and spikes on its tail?", a: "Stegosaurus" },
+        400: { q: "What era are dinosaurs most associated with, spanning the Triassic, Jurassic, and Cretaceous?", a: "The Mesozoic Era" },
+        500: { q: "What's the leading scientific explanation for the dinosaurs' extinction about 66 million years ago?", a: "An asteroid impact (the Chicxulub impactor)" }
+      },
+      "The Human Body": {
+        100: { q: "What's the largest organ in the human body?", a: "The skin" },
+        200: { q: "How many chambers does the human heart have?", a: "Four" },
+        300: { q: "What's the smallest bone in the human body, found in the ear?", a: "The stapes (stirrup)" },
+        400: { q: "What organ produces insulin?", a: "The pancreas" }
+      },
+      "Weather & Disasters": {
+        100: { q: "What scale is used to rate hurricane strength from 1 to 5?", a: "The Saffir-Simpson scale" },
+        200: { q: "What scale rates tornado intensity in the United States today?", a: "The Enhanced Fujita (EF) scale" },
+        300: { q: "What's the term for a hurricane that forms in the western Pacific?", a: "A typhoon" },
+        500: { q: "What instrument measures atmospheric pressure and helps predict storms?", a: "A barometer" }
+      },
+      "Bugs & Creepy Crawlies": {
+        100: { q: "How many legs does an insect have?", a: "Six" },
+        300: { q: "What's the only bee in a hive that lays eggs?", a: "The queen" },
+        400: { q: "How many eyes do most spiders have?", a: "Eight" },
+        500: { q: "What insect is responsible for more human deaths per year than any other animal?", a: "The mosquito" }
+      },
+      "Trees & Plants": {
+        100: { q: "What process do plants use to convert sunlight into energy?", a: "Photosynthesis" },
+        200: { q: "What's the tallest tree species in the world?", a: "The coast redwood" },
+        300: { q: "How can you estimate a tree's age from its trunk?", a: "Count the growth rings" },
+        500: { q: "What's the state tree of Florida, and the source of a well-known heart of palm?", a: "The sabal palm (cabbage palm)" }
+      }
+    }
+  },
+  {
+    id: "r14",
+    name: "Round 14: Americana",
+    tagline: "Presidents, bourbon, blackjack, and the King of Battle",
+    categories: [
+      "U.S. Presidents", "Flags & Capitals", "Candy & Snacks", "Whiskey & Bourbon",
+      "Poker & Vegas", "Aviation", "Field Artillery", "Roadside America"
+    ],
+    wildcardSlots: {
+      "U.S. Presidents": 400, "Flags & Capitals": 200, "Candy & Snacks": 300,
+      "Whiskey & Bourbon": 500, "Poker & Vegas": 100, "Aviation": 300,
+      "Field Artillery": 200, "Roadside America": 400
+    },
+    dailyDouble: { category: "Field Artillery", value: 500 },
+    questions: {
+      "U.S. Presidents": {
+        100: { q: "Who was the only U.S. president to serve more than two terms?", a: "Franklin D. Roosevelt" },
+        200: { q: "Which president is on the $50 bill?", a: "Ulysses S. Grant" },
+        300: { q: "Who was the youngest person ever elected president?", a: "John F. Kennedy — Theodore Roosevelt was younger when he took office, but wasn't elected to it" },
+        500: { q: "Which two presidents were father and son, both named for the same family line, serving in the 1700s-1800s?", a: "John Adams and John Quincy Adams" }
+      },
+      "Flags & Capitals": {
+        100: { q: "What's the capital of Australia — and it isn't Sydney?", a: "Canberra" },
+        200: { q: "What's the capital of Canada?", a: "Ottawa" },
+        400: { q: "What country's flag is a red circle on a white field?", a: "Japan" },
+        500: { q: "What's the only U.S. state flag that isn't a rectangle?", a: "Ohio — it's a swallowtail burgee" }
+      },
+      "Candy & Snacks": {
+        100: { q: "What candy bar's name refers to the three flavors it originally came in?", a: "3 Musketeers" },
+        200: { q: "What snack cake is famous for its supposedly indestructible shelf life?", a: "The Twinkie" },
+        400: { q: "What candy was famously used to lure E.T. in the 1982 film?", a: "Reese's Pieces" },
+        500: { q: "What's the best-selling candy bar in the United States?", a: "Snickers" }
+      },
+      "Whiskey & Bourbon": {
+        100: { q: "What grain must make up at least 51 percent of bourbon's mash bill?", a: "Corn" },
+        200: { q: "What U.S. state produces the overwhelming majority of the world's bourbon?", a: "Kentucky" },
+        300: { q: "What's the charcoal-filtering step that distinguishes Tennessee whiskey from bourbon?", a: "The Lincoln County Process" },
+        400: { q: "What does a whiskey's 'proof' number represent, relative to alcohol by volume?", a: "Double the ABV — 80 proof is 40 percent alcohol" }
+      },
+      "Poker & Vegas": {
+        200: { q: "What's the best possible hand in Texas Hold'em?", a: "A royal flush" },
+        300: { q: "In blackjack, what total are you trying not to exceed?", a: "21" },
+        400: { q: "What two-card starting hand in Hold'em is nicknamed 'pocket rockets'?", a: "Two aces" },
+        500: { q: "What poker hand, aces and eights, is known as the 'Dead Man's Hand'?", a: "Two pair — black aces and black eights" }
+      },
+      "Aviation": {
+        100: { q: "What brothers made the first powered airplane flight in 1903?", a: "The Wright brothers, Orville and Wilbur" },
+        200: { q: "What's the common name for an aircraft's flight data recorder?", a: "The black box — which is actually orange" },
+        400: { q: "What's the term for exceeding the speed of sound?", a: "Going supersonic (breaking the sound barrier)" },
+        500: { q: "What supersonic passenger jet flew commercially until 2003?", a: "The Concorde" }
+      },
+      "Field Artillery": {
+        100: { q: "Field Artillery carries what nickname, to the Infantry's 'Queen of Battle'?", a: "The King of Battle" },
+        300: { q: "Who is the patron saint of artillerymen, honored every December 4th?", a: "Saint Barbara" },
+        400: { q: "What Oklahoma post is the home of the Field Artillery?", a: "Fort Sill" },
+        500: { q: "Where does the nickname 'Redleg' come from?", a: "The scarlet stripe worn on artillerymen's uniform trousers" }
+      },
+      "Roadside America": {
+        100: { q: "What decommissioned highway from Chicago to Santa Monica is called 'The Mother Road'?", a: "Route 66" },
+        200: { q: "What South Dakota tourist stop is famous for free ice water and thousands of billboards?", a: "Wall Drug" },
+        300: { q: "What four presidents are carved into Mount Rushmore?", a: "Washington, Jefferson, Theodore Roosevelt, and Lincoln" },
+        500: { q: "What Florida attraction, opened in 1971, is the most-visited theme park resort in the world?", a: "Walt Disney World" }
+      }
+    }
   }
 ];
 
@@ -1202,14 +1534,6 @@ const WILDCARD_EVENTS = [
     }
   },
   {
-    key: "swap", label: "🔄 Swap Meet", weight: 2, kind: "instant", needsTarget: true,
-    describe: () => `Choose any team and trade scores with them. Choose carefully. Choose cruelly.`,
-    apply: (state, team, v, target) => {
-      if (!target) return;
-      const tmp = team.score; team.score = target.score; target.score = tmp;
-    }
-  },
-  {
     key: "insurance", label: "🛡️ Insurance Policy", weight: 2, kind: "instant",
     describe: () => `A shield. The next time this team would lose points — a blown Daily Double, a failed dare, anything — it costs you nothing. One use.`,
     apply: (state, team) => { team.shield = true; }
@@ -1317,6 +1641,43 @@ function freshState() {
 }
 
 let state = freshState();
+
+// Normalize every board at load. The rule is simply: any square that has no
+// question IS a wildcard. That means wildcardSlots never has to be maintained by
+// hand — add a question and the square becomes trivia, delete one and it becomes a
+// wildcard. A Daily Double that lands on a wildcard gets moved to a real question.
+function normalizeRounds() {
+  ROUNDS.forEach(r => {
+    if (r.type === 'gauntlet') return;
+    r.questions = r.questions || {};
+    r.wildValues = {};
+    r.categories.forEach(cat => {
+      const qs = r.questions[cat] || (r.questions[cat] = {});
+      r.wildValues[cat] = VALUES.filter(v => qs[v] === undefined);
+      // A fully-populated category still needs one surprise on it.
+      if (r.wildValues[cat].length === 0) {
+        const declared = r.wildcardSlots && r.wildcardSlots[cat];
+        const pick = VALUES.indexOf(declared) !== -1 ? declared : VALUES[VALUES.length - 1];
+        delete qs[pick];
+        r.wildValues[cat] = [pick];
+      }
+    });
+    const dd = r.dailyDouble;
+    if (!dd) return;
+    const qs = r.questions[dd.category];
+    if (!qs || r.categories.indexOf(dd.category) === -1) { delete r.dailyDouble; return; }
+    if (qs[dd.value] === undefined) {
+      // It landed on a wildcard — slide it to the richest real question here.
+      const real = VALUES.filter(v => qs[v] !== undefined);
+      if (real.length) dd.value = real[real.length - 1];
+      else delete r.dailyDouble;
+    }
+  });
+}
+
+function isWildSquare(round, cat, val) {
+  return !!(round.wildValues && round.wildValues[cat] && round.wildValues[cat].indexOf(val) !== -1);
+}
 
 function currentRound() {
   return ROUNDS[state.roundIndex];
@@ -1648,7 +2009,7 @@ function openSquare(cat, val) {
 
   const dd = round.dailyDouble;
   if (dd && dd.category === cat && dd.value === val) { openDailyDouble(cat, val); return; }
-  if (round.wildcardSlots && round.wildcardSlots[cat] === val) openWildcard(cat, val);
+  if (isWildSquare(round, cat, val)) openWildcard(cat, val);
   else openQuestion(cat, val);
 }
 
@@ -1664,9 +2025,17 @@ function markUsedAndReturn(cat, val) {
   render();
 }
 
+// The overlay covers the scoreboard, so any button that asks you to choose a
+// team has to carry that team's score with it — otherwise you're picking blind.
+function teamBtn(t, attrs) {
+  return `<button class="team-btn" ${attrs}>
+    ${escapeHtml(t.name)}<span class="btn-score">${t.score}</span>
+  </button>`;
+}
+
 function teamButtonsHtml(idPrefix) {
   return `<div class="team-btn-grid">${state.teams.map(t =>
-    `<button class="team-btn" data-team="${t.id}" data-prefix="${idPrefix}">${escapeHtml(t.name)}</button>`
+    teamBtn(t, `data-team="${t.id}" data-prefix="${idPrefix}"`)
   ).join('')}</div>`;
 }
 
@@ -2070,7 +2439,7 @@ function runDuel(ctx) {
     <div class="tag wild">⚔️ DUEL</div>
     <div class="who-line">${escapeHtml(team.name)} — call out your challenger.</div>
     <div class="team-btn-grid">${others.map(t =>
-      `<button class="team-btn" data-rival="${t.id}">${escapeHtml(t.name)}</button>`
+      teamBtn(t, `data-rival="${t.id}"`)
     ).join('')}</div>
   `;
   card.querySelectorAll('[data-rival]').forEach(btn => {
@@ -2084,8 +2453,8 @@ function runDuel(ctx) {
         ${duel.timer ? timerHtml(duel.timer) : ''}
         <div class="who-line" style="margin-top:14px;">Who won?</div>
         <div class="team-btn-grid">
-          <button class="team-btn" data-win="${team.id}" data-lose="${rival.id}">${escapeHtml(team.name)}</button>
-          <button class="team-btn" data-win="${rival.id}" data-lose="${team.id}">${escapeHtml(rival.name)}</button>
+          ${teamBtn(team, `data-win="${team.id}" data-lose="${rival.id}"`)}
+          ${teamBtn(rival, `data-win="${rival.id}" data-lose="${team.id}"`)}
         </div>
         <button class="btn-secondary none-btn" id="drawBtn">Called It a Draw</button>
       `;
@@ -2208,7 +2577,7 @@ function runInstant(ctx, event) {
       <div class="tag wild">${event.label}</div>
       <div class="wild-desc">${escapeHtml(descText)}</div>
       <div class="team-btn-grid">${others.map(t =>
-        `<button class="team-btn" data-target="${t.id}">${escapeHtml(t.name)}</button>`
+        teamBtn(t, `data-target="${t.id}"`)
       ).join('')}</div>
     `;
     card.querySelectorAll('[data-target]').forEach(btn => {
@@ -2565,6 +2934,7 @@ function randomTeamName() {
    BOOT
 ============================================================ */
 (function boot() {
+  normalizeRounds();
   const saved = loadSavedGame();
   if (saved && saved.state) {
     // Keep the saved game around but land on setup so the host chooses.

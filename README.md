@@ -26,9 +26,12 @@ python3 -m http.server 8934
 
 The setting filters every deck in the game, so the same app works at 4pm and at 11pm.
 
-**Pick a board** — nine full boards, 8 categories × 5 values each. Eight of them are
-trivia (beer, firearms, Disney, AI, college football, grilling, boats, Labor Day,
-backyard games, and a lot more). The ninth is different:
+**Pick a board** — fourteen full boards, 8 categories × 5 values each. Thirteen are
+trivia, spanning 104 categories: beer, firearms, Disney, AI, college football, grilling,
+boats, Labor Day, NBA, golf, soccer, the Olympics, Star Wars, horror, dinosaurs, sharks,
+bourbon, presidents, Field Artillery, and a lot more. One board is nothing but formats
+that get people shouting — emoji decode, riddles, Before & After, brand slogans, Odd One
+Out. And one is different from all of them:
 
 > **Round 9: The Reckoning** — no trivia at all. Forty squares of physical feats,
 > performances, speed rounds, duels, group votes, hot seats and dares. Every square
@@ -75,7 +78,13 @@ Because real life overrules the app:
 
 Everything lives in plain JS objects at the top of `index.html`:
 
-- `ROUNDS` — the boards, categories, questions, wildcard slots, Daily Doubles
+- `ROUNDS` — the boards, categories, questions and Daily Doubles
+
+Adding a category is just adding an entry to `categories` and a matching block in
+`questions`. **You do not maintain the wildcard slots** — at load, any square with no
+question automatically becomes a wildcard, and a Daily Double that lands on one slides
+to the richest real question in its category. Give a category four questions and the
+fifth square becomes the surprise on its own.
 - `CHALLENGES` — tasks, tagged `physical` / `performance` / `speed` / `social` / `room`
 - `GROUP_VOTES`, `HOT_SEAT`, `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`
 - `WILDCARD_EVENTS` — each carries a `weight` that biases the draw
