@@ -107,7 +107,7 @@ Adding a category is just adding an entry to `categories` and a matching block i
 question automatically becomes a wildcard, and a Daily Double that lands on one slides
 to the richest real question in its category. Give a category four questions and the
 fifth square becomes the surprise on its own.
-- `CHALLENGES` — 138 tasks, tagged `physical` / `performance` / `speed` / `social` / `room` / `drink`
+- `CHALLENGES` — 152 tasks, tagged `physical` / `performance` / `speed` / `social` / `room` / `drink`
 - `GROUP_VOTES`, `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`, `LIST_PROMPTS`, `FORFEITS`
 - `WILDCARD_EVENTS` — each carries a `weight` that biases the draw
 

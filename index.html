@@ -1357,10 +1357,9 @@ const BONUS_QUESTIONS = [
 ============================================================ */
 
 const CHALLENGES = [
-  /* ---------- physical ---------- */
+  /* ---------- physical — quirky, not gym class ---------- */
   { t: "Plank Standoff", d: "One person from your team holds a plank. The room counts out loud. Make it to the buzzer and the points are yours.", timer: 45, who: "one", type: "physical" },
   { t: "Wall Sit", d: "Back flat on a wall, thighs parallel to the floor. Hold it. No hands on knees, no sliding down.", timer: 45, who: "one", type: "physical" },
-  { t: "Twenty Push-Ups", d: "Twenty push-ups before the buzzer. Chest to fist, all the way up. The room is judging your form and the room is merciless.", timer: 30, who: "one", type: "physical" },
   { t: "Flamingo", d: "Stand on one foot with your eyes closed and your arms crossed. Put a foot down and it's over.", timer: 30, who: "one", type: "physical" },
   { t: "Ice Fist", d: "Hold an ice cube in a closed fist until the buzzer. You may not put it down, and you may not stop making eye contact with the room.", timer: 45, who: "one", type: "physical" },
   { t: "Steady Hand", d: "Hold a full cup of water straight out at arm's length. Elbow locked. Spill it or bend it and you get nothing.", timer: 60, who: "one", type: "physical" },
@@ -1369,11 +1368,39 @@ const CHALLENGES = [
   { t: "Sock Hoops", d: "Roll up a sock and sink it into a trash can from across the room. Three attempts.", timer: 0, who: "one", type: "physical" },
   { t: "Pack Mule", d: "Stack five household objects, carry them across the room and back without dropping a single one.", timer: 45, who: "one", type: "physical" },
   { t: "The Blind Crossing", d: "One player closes their eyes. A teammate talks them across the room and back using words only. No touching.", timer: 60, who: "team", type: "physical" },
-  { t: "Burpee Sprint", d: "Ten burpees before the buzzer. Chest down, jump up, hands overhead. Go.", timer: 30, who: "one", type: "physical" },
   { t: "Cup Pyramid", d: "Build a pyramid out of at least six cups and get it standing before the buzzer.", timer: 30, who: "one", type: "physical" },
   { t: "The Limbo", d: "Someone holds a broom. You go under it. It gets lower. Knees don't touch, hands don't touch.", timer: 0, who: "one", type: "physical" },
   { t: "Beast of Burden", d: "Piggyback a teammate one full lap around the room. Both feet down early and you're done.", timer: 45, who: "team", type: "physical" },
   { t: "Spoon Walk", d: "Balance a lime on a spoon, held in your mouth, and walk a lap. Drop it and you're out.", timer: 45, who: "one", type: "physical" },
+  { t: "Elbow Coins", d: "Stack three coins on your elbow, drop your arm, and catch them all. Three attempts.", timer: 0, who: "one", type: "physical" },
+  { t: "Knee Pillow", d: "Walk a lap with a couch pillow pinched between your knees. Hands off. Drop it and you're done.", timer: 45, who: "one", type: "physical" },
+  { t: "Chin Fruit", d: "Tuck a lime or orange under your chin and pass it to a teammate, chin to chin. No hands. Two successful passes.", timer: 60, who: "team", type: "physical" },
+  { t: "Oven Mitts", d: "Put oven mitts or socks on your hands and unwrap a piece of candy. Eat it before the buzzer.", timer: 45, who: "one", type: "physical" },
+  { t: "Balloon Elbows", d: "Keep a balloon in the air using only your elbows. Ten touches. If it hits the floor, start over.", timer: 45, who: "one", type: "physical" },
+  { t: "Forehead Balloon", d: "Hold a balloon against the wall with only your forehead. No hands. Make it to the buzzer.", timer: 20, who: "one", type: "physical" },
+  { t: "The Waiter", d: "Walk a lap with a paper plate or book and a half-full cup on top of it. Spill it and you're out.", timer: 45, who: "one", type: "physical" },
+  { t: "Shoe Bowling", d: "Stand a water bottle up. Knock it over with a thrown shoe from across the room. Three attempts.", timer: 0, who: "one", type: "physical" },
+  { t: "Card Flick", d: "Flick three playing cards — or loyalty cards — into a bowl from five feet. Land two.", timer: 0, who: "one", type: "physical" },
+  { t: "Cookie Face", d: "Put a cookie or a cracker on your forehead. Get it to your mouth. No hands.", timer: 45, who: "one", type: "physical" },
+  { t: "Jacket Puzzle", d: "Take your jacket or hoodie off, turn it inside out, and put it back on. Before the buzzer.", timer: 40, who: "one", type: "physical" },
+  { t: "One-Foot Lace", d: "Stand on one foot and untie, then retie, the other shoe. Second foot down and it's over.", timer: 45, who: "one", type: "physical" },
+  { t: "Tower of Junk", d: "Thirty seconds. Tallest free-standing stack from whatever is on the table. It has to stay up when you step back.", timer: 30, who: "one", type: "physical" },
+  { t: "Sock Kick", d: "Kick a balled-up sock into a trash can or laundry basket from six feet. Three attempts.", timer: 0, who: "one", type: "physical" },
+  { t: "Phone Head", d: "Walk a lap with a phone balanced on your head, screen up. Catch it and you're done.", timer: 40, who: "one", type: "physical" },
+  { t: "Nose Chip", d: "Balance a chip or a pretzel on your nose for ten straight seconds. The room counts.", timer: 20, who: "one", type: "physical" },
+  { t: "Furniture Islands", d: "Cross the room stepping only on cushions, pillows, or furniture. Feet on the actual floor and you're out.", timer: 45, who: "one", type: "physical" },
+  { t: "Human Burrito", d: "Wrap a teammate in a blanket like a burrito. They have to be able to hop once when you're done.", timer: 45, who: "team", type: "physical" },
+  { t: "Penny Hockey", d: "Slide a coin down the table and into a cup on the far end. Three attempts.", timer: 0, who: "one", type: "physical" },
+  { t: "Keepy-Uppy", d: "Keep a balloon off the floor for fifteen hits. Hands only. If it drops, start the count over.", timer: 40, who: "one", type: "physical" },
+  { t: "Backwards Waiter", d: "Walk a lap backwards with a half-full cup. Spill it or look over your shoulder and you're out.", timer: 45, who: "one", type: "physical" },
+  { t: "Twister Reach", d: "Left hand on the remote. Right foot on the couch. Hold it until the buzzer. Fall and it's over.", timer: 20, who: "one", type: "physical" },
+  { t: "Tissue Feet", d: "Empty a tissue box using only your feet. Ten tissues. No hands.", timer: 45, who: "one", type: "physical" },
+  { t: "Candy Mitts", d: "A teammate puts the mitts or socks on you. You feed them a piece of candy. Nobody uses bare hands.", timer: 40, who: "team", type: "physical" },
+  { t: "Balloon Knees", d: "Walk a lap with a balloon between your knees. Pop it or drop it and you're done.", timer: 40, who: "one", type: "physical" },
+  { t: "Paper Plane", d: "Fold a paper airplane and land it in a laundry basket or box from across the room. Three throws.", timer: 0, who: "one", type: "physical" },
+  { t: "Clip Collector", d: "Clip five chip clips, clothespins, or binder clips onto your own shirt before the buzzer.", timer: 25, who: "one", type: "physical" },
+  { t: "No-Hands Sip", d: "Pick a cup up off the table and take a sip using only your mouth. No hands. Set it back down.", timer: 30, who: "one", type: "physical" },
+  { t: "Three-Legged Lap", d: "Tie two teammates' inside legs together with a dish towel. Walk a lap. Untie early and you're out.", timer: 60, who: "team", type: "physical" },
 
   /* ---------- performance ---------- */
   { t: "Do The Voice", d: "Do an impression of somebody in this room. Say nothing about who it is. If three or more people correctly name them, you score.", timer: 45, who: "one", type: "performance" },
@@ -1405,11 +1432,9 @@ const CHALLENGES = [
   { t: "Roll Call", d: "Name every person in this room in reverse alphabetical order by first name.", timer: 45, who: "one", type: "speed" },
   { t: "Toppings", d: "Eight pizza toppings before the buzzer. Anything already said tonight doesn't count.", timer: 15, who: "one", type: "speed" },
   { t: "The Fifty", d: "Name twelve U.S. states before the buzzer. No repeats.", timer: 20, who: "one", type: "speed" },
-  { t: "Crayon Box", d: "Ten colors that are not red, blue, green, or yellow.", timer: 20, who: "one", type: "speed" },
 
   /* ---------- social ---------- */
   { t: "Say Something Nice", d: "Give a genuine, specific compliment to every single person in this room. Generic doesn't count and the room will call it.", timer: 90, who: "one", type: "social" },
-  { t: "Make The Call", d: "Call a parent or a sibling right now and tell them you love them. No explanation, no context. Hang up.", timer: 60, who: "one", type: "social" },
   { t: "Interrogation", d: "Speak only in questions until your team's next turn. Slip once and the points come back off.", timer: 0, who: "one", type: "social" },
   { t: "On Your Feet", d: "You are standing for the rest of this round. Sit down and it's a forfeit.", timer: 0, who: "one", type: "social" },
   { t: "Storytime", d: "Tell a genuinely embarrassing story about yourself. The room votes on whether it was worth the points.", timer: 90, who: "one", spice: "party", type: "social" },
@@ -1428,27 +1453,16 @@ const CHALLENGES = [
   { t: "Closest Guess", d: "EVERYBODY. The host writes down a number between 1 and 100. Everyone writes their guess on their phone, face down. Reveal all at once — closest wins. Nobody says a number out loud before the reveal.", timer: 45, who: "room", type: "room" },
   { t: "Human Knot", d: "EVERYBODY. Grab two hands that aren't next to you. Untangle without letting go. Beat the clock and every team scores.", timer: 120, who: "room", type: "room" },
   { t: "Freeze", d: "EVERYBODY. Freeze in place. Nobody moves, nobody laughs. First to break is out, last one frozen scores.", timer: 0, who: "room", type: "room" },
-  /* ---------- more physical ---------- */
-  { t: "Wall Handstand", d: "Kick up into a handstand against the wall and hold it until the buzzer.", timer: 30, who: "one", type: "physical" },
-  { t: "Hollow Hold", d: "On your back, shoulders and heels off the floor, arms overhead. Hold. It is worse than it sounds.", timer: 45, who: "one", type: "physical" },
-  { t: "Bottom of the Squat", d: "Squat all the way down and stay there. Heels flat. No hands.", timer: 60, who: "one", type: "physical" },
-  { t: "Chair Dips", d: "Fifteen dips off the edge of a chair before the buzzer.", timer: 30, who: "one", type: "physical" },
-  { t: "Air Squats", d: "Twenty-five squats before the buzzer. All the way down, all the way up.", timer: 30, who: "one", type: "physical" },
-  { t: "Jumping Jacks", d: "Forty jumping jacks before the buzzer. The room counts.", timer: 30, who: "one", type: "physical" },
-  { t: "Mountain Climbers", d: "Thirty mountain climbers before the buzzer. Knees to chest.", timer: 30, who: "one", type: "physical" },
-  { t: "Sit-Ups", d: "Twenty sit-ups before the buzzer. Somebody can hold your feet.", timer: 30, who: "one", type: "physical" },
-  { t: "Walking Lunges", d: "Lunge one full lap of the room. Back knee touches the floor every single time.", timer: 45, who: "one", type: "physical" },
-  { t: "Crab Walk", d: "Crab walk a lap of the room. Belly up the whole way.", timer: 45, who: "one", type: "physical" },
-  { t: "Bear Crawl", d: "Bear crawl a lap. Knees never touch the ground.", timer: 45, who: "one", type: "physical" },
+  /* ---------- more quirky physical ---------- */
   { t: "The Broom Balance", d: "Stand a broom upright on your open palm and keep it there until the buzzer. Walking is allowed. Panicking is expected.", timer: 30, who: "one", type: "physical" },
   { t: "Dizzy Line", d: "Spin in place ten times, then walk a straight line across the room. Nobody has ever looked good doing this.", timer: 45, who: "one", type: "physical" },
-  { t: "One Foot Round Trip", d: "Hop across the room and back on one foot. Second foot touches down, you're done.", timer: 45, who: "one", type: "physical" },
+  { t: "One Foot Hop", d: "Hop across the room and back on one foot. Second foot touches down, you're done.", timer: 45, who: "one", type: "physical" },
   { t: "Farmer Carry", d: "Pick up the two heaviest things you can safely hold and carry them a full lap without setting them down.", timer: 45, who: "one", type: "physical" },
   { t: "Library Posture", d: "Stack at least three books on your head and walk a lap. They all have to survive.", timer: 45, who: "one", type: "physical" },
   { t: "Juggle Something", d: "Juggle any three objects for fifteen straight seconds. Fruit, socks, remotes, whatever's close.", timer: 20, who: "one", type: "physical" },
   { t: "Weighted Plank", d: "Plank with a full cup of water balanced on your back. Spill it and it's over.", timer: 30, who: "one", type: "physical" },
   { t: "Wheelbarrow Lap", d: "One teammate on their hands, the other holding their ankles. One lap. Nobody eats carpet.", timer: 45, who: "team", type: "physical" },
-  { t: "Dead Hang", d: "Find a pull-up bar or a solid door frame and hang until the buzzer. Feet off the ground.", timer: 30, who: "one", type: "physical" },
+  { t: "Crab Walk", d: "Crab walk a lap of the room. Belly up the whole way. This is the only animal walk we kept, because it looks ridiculous.", timer: 45, who: "one", type: "physical" },
 
   /* ---------- physical, with an audience problem ---------- */
   { t: "Plank and Publish", d: "Hold a plank while the person on your left reads your three most recent text messages out loud. Break the plank early and you forfeit.", timer: 45, who: "one", type: "physical", spice: "party" },
@@ -1574,7 +1588,7 @@ const DUELS = [
   { t: "Call It", d: "Coin flip, called in the air. Best of three." },
   { t: "Split The Difference", d: "The host writes down a number between 1 and 100. Both duelists write a guess down, then reveal together. Closest wins." },
   { t: "Sudden Death", d: "The host reads one trivia question. First correct answer wins it." },
-  { t: "Scavenger Sprint", d: "Both go find something red, then something metal, then something older than you are. First one back wins.", timer: 60 },
+  { t: "House Hunt", d: "Both find something red, something metal, and something older than you are. Walking only. First one back with all three wins.", timer: 90 },
   { t: "Weather Check", d: "Both unlock your phone and open the weather app. First to read the current temperature out loud wins." },
   { t: "Battery Roulette", d: "Both hold up your phone. Lower battery percentage wins. Pure fate." },
   { t: "Middle Names", d: "Alternate naming middle names of people in this room. First to stall loses." },
@@ -2658,7 +2672,11 @@ function whoLabel(who, team) {
 function runChallenge(ctx, filterType) {
   const { val, team, done } = ctx;
   const types = filterType ? [].concat(filterType) : null;
-  const ch = drawFrom(CHALLENGES, 'challenge', types ? (c => types.indexOf(c.type) !== -1) : null);
+  const mixed = types && types.length > 1 && types.indexOf('physical') !== -1;
+  // On a normal board, quirky physical should show up more often than poems.
+  const ch = (mixed && Math.random() < 0.6)
+    ? drawFrom(CHALLENGES, 'challenge', c => c.type === 'physical')
+    : drawFrom(CHALLENGES, 'challenge', types ? (c => types.indexOf(c.type) !== -1) : null);
   const room = ch.who === 'room';
   const footer = room ? `
     <div class="who-line" style="margin-top:16px;">Who won? That team banks ${val}.</div>
