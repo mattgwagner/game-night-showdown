@@ -19,14 +19,33 @@ python3 -m http.server 8934
 
 ## How it plays
 
-**Setup** — add 2–10 teams or solo players, then pick a spice level:
+**Setup** — add 2–10 teams or solo players, then set two independent switches.
+
+Spice level:
 
 - ☀️ **Family Friendly** — kids in the room, grandma on the couch.
 - 🌙 **After Dark** — unlocks the dares that involve your camera roll and your text history.
 
-The setting filters every deck in the game, so the same app works at 4pm and at 11pm.
+And drinking games, on their own toggle — deliberately *not* folded into After Dark,
+because an adult room often has somebody sober, pregnant or driving, and they shouldn't
+have to give up the spicy deck to spare them. Every drinking card is a sip, never a shot
+or a chug, and each one shows a push-up alternative so a non-drinker plays the same square.
 
-**Pick a board** — fourteen full boards, 8 categories × 5 values each. Thirteen are
+Both switches filter every deck in the game, so the same app works at 4pm and at 11pm.
+
+**Pick a board size** — Quick (4 categories, ~20 min), Standard (6, ~35 min) or
+Marathon (8, ~50 min). Categories are drawn fresh from the round every time, so playing
+the same round twice never gives you the same board.
+
+**Or skip the board entirely** — three formats that aren't Jeopardy at all:
+
+| | |
+|---|---|
+| ⚡ **Lightning Round** | 60 seconds per team, rapid fire, 100 a pop. Passing costs only clock. |
+| 🎯 **Last Team Standing** | One question each around the room. Miss and you're out. Survive alone, take 1000. |
+| 🥔 **Hot Potato** | One category, teams alternate naming things. Stall or repeat and you're eliminated. |
+
+**Pick a board** — fourteen boards of 8 categories each. Thirteen are
 trivia, spanning 104 categories: beer, firearms, Disney, AI, college football, grilling,
 boats, Labor Day, NBA, golf, soccer, the Olympics, Star Wars, horror, dinosaurs, sharks,
 bourbon, presidents, Field Artillery, and a lot more. One board is nothing but formats
@@ -47,9 +66,8 @@ the board all night. Anyone can still shout out the answer.
 | 🔥 Challenge Accepted | Put the phone down. You're doing something. |
 | ⚔️ Duel | Pick an opponent. Only one of you walks away with points. |
 | 🗳️ The People's Court | The room votes. The majority gets paid. |
-| 🪑 Hot Seat | A question about you — guess how the room answers it. |
 | 🏹 Robin Hood | Take points straight off the leader. |
-| 🔄 Swap Meet | Trade scores with any team. Choose cruelly. |
+| 🍺 House Rules | A drinking game, when that toggle is on. |
 | 💸 Everybody Pays | You're exempt. Everyone else isn't. |
 | 🛡️ Insurance Policy | A shield that eats your next loss. |
 | 🍀 Lucky Break · 🍻 Bar Tab · 📣 Crowd Save · 🎲 Double Down | Point swings and free-for-alls. |
@@ -85,9 +103,10 @@ Adding a category is just adding an entry to `categories` and a matching block i
 question automatically becomes a wildcard, and a Daily Double that lands on one slides
 to the richest real question in its category. Give a category four questions and the
 fifth square becomes the surprise on its own.
-- `CHALLENGES` — tasks, tagged `physical` / `performance` / `speed` / `social` / `room`
-- `GROUP_VOTES`, `HOT_SEAT`, `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`
+- `CHALLENGES` — 118 tasks, tagged `physical` / `performance` / `speed` / `social` / `room` / `drink`
+- `GROUP_VOTES`, `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`, `LIST_PROMPTS`
 - `WILDCARD_EVENTS` — each carries a `weight` that biases the draw
 
-Add `spice: "party"` to any item to hide it in Family Friendly mode. Decks draw without
+Add `spice: "party"` to hide an item in Family Friendly mode, or `drinks: true` to put
+it behind the drinking toggle. Decks draw without
 repeats until exhausted, so you won't get the same dare twice in a night.

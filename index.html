@@ -277,6 +277,17 @@
     box-shadow: 0 0 12px rgba(245,197,24,.35);
   }
   .drinks-opt { text-align: center; }
+  .size-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .size-row .spice-opt { flex: 1; }
+  .mode-btn { text-align: left; padding: 14px 16px; }
+  .lightning-count {
+    color: var(--gold); font-weight: 900; letter-spacing: 1px;
+    margin: 6px 0 10px; font-size: .95rem;
+  }
+  .potato-cat {
+    font-size: clamp(1.4rem, 4vw, 2.1rem); font-weight: 900; color: var(--gold);
+    margin: 10px 0; letter-spacing: 1px;
+  }
   .sober-note {
     margin: 12px auto 0; max-width: 560px; padding: 8px 12px;
     border-left: 3px solid var(--green); background: rgba(46,204,113,.09);
@@ -1674,6 +1685,10 @@ function freshState() {
     lastCorrectTeamId: null,
     spice: "family",    // family | party
     drinks: false,      // drinking games are their own opt-in, separate from spice
+    boardSize: 6,       // how many of a round's categories actually go on the board
+    activeCategories: null, // this game's slice of them
+    dd: null,           // this game's Daily Double square
+    modeState: null,    // non-Jeopardy game in progress
     drawn: {},          // deckName -> indices already used this game
     history: [],        // undo snapshots
     finalDone: false,
@@ -1724,8 +1739,41 @@ function currentRound() {
   return ROUNDS[state.roundIndex];
 }
 
+// A round carries 8 categories but only `boardSize` of them go up. Picking a
+// fresh slice each time keeps games short AND means the same round plays
+// differently every night.
+function activeCats() {
+  const r = currentRound();
+  if (!r) return [];
+  if (!state.activeCategories || !state.activeCategories.length) return r.categories;
+  return state.activeCategories.filter(c => r.categories.indexOf(c) !== -1);
+}
+
+function startRound(roundIndex) {
+  state.roundIndex = roundIndex;
+  const r = ROUNDS[roundIndex];
+  const n = Math.min(state.boardSize || 6, r.categories.length);
+  state.activeCategories = shuffle(r.categories).slice(0, n);
+  state.used = {};
+  state.readerIndex = 0;
+  state.lastCorrectTeamId = null;
+  state.history = [];
+  state.finalDone = false;
+  state.modeState = null;
+  // Daily Double has to land on a real question that's actually on this board.
+  state.dd = null;
+  if (r.type !== 'gauntlet') {
+    const opts = [];
+    state.activeCategories.forEach(c => VALUES.forEach(v => {
+      if (r.questions[c] && r.questions[c][v] !== undefined) opts.push({ category: c, value: v });
+    }));
+    if (opts.length) state.dd = opts[Math.floor(Math.random() * opts.length)];
+  }
+  state.screen = 'board';
+}
+
 function totalCellsForRound() {
-  return currentRound().categories.length * VALUES.length;
+  return activeCats().length * VALUES.length;
 }
 
 function currentReader() {
@@ -1779,12 +1827,13 @@ function render() {
   if (state.screen === 'setup') renderSetup();
   else if (state.screen === 'roundselect') renderRoundSelect();
   else if (state.screen === 'board') renderBoard();
+  else if (state.screen === 'mode') renderMode();
   else if (state.screen === 'winner') renderWinner();
   saveGame();
 }
 
 function renderScoreboard() {
-  if (state.screen === 'setup' || state.screen === 'roundselect' || state.teams.length === 0) {
+  if (state.screen === 'setup' || state.teams.length === 0) {
     $scoreboard.style.display = 'none';
     return;
   }
@@ -1918,17 +1967,36 @@ function renderRoundSelect() {
   $main.innerHTML = `
     <h1 class="title">🏆 Game Night Showdown 🏆</h1>
     <div class="subtitle">Pick tonight's board — ${state.spice === 'party' ? '🌙 After Dark' : '☀️ Family Friendly'}${state.drinks ? ' · 🍺 Drinking games on' : ''}</div>
-    <div class="panel" style="max-width:680px;">
-      <h2>Choose a Round</h2>
+    <div class="panel" style="max-width:700px;">
+      <h2>Board Size</h2>
+      <div class="size-row">
+        ${[[4,'Quick','~20 min'],[6,'Standard','~35 min'],[8,'Marathon','~50 min']].map(([n,label,time]) => `
+          <button class="spice-opt ${ (state.boardSize||6) === n ? 'on' : ''}" data-size="${n}">
+            <span class="st-name">${label}</span>
+            <span class="st-desc">${n} categories · ${time}</span>
+          </button>`).join('')}
+      </div>
+      <div class="hint">Categories are drawn fresh from the round every time, so the same board never repeats.</div>
+
+      <h2 style="margin-top:24px;">Not Feeling a Board?</h2>
+      <div id="modeList" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <h2 style="margin-top:24px;">Choose a Round</h2>
       <div id="roundList" style="display:flex;flex-direction:column;gap:12px;"></div>
       <div class="hint" style="margin-top:14px;">
-        Every board hides eight unmarked wildcard squares — challenges, duels, dares and public votes.
+        Every board hides unmarked wildcard squares — challenges, duels, dares and public votes.
         Clear the board and it ends in a Final Showdown.
       </div>
       <button class="btn-secondary btn-full" id="backSetupBtn" style="margin-top:14px;">← Back to Players</button>
     </div>
     ${weekendStandingsHtml()}
   `;
+  document.getElementById('modeList').innerHTML = MODES.map(m => `
+    <button class="btn-secondary mode-btn" data-mode="${m.key}">
+      <div style="font-size:1.05rem;font-weight:900;color:var(--gold);">${m.icon} ${escapeHtml(m.name)}</div>
+      <div style="opacity:.75;font-size:.88rem;margin-top:4px;">${escapeHtml(m.tagline)}</div>
+    </button>`).join('');
+
   const $list = document.getElementById('roundList');
   $list.innerHTML = ROUNDS.map((r, i) => `
     <button class="btn-secondary" data-round="${i}" style="text-align:left;padding:16px 18px;">
@@ -1939,15 +2007,13 @@ function renderRoundSelect() {
     </button>
   `).join('');
   $list.querySelectorAll('[data-round]').forEach(btn => {
-    btn.onclick = () => {
-      state.roundIndex = parseInt(btn.dataset.round, 10);
-      state.used = {};
-      state.readerIndex = 0;
-      state.history = [];
-      state.finalDone = false;
-      state.screen = 'board';
-      render();
-    };
+    btn.onclick = () => { startRound(parseInt(btn.dataset.round, 10)); render(); };
+  });
+  document.querySelectorAll('[data-size]').forEach(btn => {
+    btn.onclick = () => { state.boardSize = parseInt(btn.dataset.size, 10); render(); };
+  });
+  document.querySelectorAll('[data-mode]').forEach(btn => {
+    btn.onclick = () => startMode(btn.dataset.mode);
   });
   document.getElementById('backSetupBtn').onclick = () => { state.screen = 'setup'; render(); };
 }
@@ -1966,9 +2032,10 @@ function renderBoard() {
     return;
   }
 
-  const cats = round.categories.map(c => `<div class="cat-header">${escapeHtml(c)}</div>`).join('');
+  const cols = activeCats();
+  const cats = cols.map(c => `<div class="cat-header">${escapeHtml(c)}</div>`).join('');
   const rows = VALUES.map(v => {
-    return round.categories.map(cat => {
+    return cols.map(cat => {
       const key = cat + '|' + v;
       const isUsed = !!state.used[key];
       const label = isUsed ? '' : v;
@@ -1982,7 +2049,7 @@ function renderBoard() {
   $main.innerHTML = `
     <h1 class="title" style="margin-top:4px;">🏆 ${escapeHtml(round.name)} 🏆</h1>
     ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong>'s turn to pick &amp; read — anyone can still answer!</div>` : ''}
-    <div id="board">${cats}${rows}</div>
+    <div id="board" style="grid-template-columns:repeat(${cols.length}, minmax(0, 1fr));">${cats}${rows}</div>
     <div class="host-bar">
       <button class="btn-primary" id="sideQuestBtn">🎯 Side Quest</button>
       <button class="btn-secondary" id="randomBtn">🎲 Random Square</button>
@@ -2007,7 +2074,7 @@ function renderBoard() {
   };
   document.getElementById('randomBtn').onclick = () => {
     const open = [];
-    round.categories.forEach(cat => VALUES.forEach(v => {
+    activeCats().forEach(cat => VALUES.forEach(v => {
       if (!state.used[cat + '|' + v]) open.push([cat, v]);
     }));
     if (open.length === 0) return;
@@ -2017,12 +2084,8 @@ function renderBoard() {
 
   document.getElementById('resetBtn').onclick = () => {
     if (confirm('Reset this round? Scores and revealed squares will be cleared.')) {
-      state.used = {};
-      state.readerIndex = 0;
-      state.lastCorrectTeamId = null;
-      state.history = [];
-      state.finalDone = false;
       state.teams.forEach(resetTeamStats);
+      startRound(state.roundIndex);
       render();
     }
   };
@@ -2055,7 +2118,7 @@ function openSquare(cat, val) {
     return;
   }
 
-  const dd = round.dailyDouble;
+  const dd = state.dd;
   if (dd && dd.category === cat && dd.value === val) { openDailyDouble(cat, val); return; }
   if (isWildSquare(round, cat, val)) openWildcard(cat, val);
   else openQuestion(cat, val);
@@ -2315,13 +2378,8 @@ function renderWinner() {
     document.getElementById('weekendSlot').innerHTML = weekendStandingsHtml();
   };
   document.getElementById('playAgainBtn').onclick = () => {
-    state.used = {};
-    state.readerIndex = 0;
-    state.lastCorrectTeamId = null;
-    state.history = [];
-    state.finalDone = false;
     state.teams.forEach(resetTeamStats);
-    state.screen = 'board';
+    startRound(state.roundIndex);   // reshuffles which categories come up
     render();
   };
   document.getElementById('newRoundBtn').onclick = () => {
@@ -2967,6 +3025,308 @@ function randomTeamName() {
   const l = NAME_LEFT[Math.floor(Math.random() * NAME_LEFT.length)];
   const r = NAME_RIGHT[Math.floor(Math.random() * NAME_RIGHT.length)];
   return `${l} ${r}`;
+}
+
+/* ============================================================
+   LIST PROMPTS — fuel for Hot Potato
+============================================================ */
+const LIST_PROMPTS = [
+  "NFL teams", "U.S. states", "Pizza toppings", "Disney movies", "Beer brands",
+  "Things in a kitchen drawer", "Marvel characters", "Breakfast cereals",
+  "Things you take to the beach", "Car brands", "Ice cream flavors",
+  "Things in this room", "Fast food chains", "Colors", "Farm animals",
+  "Board games", "Things that are cold", "Countries in Europe", "Types of fish",
+  "Candy bars", "Things with wheels", "Sports played with a ball",
+  "Things in a toolbox", "Musical instruments", "Things you grill",
+  "Movie franchises with sequels", "Things at a campsite", "Dog breeds",
+  "Things in a first aid kit", "Cocktails", "Things that fly", "Card games",
+  "Things you'd pack for a weekend", "Cereal mascots", "Things in a garage"
+];
+
+/* ============================================================
+   GAME MODES — the non-Jeopardy formats
+   Each one keeps everything it needs in state.modeState so it
+   survives a refresh, and each render is a pure function of that.
+============================================================ */
+const MODES = [
+  {
+    key: "lightning",
+    name: "Lightning Round",
+    tagline: "Sixty seconds per team. Rapid fire. Pass costs you nothing but the clock.",
+    icon: "⚡"
+  },
+  {
+    key: "standing",
+    name: "Last Team Standing",
+    tagline: "One question each, around the room. Miss it and you're out. Survive alone and take 1000.",
+    icon: "🎯"
+  },
+  {
+    key: "potato",
+    name: "Hot Potato",
+    tagline: "One category, teams alternate naming things. Stall or repeat and you're eliminated.",
+    icon: "🥔"
+  }
+];
+
+let modeTimer = null;
+function stopModeTimer() {
+  if (modeTimer) { clearInterval(modeTimer); modeTimer = null; }
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function aliveTeams() {
+  const ms = state.modeState;
+  return ms.alive.map(id => state.teams.find(t => t.id === id)).filter(Boolean);
+}
+
+function startMode(key) {
+  stopModeTimer();
+  const ids = state.teams.map(t => t.id);
+  if (key === 'lightning') {
+    state.modeState = { kind: 'lightning', order: ids, idx: 0, phase: 'ready', correct: {}, q: null, deadline: 0 };
+  } else if (key === 'standing') {
+    state.modeState = { kind: 'standing', alive: [...ids], idx: 0, phase: 'question', q: null, out: [] };
+    state.modeState.q = drawFrom(BONUS_QUESTIONS, 'bonus');
+  } else if (key === 'potato') {
+    state.modeState = { kind: 'potato', alive: [...ids], idx: 0, prompt: LIST_PROMPTS[Math.floor(Math.random() * LIST_PROMPTS.length)], said: 0 };
+  }
+  state.screen = 'mode';
+  render();
+}
+
+function exitMode() {
+  stopModeTimer();
+  state.modeState = null;
+  state.screen = 'roundselect';
+  render();
+}
+
+function renderMode() {
+  stopModeTimer();
+  const ms = state.modeState;
+  if (!ms) { exitMode(); return; }
+  if (ms.kind === 'lightning') return renderLightning();
+  if (ms.kind === 'standing') return renderStanding();
+  if (ms.kind === 'potato') return renderPotato();
+  exitMode();
+}
+
+/* ---------- Lightning Round ---------- */
+function renderLightning() {
+  const ms = state.modeState;
+
+  if (ms.phase === 'done') {
+    const rows = ms.order.map(id => ({ t: state.teams.find(x => x.id === id), n: ms.correct[id] || 0 }))
+      .filter(r => r.t).sort((a, b) => b.n - a.n);
+    $main.innerHTML = `
+      <h1 class="title">⚡ Lightning Round ⚡</h1>
+      <div class="panel" style="text-align:center;">
+        <h2>Final Tally</h2>
+        ${rows.map((r, i) => `
+          <div class="team-entry" style="margin-bottom:6px;">
+            <span>${i === 0 ? '🏆 ' : ''}${escapeHtml(r.t.name)}</span>
+            <span style="font-weight:900;color:var(--gold);">${r.n} correct · +${r.n * 100}</span>
+          </div>`).join('')}
+        <button class="btn-primary btn-full" id="lDone" style="margin-top:16px;">Back to the Board</button>
+      </div>`;
+    document.getElementById('lDone').onclick = exitMode;
+    return;
+  }
+
+  const team = state.teams.find(t => t.id === ms.order[ms.idx]);
+  if (!team) { ms.phase = 'done'; render(); return; }
+
+  if (ms.phase === 'ready') {
+    $main.innerHTML = `
+      <h1 class="title">⚡ Lightning Round ⚡</h1>
+      <div class="panel" style="text-align:center;">
+        <div class="who-line">Team ${ms.idx + 1} of ${ms.order.length}</div>
+        <div class="winner-name">${escapeHtml(team.name)}</div>
+        <div class="who-line">
+          Sixty seconds. The host reads, you shout. Every correct answer is 100 points.
+          Pass as often as you like — the only thing you lose is clock.
+        </div>
+        <button class="btn-primary btn-full" id="lGo">Start the Clock</button>
+        <button class="btn-secondary btn-full" id="lQuit">Quit Lightning Round</button>
+      </div>`;
+    document.getElementById('lGo').onclick = () => {
+      ms.phase = 'playing';
+      ms.deadline = Date.now() + 60000;
+      ms.q = drawFrom(BONUS_QUESTIONS, 'bonus');
+      render();
+    };
+    document.getElementById('lQuit').onclick = exitMode;
+    return;
+  }
+
+  // playing
+  const left = Math.max(0, Math.ceil((ms.deadline - Date.now()) / 1000));
+  $main.innerHTML = `
+    <h1 class="title" style="margin-bottom:0;">⚡ ${escapeHtml(team.name)} ⚡</h1>
+    <div class="panel" style="text-align:center;">
+      <div class="timer-num" id="lNum">${left}</div>
+      <div class="timer-track"><div class="timer-fill" id="lFill" style="width:${left / 60 * 100}%"></div></div>
+      <div class="lightning-count">${ms.correct[team.id] || 0} correct</div>
+      <div class="qtext">${escapeHtml(ms.q.q)}</div>
+      <div class="atext" style="opacity:.55;font-size:1rem;">${escapeHtml(ms.q.a)}</div>
+      <div class="row-gap judge-row">
+        <button class="btn-primary" id="lYes">✓ Got It</button>
+        <button class="btn-secondary" id="lNo">Pass</button>
+      </div>
+    </div>`;
+
+  const next = (scored) => {
+    if (scored) {
+      ms.correct[team.id] = (ms.correct[team.id] || 0) + 1;
+      playCorrect();
+    }
+    ms.q = drawFrom(BONUS_QUESTIONS, 'bonus');
+    render();
+  };
+  document.getElementById('lYes').onclick = () => next(true);
+  document.getElementById('lNo').onclick = () => next(false);
+
+  modeTimer = setInterval(() => {
+    const rem = Math.max(0, Math.ceil((ms.deadline - Date.now()) / 1000));
+    const $n = document.getElementById('lNum'), $f = document.getElementById('lFill');
+    if ($n) { $n.textContent = rem; if (rem <= 5) $n.classList.add('urgent'); }
+    if ($f) $f.style.width = (rem / 60 * 100) + '%';
+    if (rem <= 5 && rem > 0) playTick();
+    if (rem <= 0) {
+      stopModeTimer();
+      playBuzzer();
+      const got = ms.correct[team.id] || 0;
+      if (got > 0) scoreEvent(team, got * 100, { isAnswer: true });
+      ms.idx++;
+      ms.phase = ms.idx >= ms.order.length ? 'done' : 'ready';
+      render();
+    }
+  }, 250);
+}
+
+/* ---------- Last Team Standing ---------- */
+function renderStanding() {
+  const ms = state.modeState;
+  const alive = aliveTeams();
+
+  if (alive.length <= 1) {
+    const winner = alive[0];
+    if (winner && !ms.paid) { scoreEvent(winner, 1000, { isAnswer: true }); ms.paid = true; playFanfare(); }
+    $main.innerHTML = `
+      <h1 class="title">🎯 Last Team Standing 🎯</h1>
+      <div class="panel" style="text-align:center;">
+        <div class="medal">🏆</div>
+        <div class="winner-name">${winner ? escapeHtml(winner.name) : 'Nobody'}</div>
+        <div class="who-line">${winner ? 'Survived the whole room. +1000.' : 'Everybody went out. Nobody gets paid.'}</div>
+        <button class="btn-primary btn-full" id="sDone">Back to the Board</button>
+      </div>`;
+    document.getElementById('sDone').onclick = exitMode;
+    return;
+  }
+
+  if (ms.idx >= ms.alive.length) ms.idx = 0;
+  const team = state.teams.find(t => t.id === ms.alive[ms.idx]);
+
+  $main.innerHTML = `
+    <h1 class="title">🎯 Last Team Standing 🎯</h1>
+    <div class="panel" style="text-align:center;">
+      <div class="who-line">${alive.length} team${alive.length === 1 ? '' : 's'} still alive${ms.out.length ? ' · out: ' + ms.out.map(escapeHtml).join(', ') : ''}</div>
+      <div class="winner-name" style="font-size:1.6rem;">${escapeHtml(team.name)}</div>
+      <div class="qtext">${escapeHtml(ms.q.q)}</div>
+      ${ms.phase === 'reveal' ? `
+        <div class="atext">${escapeHtml(ms.q.a)}</div>
+        <div class="row-gap judge-row">
+          <button class="btn-primary" id="sRight">Survived</button>
+          <button class="btn-secondary" id="sWrong">Eliminated</button>
+        </div>` : `
+        <button class="btn-primary btn-full" id="sReveal">Reveal Answer</button>`}
+      <button class="btn-secondary btn-full" id="sQuit" style="margin-top:10px;">Quit This Mode</button>
+    </div>`;
+
+  document.getElementById('sQuit').onclick = exitMode;
+  if (ms.phase === 'reveal') {
+    document.getElementById('sRight').onclick = () => {
+      playCorrect();
+      ms.idx++;
+      ms.phase = 'question';
+      ms.q = drawFrom(BONUS_QUESTIONS, 'bonus');
+      render();
+    };
+    document.getElementById('sWrong').onclick = () => {
+      playWrong();
+      ms.out.push(team.name);
+      ms.alive = ms.alive.filter(id => id !== team.id);
+      if (ms.idx >= ms.alive.length) ms.idx = 0;
+      ms.phase = 'question';
+      ms.q = drawFrom(BONUS_QUESTIONS, 'bonus');
+      render();
+    };
+  } else {
+    document.getElementById('sReveal').onclick = () => { ms.phase = 'reveal'; render(); };
+  }
+}
+
+/* ---------- Hot Potato ---------- */
+function renderPotato() {
+  const ms = state.modeState;
+  const alive = aliveTeams();
+
+  if (alive.length <= 1) {
+    const winner = alive[0];
+    if (winner && !ms.paid) { scoreEvent(winner, 1000, { isAnswer: true }); ms.paid = true; playFanfare(); }
+    $main.innerHTML = `
+      <h1 class="title">🥔 Hot Potato 🥔</h1>
+      <div class="panel" style="text-align:center;">
+        <div class="medal">🏆</div>
+        <div class="winner-name">${winner ? escapeHtml(winner.name) : 'Nobody'}</div>
+        <div class="who-line">${ms.said} answers deep on <strong>${escapeHtml(ms.prompt)}</strong>${winner ? ' — and they were the last one standing. +1000.' : '.'}</div>
+        <button class="btn-primary btn-full" id="pAgain">Another Category</button>
+        <button class="btn-secondary btn-full" id="pDone">Back to the Board</button>
+      </div>`;
+    document.getElementById('pAgain').onclick = () => startMode('potato');
+    document.getElementById('pDone').onclick = exitMode;
+    return;
+  }
+
+  if (ms.idx >= ms.alive.length) ms.idx = 0;
+  const team = state.teams.find(t => t.id === ms.alive[ms.idx]);
+
+  $main.innerHTML = `
+    <h1 class="title">🥔 Hot Potato 🥔</h1>
+    <div class="panel" style="text-align:center;">
+      <div class="who-line">Name something in this category. No repeats. Five seconds of silence and you're out.</div>
+      <div class="potato-cat">${escapeHtml(ms.prompt)}</div>
+      <div class="who-line">${ms.said} named so far · ${alive.length} teams alive</div>
+      <div class="winner-name" style="font-size:1.7rem;">${escapeHtml(team.name)}</div>
+      <div class="row-gap judge-row">
+        <button class="btn-primary" id="pGot">✓ Named One</button>
+        <button class="btn-secondary" id="pOut">Stalled — Out</button>
+      </div>
+      <button class="btn-secondary btn-full" id="pQuit" style="margin-top:10px;">Quit This Mode</button>
+    </div>`;
+
+  document.getElementById('pGot').onclick = () => {
+    ms.said++;
+    ms.idx++;
+    playCorrect();
+    render();
+  };
+  document.getElementById('pOut').onclick = () => {
+    playWrong();
+    ms.alive = ms.alive.filter(id => id !== team.id);
+    if (ms.idx >= ms.alive.length) ms.idx = 0;
+    render();
+  };
+  document.getElementById('pQuit').onclick = exitMode;
 }
 
 /* ============================================================
