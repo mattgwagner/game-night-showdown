@@ -29,7 +29,10 @@ Spice level:
 And drinking games, on their own toggle — deliberately *not* folded into After Dark,
 because an adult room often has somebody sober, pregnant or driving, and they shouldn't
 have to give up the spicy deck to spare them. Every drinking card is a sip, never a shot
-or a chug, and each one shows a push-up alternative so a non-drinker plays the same square.
+or a chug, and every one offers **the forfeit** instead — a random ten-second bit drawn from
+35 of them (do the last person's impression, sing your next sentence, give a real compliment
+to the person on your left). Anybody can call for the forfeit, drinker or not, so taking one
+never marks you out — and it's usually funnier than the sip.
 
 Both switches filter every deck in the game, so the same app works at 4pm and at 11pm.
 
@@ -103,10 +106,12 @@ Adding a category is just adding an entry to `categories` and a matching block i
 question automatically becomes a wildcard, and a Daily Double that lands on one slides
 to the richest real question in its category. Give a category four questions and the
 fifth square becomes the surprise on its own.
-- `CHALLENGES` — 118 tasks, tagged `physical` / `performance` / `speed` / `social` / `room` / `drink`
-- `GROUP_VOTES`, `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`, `LIST_PROMPTS`
+- `CHALLENGES` — 138 tasks, tagged `physical` / `performance` / `speed` / `social` / `room` / `drink`
+- `GROUP_VOTES`, `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`, `LIST_PROMPTS`, `FORFEITS`
 - `WILDCARD_EVENTS` — each carries a `weight` that biases the draw
 
 Add `spice: "party"` to hide an item in Family Friendly mode, or `drinks: true` to put
-it behind the drinking toggle. Decks draw without
+it behind the drinking toggle. Set `who` to `"room"` for a challenge the whole party plays
+at once — 42 of the 138 are whole-room or whole-team, which are the ones that actually get
+people laughing. Decks draw without
 repeats until exhausted, so you won't get the same dare twice in a night.

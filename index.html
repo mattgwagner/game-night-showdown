@@ -288,11 +288,17 @@
     font-size: clamp(1.4rem, 4vw, 2.1rem); font-weight: 900; color: var(--gold);
     margin: 10px 0; letter-spacing: 1px;
   }
-  .sober-note {
-    margin: 12px auto 0; max-width: 560px; padding: 8px 12px;
-    border-left: 3px solid var(--green); background: rgba(46,204,113,.09);
-    border-radius: 0 8px 8px 0; font-size: .85rem; opacity: .9; text-align: left;
+  .forfeit-box {
+    margin: 14px auto 0; max-width: 580px; padding: 12px 14px;
+    border: 2px dashed var(--green); background: rgba(46,204,113,.08);
+    border-radius: 12px; text-align: center;
   }
+  .forfeit-label {
+    font-size: .78rem; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--green); font-weight: 900; margin-bottom: 6px;
+  }
+  .forfeit-text { font-size: 1rem; line-height: 1.45; }
+  .forfeit-reroll { margin-top: 10px; padding: 6px 14px; font-size: .82rem; }
   .resume-box {
     border: 2px solid var(--green); border-radius: 12px;
     padding: 14px; margin-bottom: 16px; background: rgba(46,204,113,.08);
@@ -1439,7 +1445,27 @@ const CHALLENGES = [
   { t: "Drink Roulette", d: "On the count of three, everybody points at the person they think is going to win this whole game. Anybody who gets pointed at more than once takes a sip.", timer: 0, who: "room", type: "drink", drinks: true },
   { t: "The Interview", d: "Thirty seconds of rapid-fire questions from the room. Every one gets an answer. Hesitate, dodge, or laugh and you take a sip.", timer: 30, who: "one", type: "drink", drinks: true },
   { t: "Red or Black", d: "Call red or black, then flip over the top card of a deck. Miss it and take a sip. Hit it and hand out two.", timer: 0, who: "one", type: "drink", drinks: true },
-  { t: "Waterfall of Words", d: "Picker starts a story with one sentence. It goes around the room, one sentence each. Anybody who breaks the story or goes silent takes a sip.", timer: 0, who: "room", type: "drink", drinks: true }
+  { t: "Waterfall of Words", d: "Picker starts a story with one sentence. It goes around the room, one sentence each. Anybody who breaks the story or goes silent takes a sip.", timer: 0, who: "room", type: "drink", drinks: true },
+  { t: "Everybody Freeze Frame", d: "EVERYBODY. The host names a scene — a bank robbery, a family photo, the moment the boat sinks. The whole room has ten seconds to freeze into it. Best pose scores for their team.", timer: 15, who: "room", type: "room" },
+  { t: "One Word Story", d: "EVERYBODY. Build a story around the room, one word per person, no pausing. It has to still be a sentence when it comes back around.", timer: 0, who: "room", type: "room" },
+  { t: "Simon Says", d: "EVERYBODY. One round of Simon Says, host leading, no mercy. Last person standing scores for their team.", timer: 0, who: "room", type: "room" },
+  { t: "The Compliment Circle", d: "EVERYBODY. Go around the room — each person gives the person on their left one genuine compliment. Ten seconds each. Anybody who phones it in gets sent around again.", timer: 0, who: "room", type: "room" },
+  { t: "Copycat", d: "EVERYBODY. The picking team starts a motion. Each person around the circle repeats every motion before it and adds one. First to break the chain ends it.", timer: 0, who: "room", type: "room" },
+  { t: "Air Band", d: "EVERYBODY. Host plays fifteen seconds of anything. Every person picks an instrument and commits. No two people on the same instrument.", timer: 20, who: "room", type: "room" },
+  { t: "Same Face", d: "EVERYBODY. Host names an emotion. On three, the whole room makes that face at each other. Funniest face takes it.", timer: 0, who: "room", type: "room" },
+  { t: "Desert Island", d: "EVERYBODY. Go around the room naming one thing you'd take to a desert island. No repeats, no hesitating. First person to stall is out.", timer: 0, who: "room", type: "room" },
+  { t: "Stand Up, Sit Down", d: "EVERYBODY on your feet. The host calls out things — 'sit down if you've never been on a cruise.' Last person standing scores.", timer: 0, who: "room", type: "room" },
+  { t: "The Wave", d: "EVERYBODY. Get a clean stadium wave all the way around the room three times without a single gap. Sounds easy. It is not.", timer: 45, who: "room", type: "room" },
+  { t: "Guess Who Wrote It", d: "EVERYBODY writes one word describing this group on their phone and hands it to the host. Host reads them out. The room guesses who wrote which.", timer: 60, who: "room", type: "room" },
+  { t: "Group Tongue Twister", d: "EVERYBODY, in unison, three times fast: 'red leather, yellow leather.' If the room falls apart, the room falls apart together.", timer: 25, who: "room", type: "room" },
+  { t: "Team Chant", d: "EVERY TEAM huddles up and invents a five-second chant. Perform them one at a time. Loudest room reaction wins it.", timer: 60, who: "room", type: "room" },
+  { t: "Pass the Face", d: "EVERYBODY. Picker makes a face at the person on their left, who copies it exactly and passes their own new one on. All the way around.", timer: 0, who: "room", type: "room" },
+  { t: "Count to Ten", d: "EVERYBODY. As a room, count to ten out loud — but nobody can plan who says which number, and if two people speak at once you start over.", timer: 60, who: "room", type: "room" },
+  { t: "Worst Haircut", d: "EVERYBODY. Go around the room, everyone describes their worst haircut era in one sentence. Room votes on the champion.", timer: 90, who: "room", type: "room" },
+  { t: "Category Chain", d: "EVERYBODY. Picker names a category. Go around the room, one item each, no repeats. First to stall sits down. Keep going until one is left.", timer: 0, who: "room", type: "room" },
+  { t: "Everybody Points", d: "EVERYBODY. The host reads a question about the room. On three, everybody points at their answer. Whoever gets the most fingers has to accept it.", timer: 0, who: "room", type: "room" },
+  { t: "Two Line Standoff", d: "EVERYBODY. Split into two lines facing each other. Staring contest with the person opposite. Winners step forward and pair up again until one is left.", timer: 0, who: "room", type: "room" },
+  { t: "Group Portrait", d: "EVERYBODY. The host names a theme — 'a band album cover,' 'a family in 1987.' The room has twenty seconds to arrange itself and hold it for a photo.", timer: 25, who: "room", type: "room" }
 ];
 
 const GROUP_VOTES = [
@@ -1520,6 +1546,55 @@ const FINAL_SHOWDOWN = [
   { cat: "Television", q: "Name the four main characters in Seinfeld's core cast.", a: "Jerry, George, Elaine, and Kramer" },
   { cat: "The Military", q: "Name all six branches of the United States Armed Forces.", a: "Army, Marine Corps, Navy, Air Force, Space Force, Coast Guard" }
 ];
+
+/* ============================================================
+   FORFEITS
+   The alternative to a sip. Anybody can call for the forfeit
+   instead of drinking — not just non-drinkers — so it never
+   marks somebody out. Ten seconds, funny, and doable from a
+   chair with nothing in your hands.
+============================================================ */
+const FORFEITS = [
+  { d: "Say your next three sentences in an accent the room picks for you." },
+  { d: "Give a genuine, specific compliment to the person on your left. Generic doesn't count." },
+  { d: "Do an impression of the last person who spoke. Right now, while it's fresh." },
+  { d: "Sing the next thing you were going to say." },
+  { d: "The person on your right gives you a nickname. You answer to it until your next turn." },
+  { d: "Tell the room one true thing about yourself that nobody here knows." },
+  { d: "Ten seconds of your best dance. You may remain seated. You may not stop early." },
+  { d: "Anyone in the room may ask you one question. You answer it honestly." },
+  { d: "Refer to yourself in the third person until your next turn." },
+  { d: "High-five every single person in this room. Make eye contact each time." },
+  { d: "Make the room laugh within ten seconds. Method is entirely up to you." },
+  { d: "Do an animal impression. The room has to guess which animal." },
+  { d: "Say the alphabet backwards from Z to T without stopping." },
+  { d: "Name five things you can see in this room in five seconds." },
+  { d: "Give a ten-second toast to whoever is currently losing." },
+  { d: "Swap seats with somebody. You don't get to negotiate." },
+  { d: "The room picks one common word. You can't say it until your next turn." },
+  { d: "Tell the worst joke you know. The groan is the point." },
+  { d: "Say something genuinely nice about the team that's beating you. Mean it." },
+  { d: "Best celebrity impression, ten seconds, no announcing who it is." },
+  { d: "Whisper everything you say until your next turn." },
+  { d: "Stand up and stretch. The entire room has to copy exactly what you do." },
+  { d: "Name three things you're actually grateful for. No jokes in this one." },
+  { d: "Give the room your most controversial food opinion and defend it for fifteen seconds." },
+  { d: "Recite a famous movie quote so badly that nobody can place it." },
+  { d: "Make deliberate eye contact with every person in the room, one at a time. Say nothing." },
+  { d: "Pick a new name for yourself for the rest of the round. It has to be worse than your real one." },
+  { d: "Do the last dance move you saw on your phone." },
+  { d: "Compliment somebody's outfit and then explain, in detail, exactly why it works." },
+  { d: "Narrate what the person across from you is doing, like a golf commentator, for ten seconds." },
+  { d: "Speak only in questions until somebody else takes a forfeit." },
+  { d: "Teach the room a completely useless fact you happen to know." },
+  { d: "Do your best impression of somebody famous ordering at a drive-thru." },
+  { d: "Let the room vote on one rule you have to follow until your next turn." },
+  { d: "Say the most sincere thing you can about the person to your right. Ten seconds." }
+];
+
+function drawForfeit() {
+  return drawFrom(FORFEITS, 'forfeit');
+}
 
 // ============================================================
 // WILDCARD EVENTS
@@ -1893,7 +1968,7 @@ function renderSetup() {
       <button class="spice-opt drinks-opt ${state.drinks ? 'on' : ''}" id="drinksBtn" style="width:100%;margin-bottom:14px;">
         <span class="st-name">${state.drinks ? '🍺 Drinking Games: ON' : '🥤 Drinking Games: OFF'}</span>
         <span class="st-desc">${state.drinks
-          ? 'Sips only, never shots. Non-drinkers get a push-up alternative on every card.'
+          ? 'Sips only, never shots. Every card offers a forfeit instead, so nobody has to drink to play.'
           : 'Switch on to add 22 drinking games. Independent of spice level.'}</span>
       </button>
 
@@ -2440,8 +2515,11 @@ function drawFrom(pool, deckName, filterFn) {
     candidates = pool.map((it, i) => ({ it, i })).filter(x => !filterFn || filterFn(x.it));
   }
   let fresh = candidates.filter(x => used.indexOf(x.i) === -1);
-  if (fresh.length === 0) { // deck exhausted, reshuffle
-    state.drawn[deckName] = [];
+  if (fresh.length === 0) {
+    // This subset is spent. Recycle ONLY its own indices — wiping the whole
+    // deck here would let every other type start repeating too.
+    const mine = candidates.map(x => x.i);
+    state.drawn[deckName] = used.filter(i => mine.indexOf(i) === -1);
     fresh = candidates;
   }
   const pick = fresh[Math.floor(Math.random() * fresh.length)];
@@ -2536,11 +2614,23 @@ function runChallenge(ctx, filterType) {
     <div class="tag wild">${ch.type === 'drink' ? '🍺' : '🔥'} ${escapeHtml(ch.t)}</div>
     <div class="who-line">${escapeHtml(whoLabel(ch.who, team))}</div>
     <div class="qtext task">${escapeHtml(ch.d)}</div>
-    ${ch.drinks ? '<div class="sober-note">Not drinking? Take the push-ups instead — five per sip. Nobody has to explain themselves.</div>' : ''}
+    ${ch.drinks ? `
+      <div class="forfeit-box">
+        <div class="forfeit-label">🎭 Or take the forfeit instead — anybody can call for it</div>
+        <div class="forfeit-text" id="forfeitText">${escapeHtml(drawForfeit().d)}</div>
+        <button class="btn-secondary forfeit-reroll" id="forfeitReroll">🎲 Different One</button>
+      </div>` : ''}
     ${ch.timer ? timerHtml(ch.timer) : ''}
     ${judgeHtml(val, 'They Did It', 'They Choked')}
   `;
   if (ch.timer) wireTimer(ch.timer);
+  const $reroll = document.getElementById('forfeitReroll');
+  if ($reroll) {
+    // Swap the text in place — a full re-render would restart the timer.
+    $reroll.onclick = () => {
+      document.getElementById('forfeitText').textContent = drawForfeit().d;
+    };
+  }
   wireJudge(team, val, done);
 }
 
