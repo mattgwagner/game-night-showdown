@@ -4,7 +4,7 @@ export interface Env {
   ROOM: DurableObjectNamespace<BuzzRoom>;
 }
 
-type Role = "host" | "player";
+type Role = "host" | "player" | "controller";
 
 type Attachment = {
   role: Role;
@@ -17,6 +17,15 @@ type Attachment = {
 type BuzzEntry = { id: string; name: string; teamId: number | null; teamName: string; at: number };
 type TeamInfo = { id: number; name: string; color?: string };
 
+type Prompt = {
+  cat: string;
+  val: number;
+  q: string;
+  a: string;
+  hint?: string;
+  revealed: boolean;
+};
+
 type ClientMsg =
   | { type: "hello"; role: Role; name?: string; teamId?: number | null; teamName?: string }
   | { type: "setTeams"; teams: TeamInfo[] }
@@ -24,7 +33,12 @@ type ClientMsg =
   | { type: "disarm" }
   | { type: "buzz" }
   | { type: "pop" }
-  | { type: "clear" };
+  | { type: "clear" }
+  | { type: "prompt"; cat: string; val: number; q: string; a: string; hint?: string }
+  | { type: "revealAnswer" }
+  | { type: "clearPrompt" }
+  | { type: "remoteAward"; teamId: number }
+  | { type: "remoteNobody" };
 
 type ServerMsg =
   | {
@@ -35,6 +49,7 @@ type ServerMsg =
       queue: BuzzEntry[];
       players: { id: string; name: string; teamName: string }[];
       teams: TeamInfo[];
+      prompt: Prompt | null;
     }
   | {
       type: "state";
@@ -42,7 +57,10 @@ type ServerMsg =
       queue: BuzzEntry[];
       players: { id: string; name: string; teamName: string }[];
       teams: TeamInfo[];
+      prompt: Prompt | null;
     }
+  | { type: "remoteAward"; teamId: number; val: number; cat: string }
+  | { type: "remoteNobody"; cat: string; val: number }
   | { type: "error"; message: string };
 
 const CORS = {
@@ -53,6 +71,10 @@ const CORS = {
 
 function codeOk(code: string) {
   return /^[A-Z0-9]{4}$/.test(code);
+}
+
+function isStaff(role: Role) {
+  return role === "host" || role === "controller";
 }
 
 export default {
@@ -74,7 +96,15 @@ export default {
         const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         code = Array.from({ length: 4 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
       }
-      return Response.json({ code, joinPath: `?join=${code}`, wsPath: `/ws?room=${code}` }, { headers: CORS });
+      return Response.json(
+        {
+          code,
+          joinPath: `?join=${code}`,
+          hostPath: `?host=${code}`,
+          wsPath: `/ws?room=${code}`,
+        },
+        { headers: CORS },
+      );
     }
 
     if (url.pathname === "/ws") {
@@ -94,6 +124,7 @@ export class BuzzRoom extends DurableObject<Env> {
   armed = false;
   queue: BuzzEntry[] = [];
   teams: TeamInfo[] = [];
+  prompt: Prompt | null = null;
   code = "";
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -103,6 +134,7 @@ export class BuzzRoom extends DurableObject<Env> {
       this.armed = (await this.ctx.storage.get<boolean>("armed")) || false;
       this.queue = (await this.ctx.storage.get<BuzzEntry[]>("queue")) || [];
       this.teams = (await this.ctx.storage.get<TeamInfo[]>("teams")) || [];
+      this.prompt = (await this.ctx.storage.get<Prompt | null>("prompt")) || null;
       this.code = (await this.ctx.storage.get<string>("code")) || "";
     });
   }
@@ -141,8 +173,13 @@ export class BuzzRoom extends DurableObject<Env> {
     const att = (ws.deserializeAttachment() || {}) as Attachment;
 
     if (msg.type === "hello") {
-      att.role = msg.role === "host" ? "host" : "player";
-      att.name = (msg.name || (att.role === "host" ? "Host" : "Player")).trim().slice(0, 24) || "Player";
+      const role: Role =
+        msg.role === "host" ? "host" : msg.role === "controller" ? "controller" : "player";
+      att.role = role;
+      att.name =
+        (msg.name || (role === "host" ? "Stage" : role === "controller" ? "Host" : "Player"))
+          .trim()
+          .slice(0, 24) || "Player";
       if (msg.teamId != null) att.teamId = msg.teamId;
       if (msg.teamName) att.teamName = String(msg.teamName).slice(0, 24);
       ws.serializeAttachment(att);
@@ -154,6 +191,7 @@ export class BuzzRoom extends DurableObject<Env> {
         queue: this.queue,
         players: this.playerList(),
         teams: this.teams,
+        prompt: this.promptFor(att.role),
       });
       this.broadcastState();
       return;
@@ -178,19 +216,20 @@ export class BuzzRoom extends DurableObject<Env> {
       return;
     }
 
-    if (att.role !== "host") {
+    if (!isStaff(att.role)) {
       this.send(ws, { type: "error", message: "host only" });
       return;
     }
 
-    if (msg.type === "setTeams") {
+    // Stage-only: arm / disarm / setTeams / prompt / clearPrompt
+    if (msg.type === "setTeams" && att.role === "host") {
       this.teams = Array.isArray(msg.teams) ? msg.teams.slice(0, 12) : [];
       await this.persist();
       this.broadcastState();
       return;
     }
 
-    if (msg.type === "arm") {
+    if (msg.type === "arm" && att.role === "host") {
       this.armed = true;
       this.queue = [];
       await this.persist();
@@ -198,13 +237,35 @@ export class BuzzRoom extends DurableObject<Env> {
       return;
     }
 
-    if (msg.type === "disarm") {
+    if (msg.type === "disarm" && att.role === "host") {
       this.armed = false;
       await this.persist();
       this.broadcastState();
       return;
     }
 
+    if (msg.type === "prompt" && att.role === "host") {
+      this.prompt = {
+        cat: String(msg.cat || "").slice(0, 80),
+        val: Number(msg.val) || 0,
+        q: String(msg.q || "").slice(0, 500),
+        a: String(msg.a || "").slice(0, 500),
+        hint: msg.hint ? String(msg.hint).slice(0, 200) : undefined,
+        revealed: false,
+      };
+      await this.persist();
+      this.broadcastState();
+      return;
+    }
+
+    if (msg.type === "clearPrompt" && att.role === "host") {
+      this.prompt = null;
+      await this.persist();
+      this.broadcastState();
+      return;
+    }
+
+    // Staff (stage or controller)
     if (msg.type === "pop") {
       this.queue.shift();
       await this.persist();
@@ -215,6 +276,42 @@ export class BuzzRoom extends DurableObject<Env> {
     if (msg.type === "clear") {
       this.queue = [];
       await this.persist();
+      this.broadcastState();
+      return;
+    }
+
+    if (msg.type === "revealAnswer") {
+      if (this.prompt) {
+        this.prompt = { ...this.prompt, revealed: true };
+        await this.persist();
+        this.broadcastState();
+      }
+      return;
+    }
+
+    if (msg.type === "remoteAward") {
+      if (!this.prompt) return;
+      const cat = this.prompt.cat;
+      const val = this.prompt.val;
+      const teamId = Number(msg.teamId);
+      this.armed = false;
+      this.queue = [];
+      this.prompt = null;
+      await this.persist();
+      this.broadcastAll({ type: "remoteAward", teamId, val, cat });
+      this.broadcastState();
+      return;
+    }
+
+    if (msg.type === "remoteNobody") {
+      if (!this.prompt) return;
+      const cat = this.prompt.cat;
+      const val = this.prompt.val;
+      this.armed = false;
+      this.queue = [];
+      this.prompt = null;
+      await this.persist();
+      this.broadcastAll({ type: "remoteNobody", cat, val });
       this.broadcastState();
     }
   }
@@ -236,6 +333,14 @@ export class BuzzRoom extends DurableObject<Env> {
     }
   }
 
+  /** Controllers get the answer; stage/players get it blank until revealed. */
+  private promptFor(role: Role): Prompt | null {
+    if (!this.prompt) return null;
+    if (role === "controller") return this.prompt;
+    if (this.prompt.revealed) return this.prompt;
+    return { ...this.prompt, a: "" };
+  }
+
   private playerList() {
     const out: { id: string; name: string; teamName: string }[] = [];
     for (const sock of this.ctx.getWebSockets()) {
@@ -246,7 +351,12 @@ export class BuzzRoom extends DurableObject<Env> {
   }
 
   private async persist() {
-    await this.ctx.storage.put({ armed: this.armed, queue: this.queue, teams: this.teams });
+    await this.ctx.storage.put({
+      armed: this.armed,
+      queue: this.queue,
+      teams: this.teams,
+      prompt: this.prompt,
+    });
   }
 
   private send(ws: WebSocket, msg: ServerMsg) {
@@ -257,21 +367,30 @@ export class BuzzRoom extends DurableObject<Env> {
     }
   }
 
-  private broadcastState() {
-    const payload: ServerMsg = {
-      type: "state",
-      armed: this.armed,
-      queue: this.queue,
-      players: this.playerList(),
-      teams: this.teams,
-    };
-    const raw = JSON.stringify(payload);
+  private broadcastAll(msg: ServerMsg) {
+    const raw = JSON.stringify(msg);
     for (const sock of this.ctx.getWebSockets()) {
       try {
         sock.send(raw);
       } catch {
         /* ignore */
       }
+    }
+  }
+
+  private broadcastState() {
+    for (const sock of this.ctx.getWebSockets()) {
+      const a = sock.deserializeAttachment() as Attachment | null;
+      const role = (a && a.role) || "player";
+      const payload: ServerMsg = {
+        type: "state",
+        armed: this.armed,
+        queue: this.queue,
+        players: this.playerList(),
+        teams: this.teams,
+        prompt: this.promptFor(role),
+      };
+      this.send(sock, payload);
     }
   }
 }

@@ -2643,7 +2643,10 @@ function closeOverlay() {
   if (ov) ov.remove();
   const fab = document.getElementById('hostFab');
   if (fab) fab.style.display = '';
-  if (buzz.connected && buzz.armed) buzzDisarm();
+  if (buzz.connected && (buzz.armed || buzz.prompt)) {
+    buzzDisarm();
+    buzzSend({ type: 'clearPrompt' });
+  }
   syncWakeLock();
 }
 
@@ -2683,9 +2686,17 @@ function openQuestion(cat, val) {
   const item = currentRound().questions[cat][val];
   const hint = CATEGORY_HINTS[cat] || item.hint;
   prepareOverlayChrome();
-  if (buzz.connected) {
+  const split = buzz.connected; // TV/stage hides answers until host phone reveals
+  if (split) {
     buzzQuestion = { cat, val };
     buzzArm();
+    buzzSend({
+      type: 'prompt',
+      cat, val,
+      q: item.q,
+      a: item.a,
+      hint: hint || '',
+    });
   }
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
@@ -2695,26 +2706,35 @@ function openQuestion(cat, val) {
       ${hint ? `<div class="who-line">${escapeHtml(hint)}</div>` : ''}
       <div class="qtext">${escapeHtml(item.q)}</div>
       <div id="buzzPanelHost"></div>
-      <button class="btn-primary" id="revealBtn">Reveal Answer</button>
       <div id="answerArea"></div>
+      ${split
+        ? `<button class="btn-secondary" id="revealBtn">Show Answer on TV</button>
+           <div class="hint" id="splitHint">Answer is on the host phone</div>`
+        : `<button class="btn-primary" id="revealBtn">Reveal Answer</button>`}
     </div>
   `;
   document.body.appendChild(overlay);
   renderHostBuzzPanel();
 
   const finishAward = (team) => {
-    if (buzz.connected) buzzDisarm();
+    if (buzz.connected) {
+      buzzDisarm();
+      buzzSend({ type: 'clearPrompt' });
+    }
     scoreEvent(team, val, { isAnswer: true });
     playCorrect();
     markUsedAndReturn(cat, val);
   };
   const finishNobody = () => {
-    if (buzz.connected) buzzDisarm();
+    if (buzz.connected) {
+      buzzDisarm();
+      buzzSend({ type: 'clearPrompt' });
+    }
     playWrong();
     markUsedAndReturn(cat, val);
   };
 
-  const showAward = (stealMode) => {
+  const showAward = (stealMode, answerText) => {
     const area = document.getElementById('answerArea');
     const lead = buzz.queue[0];
     let suggest = '';
@@ -2725,7 +2745,7 @@ function openQuestion(cat, val) {
         : '';
     }
     area.innerHTML = `
-      <div class="atext">${escapeHtml(item.a)}</div>
+      ${answerText ? `<div class="atext">${escapeHtml(answerText)}</div>` : ''}
       ${suggest}
       <div>${stealMode ? 'Steal — who got it?' : 'Who got it?'}</div>
       ${teamButtonsHtml('award')}
@@ -2748,13 +2768,22 @@ function openQuestion(cat, val) {
       };
     });
     const $steal = document.getElementById('stealBtn');
-    if ($steal) $steal.onclick = () => showAward(true);
+    if ($steal) $steal.onclick = () => showAward(true, answerText);
     document.getElementById('noneBtn').onclick = finishNobody;
   };
 
+  // Called when answer should appear on the TV (local reveal or remote)
+  window.__stageShowAnswer = (answerText) => {
+    const btn = document.getElementById('revealBtn');
+    if (btn) btn.remove();
+    const hintEl = document.getElementById('splitHint');
+    if (hintEl) hintEl.remove();
+    showAward(false, answerText || item.a);
+  };
+
   document.getElementById('revealBtn').onclick = () => {
-    document.getElementById('revealBtn').remove();
-    showAward(false);
+    if (split) buzzSend({ type: 'revealAnswer' });
+    window.__stageShowAnswer(item.a);
   };
 }
 
@@ -3953,8 +3982,10 @@ function renderPotato() {
 
 
 /* ============================================================
-   PHONE BUZZ-IN
-   Host enables a room; phones open ?join=CODE and tap Buzz.
+   PHONE BUZZ-IN + HOST COMPANION
+   Stage (iPad/TV): questions, no answers until revealed.
+   ?host=CODE: host phone sees answers + scores.
+   ?join=CODE: players buzz in.
 ============================================================ */
 const BUZZ_API = 'https://game-night-buzz.mattgwagner.workers.dev';
 const BUZZ_WS = BUZZ_API.replace(/^http/, 'ws') + '/ws';
@@ -3969,6 +4000,7 @@ const buzz = {
   queue: [],
   players: [],
   teams: [],
+  prompt: null,
   name: '',
   teamId: null,
   teamName: '',
@@ -3993,18 +4025,35 @@ function resolveBuzzTeam(entry) {
 }
 
 function buzzApplyState(msg) {
+  const prevRevealed = !!(buzz.prompt && buzz.prompt.revealed);
   buzz.armed = !!msg.armed;
   buzz.queue = msg.queue || [];
   buzz.players = msg.players || [];
   if (msg.teams) buzz.teams = msg.teams;
+  if (msg.prompt !== undefined) buzz.prompt = msg.prompt;
+
+  // Stage: remote reveal landed
+  if (buzz.role === 'host' && buzz.prompt && buzz.prompt.revealed && !prevRevealed) {
+    if (typeof window.__stageShowAnswer === 'function' && document.getElementById('overlay')) {
+      window.__stageShowAnswer(buzz.prompt.a);
+    }
+  }
+
   const panel = document.getElementById('buzzPanelHost');
   if (panel) renderHostBuzzPanel();
   const joinRoot = document.getElementById('buzzJoinRoot');
   if (joinRoot) renderBuzzJoinApp();
+  const hostRoot = document.getElementById('buzzHostRoot');
+  if (hostRoot) renderHostCompanionApp();
 }
 
 function connectBuzzSocket(code, role, opts = {}) {
   return new Promise((resolve, reject) => {
+    if (buzz.ws) {
+      try { buzz.ws.close(); } catch (e) {}
+      buzz.ws = null;
+      buzz.connected = false;
+    }
     const ws = new WebSocket(`${BUZZ_WS}?room=${encodeURIComponent(code)}`);
     buzz.ws = ws;
     buzz.code = code;
@@ -4012,10 +4061,11 @@ function connectBuzzSocket(code, role, opts = {}) {
     let opened = false;
     ws.onopen = () => {
       opened = true;
+      const defaultName = role === 'host' ? 'Stage' : role === 'controller' ? 'Host' : 'Player';
       buzzSend({
         type: 'hello',
         role,
-        name: opts.name || (role === 'host' ? 'Host' : 'Player'),
+        name: opts.name || defaultName,
         teamId: opts.teamId != null ? opts.teamId : null,
         teamName: opts.teamName || '',
       });
@@ -4036,6 +4086,16 @@ function connectBuzzSocket(code, role, opts = {}) {
         resolve(msg);
       } else if (msg.type === 'state') {
         buzzApplyState(msg);
+      } else if (msg.type === 'remoteAward' && buzz.role === 'host') {
+        const team = state.teams.find(t => t.id == msg.teamId);
+        if (team) {
+          scoreEvent(team, msg.val, { isAnswer: true });
+          playCorrect();
+          markUsedAndReturn(msg.cat, msg.val);
+        }
+      } else if (msg.type === 'remoteNobody' && buzz.role === 'host') {
+        playWrong();
+        markUsedAndReturn(msg.cat, msg.val);
       } else if (msg.type === 'error') {
         flashToast(msg.message || 'Buzz error');
       }
@@ -4047,6 +4107,8 @@ function connectBuzzSocket(code, role, opts = {}) {
       if (!opened) reject(new Error('connect failed'));
       const joinRoot = document.getElementById('buzzJoinRoot');
       if (joinRoot) renderBuzzJoinApp();
+      const hostRoot = document.getElementById('buzzHostRoot');
+      if (hostRoot) renderHostCompanionApp();
     };
     ws.onerror = () => {
       if (!opened) reject(new Error('ws error'));
@@ -4069,34 +4131,49 @@ async function enableBuzzers() {
   }
 }
 
-let buzzQuestion = null; // { cat, val }
+let buzzQuestion = null;
 function buzzArm() { buzzSend({ type: 'arm' }); }
 function buzzDisarm() { buzzSend({ type: 'disarm' }); buzzQuestion = null; }
 function buzzPop() { buzzSend({ type: 'pop' }); }
 
+function roomLinks(code) {
+  const base = location.origin + location.pathname.replace(/\/index\.html$/, '/').replace(/\/?$/, '/');
+  return {
+    join: base + '?join=' + code,
+    host: base + '?host=' + code,
+  };
+}
+
 function openBuzzHostCard() {
   prepareOverlayChrome();
-  const joinUrl = location.origin + location.pathname + '?join=' + buzz.code;
+  buzzSend({
+    type: 'setTeams',
+    teams: state.teams.map(t => ({ id: t.id, name: t.name, color: t.color })),
+  });
+  const links = roomLinks(buzz.code);
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `
     <div class="card">
       <div class="tag">🔔 Buzzers</div>
       <div class="buzz-code">${escapeHtml(buzz.code)}</div>
-      <div class="buzz-join-url">${escapeHtml(joinUrl)}</div>
-      <div class="who-line">${buzz.players.length} phone${buzz.players.length === 1 ? '' : 's'} connected</div>
-      <div class="buzz-queue">${buzz.players.map(p => escapeHtml(p.name + (p.teamName ? ' · ' + p.teamName : ''))).join('<br>') || 'Waiting for phones…'}</div>
-      <button class="btn-primary btn-full" id="buzzCopyBtn" style="margin-top:14px;">Copy Link</button>
+      <div class="who-line"><strong>Players</strong></div>
+      <div class="buzz-join-url">${escapeHtml(links.join)}</div>
+      <div class="who-line" style="margin-top:12px;"><strong>Host phone (answers)</strong></div>
+      <div class="buzz-join-url">${escapeHtml(links.host)}</div>
+      <div class="who-line">${buzz.players.length} player${buzz.players.length === 1 ? '' : 's'} connected</div>
+      <button class="btn-primary btn-full" id="buzzCopyHost" style="margin-top:14px;">Copy Host Link</button>
+      <button class="btn-secondary btn-full" id="buzzCopyJoin">Copy Player Link</button>
       <button class="btn-secondary btn-full" id="buzzCloseBtn">Done</button>
     </div>`;
   document.body.appendChild(overlay);
-  document.getElementById('buzzCopyBtn').onclick = async () => {
-    try {
-      await navigator.clipboard.writeText(joinUrl);
-      flashToast('Link copied');
-    } catch {
-      flashToast(joinUrl);
-    }
+  document.getElementById('buzzCopyHost').onclick = async () => {
+    try { await navigator.clipboard.writeText(links.host); flashToast('Host link copied'); }
+    catch { flashToast(links.host); }
+  };
+  document.getElementById('buzzCopyJoin').onclick = async () => {
+    try { await navigator.clipboard.writeText(links.join); flashToast('Player link copied'); }
+    catch { flashToast(links.join); }
   };
   document.getElementById('buzzCloseBtn').onclick = closeOverlay;
 }
@@ -4106,14 +4183,14 @@ function renderHostBuzzPanel() {
   if (!el) return;
   if (!buzz.connected) { el.innerHTML = ''; return; }
   const lead = buzz.queue[0];
-  const points = (buzzQuestion && buzzQuestion.val) || 0;
-  const cat = (buzzQuestion && buzzQuestion.cat) || '';
+  const points = (buzzQuestion && buzzQuestion.val) || (buzz.prompt && buzz.prompt.val) || 0;
+  const cat = (buzzQuestion && buzzQuestion.cat) || (buzz.prompt && buzz.prompt.cat) || '';
   if (!buzz.armed && !lead) {
-    el.innerHTML = `<div class="buzz-panel"><div class="buzz-meta">Buzzers connected (${buzz.players.length})</div></div>`;
+    el.innerHTML = `<div class="buzz-panel"><div class="buzz-meta">Buzzers on (${buzz.players.length})</div></div>`;
     return;
   }
   if (!lead) {
-    el.innerHTML = `<div class="buzz-panel"><div class="buzz-meta">Listening… ${buzz.players.length} phone${buzz.players.length === 1 ? '' : 's'}</div></div>`;
+    el.innerHTML = `<div class="buzz-panel"><div class="buzz-meta">Listening… ${buzz.players.length}</div></div>`;
     return;
   }
   const team = resolveBuzzTeam(lead);
@@ -4131,12 +4208,13 @@ function renderHostBuzzPanel() {
   document.getElementById('buzzYes').onclick = () => {
     const t = resolveBuzzTeam(buzz.queue[0]) || team;
     if (!t) {
-      flashToast('Reveal and pick their team');
-      const reveal = document.getElementById('revealBtn');
-      if (reveal) reveal.click();
+      flashToast('Pick their team after showing the answer');
       return;
     }
-    if (buzz.connected) buzzDisarm();
+    if (buzz.connected) {
+      buzzDisarm();
+      buzzSend({ type: 'clearPrompt' });
+    }
     scoreEvent(t, points, { isAnswer: true });
     playCorrect();
     markUsedAndReturn(cat, points);
@@ -4147,12 +4225,17 @@ function renderHostBuzzPanel() {
   };
 }
 
-/* ---------- Player join (?join=CODE) ---------- */
 function getJoinCode() {
   const q = new URLSearchParams(location.search);
   return (q.get('join') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
 }
 
+function getHostCode() {
+  const q = new URLSearchParams(location.search);
+  return (q.get('host') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+}
+
+/* ---------- Player join (?join=CODE) ---------- */
 function renderBuzzJoin() {
   document.body.classList.add('on-buzz');
   $scoreboard.style.display = 'none';
@@ -4166,7 +4249,6 @@ function renderBuzzJoinApp() {
   const root = document.getElementById('buzzJoinRoot');
   if (!root) return;
 
-  // Step 1: name
   if (!buzz.connected) {
     root.innerHTML = `
       <h2 style="text-align:center;color:var(--gold);">Join</h2>
@@ -4187,7 +4269,6 @@ function renderBuzzJoinApp() {
     return;
   }
 
-  // Step 2: pick team if needed
   if (buzz.teams.length && !buzz.teamName) {
     root.innerHTML = `
       <h2 style="text-align:center;color:var(--gold);">${escapeHtml(buzz.name)}</h2>
@@ -4196,15 +4277,12 @@ function renderBuzzJoinApp() {
       <button class="btn-primary btn-full" id="buzzTeamGo" disabled>Continue</button>`;
     const box = document.getElementById('buzzTeamPick');
     box.innerHTML = `<div class="team-btn-grid">${buzz.teams.map(tm =>
-      `<button class="team-btn" data-team="${tm.id}" data-name="${escapeHtml(tm.name)}" style="border-color:${tm.color || 'var(--gold)'}">${escapeHtml(tm.name)}</button>`
+      `<button class="team-btn" data-team="${tm.id}" style="border-color:${tm.color || 'var(--gold)'}">${escapeHtml(tm.name)}</button>`
     ).join('')}</div>`;
     const go = document.getElementById('buzzTeamGo');
     box.querySelectorAll('[data-team]').forEach(btn => {
       btn.onclick = () => {
-        box.querySelectorAll('[data-team]').forEach(b => {
-          b.classList.remove('on');
-          b.style.background = '';
-        });
+        box.querySelectorAll('[data-team]').forEach(b => { b.classList.remove('on'); b.style.background = ''; });
         btn.classList.add('on');
         btn.style.background = 'rgba(46,204,113,.25)';
         buzz.teamId = parseInt(btn.dataset.team, 10);
@@ -4214,19 +4292,12 @@ function renderBuzzJoinApp() {
       };
     });
     go.onclick = () => {
-      buzzSend({
-        type: 'hello',
-        role: 'player',
-        name: buzz.name,
-        teamId: buzz.teamId,
-        teamName: buzz.teamName,
-      });
+      buzzSend({ type: 'hello', role: 'player', name: buzz.name, teamId: buzz.teamId, teamName: buzz.teamName });
       renderBuzzJoinApp();
     };
     return;
   }
 
-  // Step 3: buzz button
   const lead = buzz.queue[0];
   const myPos = buzz.queue.findIndex(q => q.id === buzz.myId);
   const canBuzz = buzz.armed && myPos === -1;
@@ -4243,9 +4314,94 @@ function renderBuzzJoinApp() {
     <button class="buzz-btn ${canBuzz ? 'armed-pulse' : ''} ${!canBuzz ? 'locked-out' : ''}"
       id="buzzTap" ${canBuzz ? '' : 'disabled'}>BUZZ</button>`;
   const btn = document.getElementById('buzzTap');
-  if (btn && canBuzz) {
-    btn.onclick = () => buzzSend({ type: 'buzz' });
+  if (btn && canBuzz) btn.onclick = () => buzzSend({ type: 'buzz' });
+}
+
+/* ---------- Host companion (?host=CODE) — answers stay here, not on the TV ---------- */
+function renderHostCompanion() {
+  document.body.classList.add('on-buzz');
+  $scoreboard.style.display = 'none';
+  document.documentElement.style.setProperty('--sb-h', '0px');
+  buzz.joinCode = getHostCode();
+  $main.innerHTML = `<div id="buzzHostRoot" class="panel" style="max-width:560px;margin-top:24px;"></div>`;
+  connectBuzzSocket(buzz.joinCode, 'controller', { name: 'Host' })
+    .then(() => renderHostCompanionApp())
+    .catch(() => {
+      document.getElementById('buzzHostRoot').innerHTML = `
+        <h2 style="text-align:center;color:var(--gold);">Host</h2>
+        <div class="buzz-code">${escapeHtml(buzz.joinCode)}</div>
+        <div class="who-line" style="text-align:center;">Enable buzzers on the TV first, then refresh.</div>
+        <button class="btn-primary btn-full" id="hostRetry">Retry</button>`;
+      document.getElementById('hostRetry').onclick = () => location.reload();
+    });
+}
+
+function renderHostCompanionApp() {
+  const root = document.getElementById('buzzHostRoot');
+  if (!root) return;
+  if (!buzz.connected) {
+    root.innerHTML = `<div class="who-line" style="text-align:center;">Connecting…</div>`;
+    return;
   }
+
+  const p = buzz.prompt;
+  const lead = buzz.queue[0];
+
+  if (!p) {
+    root.innerHTML = `
+      <h2 style="text-align:center;color:var(--gold);">Host</h2>
+      <div class="buzz-code">${escapeHtml(buzz.code)}</div>
+      <div class="who-line" style="text-align:center;">Waiting for a question on the TV…</div>
+      <div class="hint" style="text-align:center;">${buzz.players.length} player${buzz.players.length === 1 ? '' : 's'} · ${buzz.armed ? 'buzzers live' : 'idle'}</div>`;
+    return;
+  }
+
+  const team = lead ? resolveBuzzTeam(lead) : null;
+  // On controller, resolve against buzz.teams if state.teams empty
+  const teamFromBuzz = lead && lead.teamId != null
+    ? (buzz.teams.find(t => t.id == lead.teamId) || null)
+    : null;
+  const awardTeam = team || teamFromBuzz;
+
+  root.innerHTML = `
+    <div class="tag">${escapeHtml(p.cat)} — ${p.val}</div>
+    ${p.hint ? `<div class="who-line">${escapeHtml(p.hint)}</div>` : ''}
+    <div class="qtext">${escapeHtml(p.q)}</div>
+    <div class="atext">${escapeHtml(p.a)}</div>
+    ${lead ? `
+      <div class="buzz-panel">
+        <div class="buzz-meta">Buzzed in</div>
+        <div class="buzz-lead">${escapeHtml(lead.name)}${lead.teamName ? ' · ' + escapeHtml(lead.teamName) : ''}</div>
+        <div class="row-gap judge-row">
+          <button class="btn-primary" id="hcYes" ${awardTeam ? '' : 'disabled'}>Correct (+${p.val})</button>
+          <button class="btn-secondary" id="hcNo">Wrong</button>
+        </div>
+      </div>` : `<div class="hint" style="text-align:center;">${buzz.armed ? 'Listening for buzzes…' : ''}</div>`}
+    <div class="who-line" style="margin-top:12px;">Award team</div>
+    <div class="team-btn-grid" id="hcTeams"></div>
+    <button class="btn-secondary btn-full" id="hcReveal" style="margin-top:12px;">${p.revealed ? 'Answer on TV' : 'Show Answer on TV'}</button>
+    <button class="btn-secondary btn-full" id="hcNobody">Nobody</button>`;
+
+  const grid = document.getElementById('hcTeams');
+  const teams = buzz.teams.length ? buzz.teams : state.teams;
+  grid.innerHTML = teams.map(tm =>
+    `<button class="team-btn" data-team="${tm.id}" style="border-color:${tm.color || 'var(--gold)'}">${escapeHtml(tm.name)}</button>`
+  ).join('');
+  grid.querySelectorAll('[data-team]').forEach(btn => {
+    btn.onclick = () => buzzSend({ type: 'remoteAward', teamId: parseInt(btn.dataset.team, 10) });
+  });
+
+  const yes = document.getElementById('hcYes');
+  if (yes) {
+    yes.onclick = () => {
+      if (!awardTeam) return;
+      buzzSend({ type: 'remoteAward', teamId: awardTeam.id });
+    };
+  }
+  const no = document.getElementById('hcNo');
+  if (no) no.onclick = () => { playWrong(); buzzPop(); };
+  document.getElementById('hcReveal').onclick = () => buzzSend({ type: 'revealAnswer' });
+  document.getElementById('hcNobody').onclick = () => buzzSend({ type: 'remoteNobody' });
 }
 
 /* ============================================================
@@ -4287,6 +4443,11 @@ document.addEventListener('keydown', (e) => {
 
 (function boot() {
   normalizeRounds();
+  const hostCode = getHostCode();
+  if (hostCode) {
+    renderHostCompanion();
+    return;
+  }
   const join = getJoinCode();
   if (join) {
     renderBuzzJoin();
