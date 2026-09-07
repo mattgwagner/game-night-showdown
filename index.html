@@ -366,7 +366,14 @@
     background: rgba(245,197,24,.12); border: 2px solid var(--gold-dim);
     border-radius: 10px; padding: 10px 14px; font-weight: 900; color: var(--gold);
     font-size: clamp(.85rem, 2vw, 1.05rem);
+    cursor: pointer;
+    min-height: 48px;
   }
+  .intro-cat.on {
+    background: rgba(245,197,24,.28); border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(245,197,24,.35);
+  }
+  .intro-cat.off { opacity: .4; }
   .host-bar .muted-on, .host-sheet .muted-on { border: 2px solid var(--red); color: #ffb4ae; }
 
   /* Host tools collapse so the TV sees board, not a button strip */
@@ -2151,25 +2158,43 @@ function startRound(roundIndex) {
   state.roundIndex = roundIndex;
   const r = ROUNDS[roundIndex];
   const n = Math.min(state.boardSize || 4, r.categories.length);
-  state.activeCategories = shuffle(r.categories).slice(0, n);
   state.used = {};
   state.readerIndex = 0;
   state.lastCorrectTeamId = null;
   state.history = [];
   state.finalDone = false;
   state.finalOffered = false;
-  state.boardIntro = true;
   state.modeState = null;
-  // Daily Double has to land on a real question that's actually on this board.
+  state.dd = null;
+
+  if (r.type === 'gauntlet') {
+    state.activeCategories = r.categories.slice();
+    state.boardIntro = false;
+    state.screen = 'board';
+    return;
+  }
+
+  // Pre-pick boardSize categories; host can change on the next screen.
+  state.activeCategories = shuffle(r.categories).slice(0, n);
+  state.boardIntro = true;
+  state.screen = 'board';
+}
+
+function lockInCategories(selected) {
+  const r = currentRound();
+  const picks = selected.filter(c => r.categories.indexOf(c) !== -1);
+  if (!picks.length) return;
+  state.activeCategories = picks;
+  state.boardIntro = false;
   state.dd = null;
   if (r.type !== 'gauntlet') {
     const opts = [];
-    state.activeCategories.forEach(c => VALUES.forEach(v => {
+    picks.forEach(c => VALUES.forEach(v => {
       if (r.questions[c] && r.questions[c][v] !== undefined) opts.push({ category: c, value: v });
     }));
     if (opts.length) state.dd = opts[Math.floor(Math.random() * opts.length)];
   }
-  state.screen = 'board';
+  render();
 }
 
 function totalCellsForRound() {
@@ -2457,7 +2482,7 @@ function renderBoard() {
 
   const cols = activeCats();
   if (state.boardIntro) {
-    renderBoardIntro(round, cols);
+    renderBoardIntro(round);
     return;
   }
 
@@ -4013,13 +4038,14 @@ function buzzSend(msg) {
 
 function resolveBuzzTeam(entry) {
   if (!entry) return null;
+  const pool = (state.teams && state.teams.length) ? state.teams : (buzz.teams || []);
   if (entry.teamId != null) {
-    const byId = state.teams.find(t => t.id == entry.teamId);
+    const byId = pool.find(t => t.id == entry.teamId);
     if (byId) return byId;
   }
   if (entry.teamName) {
     const n = entry.teamName.toLowerCase();
-    return state.teams.find(t => t.name.toLowerCase() === n) || null;
+    return pool.find(t => t.name.toLowerCase() === n) || null;
   }
   return null;
 }
