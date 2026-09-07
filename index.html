@@ -473,6 +473,37 @@
     18% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
     100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
   }
+
+  /* ---------- Phone buzz-in ---------- */
+  .buzz-code {
+    font-size: clamp(2.4rem, 10vmin, 4rem); font-weight: 900; letter-spacing: 8px;
+    color: var(--gold); margin: 10px 0;
+  }
+  .buzz-join-url { font-size: .9rem; opacity: .75; word-break: break-all; margin-bottom: 14px; }
+  .buzz-btn {
+    width: min(100%, 320px); min-height: 120px; margin: 18px auto;
+    border-radius: 24px; font-size: 2.4rem; font-weight: 900;
+    background: var(--red); color: #fff; border: 4px solid #fff;
+    box-shadow: 0 0 30px rgba(231,76,60,.55);
+    display: block;
+  }
+  .buzz-btn:disabled {
+    background: #444; box-shadow: none; opacity: .55;
+  }
+  .buzz-btn.locked-out { background: #555; }
+  .buzz-btn.armed-pulse { animation: pulse .7s infinite alternate; }
+  .buzz-panel {
+    margin-top: 14px; padding: 12px; border: 2px solid var(--gold-dim);
+    border-radius: 12px; background: rgba(0,0,0,.25);
+  }
+  .buzz-panel .buzz-lead {
+    font-size: clamp(1.4rem, 4vmin, 2rem); font-weight: 900; color: var(--gold);
+    margin: 6px 0 10px;
+  }
+  .buzz-panel .buzz-meta { opacity: .75; font-size: .9rem; margin-bottom: 8px; }
+  .buzz-queue { opacity: .7; font-size: .85rem; margin-top: 8px; }
+  body.on-buzz #scoreboard { display: none !important; }
+  body.on-buzz #app { padding-top: var(--safe-top); }
 </style>
 </head>
 <body>
@@ -2480,6 +2511,7 @@ function openHostSheet({ canUndo, usedCount, totalCells }) {
       <button class="btn-secondary" id="undoBtn" ${canUndo ? '' : 'disabled'}>↩ Undo</button>
       <button class="btn-secondary ${soundMuted ? 'muted-on' : ''}" id="muteBtn">${soundMuted ? '🔇 Muted' : '🔊 Sound'}</button>
       <button class="btn-secondary" id="fullBtn">⛶ Fullscreen</button>
+      <button class="btn-secondary sheet-wide" id="buzzBtn">${buzz.connected ? '🔔 Buzzers: ' + buzz.code + ' (' + buzz.players.length + ')' : '🔔 Enable Buzzers'}</button>
       <button class="btn-secondary sheet-wide" id="changeRoundBtn">Change Round</button>
       <button class="btn-secondary sheet-wide" id="resetBtn">Reset Round</button>
       <button class="btn-primary sheet-wide" id="hostCloseBtn">Done</button>
@@ -2500,6 +2532,11 @@ function openHostSheet({ canUndo, usedCount, totalCells }) {
     openHostSheet({ canUndo, usedCount, totalCells });
   };
   document.getElementById('fullBtn').onclick = () => { toggleFullscreen(); };
+  document.getElementById('buzzBtn').onclick = () => {
+    closeHostSheet();
+    if (buzz.connected) openBuzzHostCard();
+    else enableBuzzers().then(() => openBuzzHostCard());
+  };
   document.getElementById('randomBtn').onclick = () => {
     closeHostSheet();
     const open = [];
@@ -2606,6 +2643,7 @@ function closeOverlay() {
   if (ov) ov.remove();
   const fab = document.getElementById('hostFab');
   if (fab) fab.style.display = '';
+  if (buzz.connected && buzz.armed) buzzDisarm();
   syncWakeLock();
 }
 
@@ -2645,6 +2683,10 @@ function openQuestion(cat, val) {
   const item = currentRound().questions[cat][val];
   const hint = CATEGORY_HINTS[cat] || item.hint;
   prepareOverlayChrome();
+  if (buzz.connected) {
+    buzzQuestion = { cat, val };
+    buzzArm();
+  }
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `
@@ -2652,37 +2694,62 @@ function openQuestion(cat, val) {
       <div class="tag">${escapeHtml(cat)} — ${val} pts</div>
       ${hint ? `<div class="who-line">${escapeHtml(hint)}</div>` : ''}
       <div class="qtext">${escapeHtml(item.q)}</div>
+      <div id="buzzPanelHost"></div>
       <button class="btn-primary" id="revealBtn">Reveal Answer</button>
       <div id="answerArea"></div>
     </div>
   `;
   document.body.appendChild(overlay);
+  renderHostBuzzPanel();
+
+  const finishAward = (team) => {
+    if (buzz.connected) buzzDisarm();
+    scoreEvent(team, val, { isAnswer: true });
+    playCorrect();
+    markUsedAndReturn(cat, val);
+  };
+  const finishNobody = () => {
+    if (buzz.connected) buzzDisarm();
+    playWrong();
+    markUsedAndReturn(cat, val);
+  };
 
   const showAward = (stealMode) => {
     const area = document.getElementById('answerArea');
+    const lead = buzz.queue[0];
+    let suggest = '';
+    if (lead && !stealMode) {
+      const team = resolveBuzzTeam(lead);
+      suggest = team
+        ? `<button class="btn-primary btn-full" id="buzzAwardBtn" style="margin-bottom:10px;">✓ ${escapeHtml(lead.name)} / ${escapeHtml(team.name)} (+${val})</button>`
+        : '';
+    }
     area.innerHTML = `
       <div class="atext">${escapeHtml(item.a)}</div>
+      ${suggest}
       <div>${stealMode ? 'Steal — who got it?' : 'Who got it?'}</div>
       ${teamButtonsHtml('award')}
       ${stealMode ? '' : '<button class="btn-secondary" id="stealBtn" style="margin-top:10px;">Open steals</button>'}
       <button class="btn-secondary none-btn" id="noneBtn">Nobody</button>
     `;
+    const $ba = document.getElementById('buzzAwardBtn');
+    if ($ba) {
+      $ba.onclick = () => {
+        const team = resolveBuzzTeam(buzz.queue[0]);
+        if (team) finishAward(team);
+      };
+    }
     document.querySelectorAll('[data-prefix="award"]').forEach(btn => {
       btn.onclick = () => {
         if (btn.dataset.locked) return;
         btn.dataset.locked = '1';
         const team = state.teams.find(t => t.id == btn.dataset.team);
-        scoreEvent(team, val, { isAnswer: true });
-        playCorrect();
-        markUsedAndReturn(cat, val);
+        finishAward(team);
       };
     });
     const $steal = document.getElementById('stealBtn');
     if ($steal) $steal.onclick = () => showAward(true);
-    document.getElementById('noneBtn').onclick = () => {
-      playWrong();
-      markUsedAndReturn(cat, val);
-    };
+    document.getElementById('noneBtn').onclick = finishNobody;
   };
 
   document.getElementById('revealBtn').onclick = () => {
@@ -3037,7 +3104,7 @@ function runChallenge(ctx, filterType) {
     : drawFrom(CHALLENGES, 'challenge', types ? (c => types.indexOf(c.type) !== -1) : null);
   const room = ch.who === 'room';
   const footer = room ? `
-    <div class="who-line" style="margin-top:16px;">Who won? That team banks ${val}.</div>
+    <div class="who-line" style="margin-top:16px;">Who won? (+${val})</div>
     ${teamButtonsHtml('chalaward')}
     <button class="btn-secondary none-btn" id="chalNoneBtn">Nobody — no points</button>
   ` : `
@@ -3053,7 +3120,7 @@ function runChallenge(ctx, filterType) {
     <div class="qtext task">${escapeHtml(ch.d)}</div>
     ${ch.drinks ? `
       <div class="forfeit-box">
-        <div class="forfeit-label">🎭 Or take the forfeit instead — anybody can call for it</div>
+        <div class="forfeit-label">Or forfeit</div>
         <div class="forfeit-text" id="forfeitText">${escapeHtml(drawForfeit().d)}</div>
         <button class="btn-secondary forfeit-reroll" id="forfeitReroll">🎲 Different One</button>
       </div>` : ''}
@@ -3134,7 +3201,7 @@ function runVote(ctx) {
   card.innerHTML = `
     <div class="tag wild">🗳️ THE PEOPLE'S COURT</div>
     <div class="qtext">${escapeHtml(v.q)}</div>
-    <div class="who-line">Host counts down from three. Hands go up on ZERO — all at once, no looking around first, no changing once they're up. Then tap the side that won.</div>
+    <div class="who-line">Hands up on three. Tap the winning side.</div>
     <div class="team-btn-grid vote-grid">
       ${v.opts.map((o, i) => `<button class="team-btn vote-opt" data-opt="${i}">${escapeHtml(o)}</button>`).join('')}
     </div>
@@ -3145,7 +3212,7 @@ function runVote(ctx) {
       card.innerHTML = `
         <div class="tag wild">🗳️ THE ROOM HAS SPOKEN</div>
         <div class="atext">${escapeHtml(winning)}</div>
-        <div class="who-line">Tap every team that voted with the majority. They each bank ${val}.</div>
+        <div class="who-line">Tap majority voters (+${val} each).</div>
         ${teamButtonsHtml('voteaward')}
         <button class="btn-primary btn-full" id="voteDoneBtn" style="margin-top:14px;">Done — Next Square</button>
       `;
@@ -3709,12 +3776,9 @@ function renderLightning() {
       <div class="panel" style="text-align:center;">
         <div class="who-line">Team ${ms.idx + 1} of ${ms.order.length}</div>
         <div class="winner-name">${escapeHtml(team.name)}</div>
-        <div class="who-line">
-          Sixty seconds. The host reads, you shout. Every correct answer is 100 points.
-          Pass as often as you like — the only thing you lose is clock.
-        </div>
-        <button class="btn-primary btn-full" id="lGo">Start the Clock</button>
-        <button class="btn-secondary btn-full" id="lQuit">Quit Lightning Round</button>
+        <div class="who-line">60 seconds · 100 pts each · pass freely</div>
+        <button class="btn-primary btn-full" id="lGo">Start</button>
+        <button class="btn-secondary btn-full" id="lQuit">Quit</button>
       </div>`;
     document.getElementById('lGo').onclick = () => {
       ms.phase = 'playing';
@@ -3887,6 +3951,303 @@ function renderPotato() {
   document.getElementById('pQuit').onclick = exitMode;
 }
 
+
+/* ============================================================
+   PHONE BUZZ-IN
+   Host enables a room; phones open ?join=CODE and tap Buzz.
+============================================================ */
+const BUZZ_API = 'https://game-night-buzz.mattgwagner.workers.dev';
+const BUZZ_WS = BUZZ_API.replace(/^http/, 'ws') + '/ws';
+
+const buzz = {
+  connected: false,
+  code: '',
+  ws: null,
+  myId: '',
+  role: null,
+  armed: false,
+  queue: [],
+  players: [],
+  teams: [],
+  name: '',
+  teamId: null,
+  teamName: '',
+  joinCode: '',
+};
+
+function buzzSend(msg) {
+  if (buzz.ws && buzz.ws.readyState === 1) buzz.ws.send(JSON.stringify(msg));
+}
+
+function resolveBuzzTeam(entry) {
+  if (!entry) return null;
+  if (entry.teamId != null) {
+    const byId = state.teams.find(t => t.id == entry.teamId);
+    if (byId) return byId;
+  }
+  if (entry.teamName) {
+    const n = entry.teamName.toLowerCase();
+    return state.teams.find(t => t.name.toLowerCase() === n) || null;
+  }
+  return null;
+}
+
+function buzzApplyState(msg) {
+  buzz.armed = !!msg.armed;
+  buzz.queue = msg.queue || [];
+  buzz.players = msg.players || [];
+  if (msg.teams) buzz.teams = msg.teams;
+  const panel = document.getElementById('buzzPanelHost');
+  if (panel) renderHostBuzzPanel();
+  const joinRoot = document.getElementById('buzzJoinRoot');
+  if (joinRoot) renderBuzzJoinApp();
+}
+
+function connectBuzzSocket(code, role, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`${BUZZ_WS}?room=${encodeURIComponent(code)}`);
+    buzz.ws = ws;
+    buzz.code = code;
+    buzz.role = role;
+    let opened = false;
+    ws.onopen = () => {
+      opened = true;
+      buzzSend({
+        type: 'hello',
+        role,
+        name: opts.name || (role === 'host' ? 'Host' : 'Player'),
+        teamId: opts.teamId != null ? opts.teamId : null,
+        teamName: opts.teamName || '',
+      });
+      if (role === 'host') {
+        buzzSend({
+          type: 'setTeams',
+          teams: state.teams.map(t => ({ id: t.id, name: t.name, color: t.color })),
+        });
+      }
+    };
+    ws.onmessage = (ev) => {
+      let msg;
+      try { msg = JSON.parse(ev.data); } catch { return; }
+      if (msg.type === 'welcome') {
+        buzz.connected = true;
+        buzz.myId = msg.id;
+        buzzApplyState(msg);
+        resolve(msg);
+      } else if (msg.type === 'state') {
+        buzzApplyState(msg);
+      } else if (msg.type === 'error') {
+        flashToast(msg.message || 'Buzz error');
+      }
+    };
+    ws.onclose = () => {
+      buzz.connected = false;
+      buzz.ws = null;
+      buzz.armed = false;
+      if (!opened) reject(new Error('connect failed'));
+      const joinRoot = document.getElementById('buzzJoinRoot');
+      if (joinRoot) renderBuzzJoinApp();
+    };
+    ws.onerror = () => {
+      if (!opened) reject(new Error('ws error'));
+    };
+  });
+}
+
+async function enableBuzzers() {
+  try {
+    const res = await fetch(BUZZ_API + '/room', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+    await connectBuzzSocket(data.code, 'host');
+    flashToast('Buzzers on — ' + data.code);
+  } catch (e) {
+    flashToast('Could not start buzzers');
+  }
+}
+
+let buzzQuestion = null; // { cat, val }
+function buzzArm() { buzzSend({ type: 'arm' }); }
+function buzzDisarm() { buzzSend({ type: 'disarm' }); buzzQuestion = null; }
+function buzzPop() { buzzSend({ type: 'pop' }); }
+
+function openBuzzHostCard() {
+  prepareOverlayChrome();
+  const joinUrl = location.origin + location.pathname + '?join=' + buzz.code;
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  overlay.innerHTML = `
+    <div class="card">
+      <div class="tag">🔔 Buzzers</div>
+      <div class="buzz-code">${escapeHtml(buzz.code)}</div>
+      <div class="buzz-join-url">${escapeHtml(joinUrl)}</div>
+      <div class="who-line">${buzz.players.length} phone${buzz.players.length === 1 ? '' : 's'} connected</div>
+      <div class="buzz-queue">${buzz.players.map(p => escapeHtml(p.name + (p.teamName ? ' · ' + p.teamName : ''))).join('<br>') || 'Waiting for phones…'}</div>
+      <button class="btn-primary btn-full" id="buzzCopyBtn" style="margin-top:14px;">Copy Link</button>
+      <button class="btn-secondary btn-full" id="buzzCloseBtn">Done</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('buzzCopyBtn').onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(joinUrl);
+      flashToast('Link copied');
+    } catch {
+      flashToast(joinUrl);
+    }
+  };
+  document.getElementById('buzzCloseBtn').onclick = closeOverlay;
+}
+
+function renderHostBuzzPanel() {
+  const el = document.getElementById('buzzPanelHost');
+  if (!el) return;
+  if (!buzz.connected) { el.innerHTML = ''; return; }
+  const lead = buzz.queue[0];
+  const points = (buzzQuestion && buzzQuestion.val) || 0;
+  const cat = (buzzQuestion && buzzQuestion.cat) || '';
+  if (!buzz.armed && !lead) {
+    el.innerHTML = `<div class="buzz-panel"><div class="buzz-meta">Buzzers connected (${buzz.players.length})</div></div>`;
+    return;
+  }
+  if (!lead) {
+    el.innerHTML = `<div class="buzz-panel"><div class="buzz-meta">Listening… ${buzz.players.length} phone${buzz.players.length === 1 ? '' : 's'}</div></div>`;
+    return;
+  }
+  const team = resolveBuzzTeam(lead);
+  const rest = buzz.queue.slice(1).map(q => escapeHtml(q.name)).join(', ');
+  el.innerHTML = `
+    <div class="buzz-panel">
+      <div class="buzz-meta">Buzzed in</div>
+      <div class="buzz-lead">${escapeHtml(lead.name)}${lead.teamName ? ' · ' + escapeHtml(lead.teamName) : ''}</div>
+      <div class="row-gap judge-row">
+        <button class="btn-primary" id="buzzYes">Correct${team && points ? ' (+' + points + ')' : ''}</button>
+        <button class="btn-secondary" id="buzzNo">Wrong</button>
+      </div>
+      ${rest ? `<div class="buzz-queue">Next: ${rest}</div>` : ''}
+    </div>`;
+  document.getElementById('buzzYes').onclick = () => {
+    const t = resolveBuzzTeam(buzz.queue[0]) || team;
+    if (!t) {
+      flashToast('Reveal and pick their team');
+      const reveal = document.getElementById('revealBtn');
+      if (reveal) reveal.click();
+      return;
+    }
+    if (buzz.connected) buzzDisarm();
+    scoreEvent(t, points, { isAnswer: true });
+    playCorrect();
+    markUsedAndReturn(cat, points);
+  };
+  document.getElementById('buzzNo').onclick = () => {
+    playWrong();
+    buzzPop();
+  };
+}
+
+/* ---------- Player join (?join=CODE) ---------- */
+function getJoinCode() {
+  const q = new URLSearchParams(location.search);
+  return (q.get('join') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+}
+
+function renderBuzzJoin() {
+  document.body.classList.add('on-buzz');
+  $scoreboard.style.display = 'none';
+  document.documentElement.style.setProperty('--sb-h', '0px');
+  buzz.joinCode = getJoinCode();
+  $main.innerHTML = `<div id="buzzJoinRoot" class="panel" style="max-width:480px;margin-top:24px;"></div>`;
+  renderBuzzJoinApp();
+}
+
+function renderBuzzJoinApp() {
+  const root = document.getElementById('buzzJoinRoot');
+  if (!root) return;
+
+  // Step 1: name
+  if (!buzz.connected) {
+    root.innerHTML = `
+      <h2 style="text-align:center;color:var(--gold);">Join</h2>
+      <div class="buzz-code">${escapeHtml(buzz.joinCode || '————')}</div>
+      <div class="team-row"><input id="buzzName" type="text" placeholder="Your name" maxlength="24" style="font-size:16px;" /></div>
+      <button class="btn-primary btn-full" id="buzzJoinBtn">Join</button>`;
+    document.getElementById('buzzJoinBtn').onclick = async () => {
+      const name = (document.getElementById('buzzName').value || '').trim();
+      if (!name) { flashToast('Enter your name'); return; }
+      buzz.name = name;
+      try {
+        await connectBuzzSocket(buzz.joinCode, 'player', { name });
+        renderBuzzJoinApp();
+      } catch {
+        flashToast('Could not join — is the host online?');
+      }
+    };
+    return;
+  }
+
+  // Step 2: pick team if needed
+  if (buzz.teams.length && !buzz.teamName) {
+    root.innerHTML = `
+      <h2 style="text-align:center;color:var(--gold);">${escapeHtml(buzz.name)}</h2>
+      <div class="who-line" style="text-align:center;">Your team</div>
+      <div id="buzzTeamPick" style="margin:10px 0;"></div>
+      <button class="btn-primary btn-full" id="buzzTeamGo" disabled>Continue</button>`;
+    const box = document.getElementById('buzzTeamPick');
+    box.innerHTML = `<div class="team-btn-grid">${buzz.teams.map(tm =>
+      `<button class="team-btn" data-team="${tm.id}" data-name="${escapeHtml(tm.name)}" style="border-color:${tm.color || 'var(--gold)'}">${escapeHtml(tm.name)}</button>`
+    ).join('')}</div>`;
+    const go = document.getElementById('buzzTeamGo');
+    box.querySelectorAll('[data-team]').forEach(btn => {
+      btn.onclick = () => {
+        box.querySelectorAll('[data-team]').forEach(b => {
+          b.classList.remove('on');
+          b.style.background = '';
+        });
+        btn.classList.add('on');
+        btn.style.background = 'rgba(46,204,113,.25)';
+        buzz.teamId = parseInt(btn.dataset.team, 10);
+        const tm = buzz.teams.find(x => x.id == buzz.teamId);
+        buzz.teamName = tm ? tm.name : '';
+        go.disabled = false;
+      };
+    });
+    go.onclick = () => {
+      buzzSend({
+        type: 'hello',
+        role: 'player',
+        name: buzz.name,
+        teamId: buzz.teamId,
+        teamName: buzz.teamName,
+      });
+      renderBuzzJoinApp();
+    };
+    return;
+  }
+
+  // Step 3: buzz button
+  const lead = buzz.queue[0];
+  const myPos = buzz.queue.findIndex(q => q.id === buzz.myId);
+  const canBuzz = buzz.armed && myPos === -1;
+  let status = 'Wait';
+  if (canBuzz) status = 'Buzz in!';
+  else if (myPos === 0) status = "You're up";
+  else if (myPos > 0) status = `#${myPos + 1}`;
+  else if (lead) status = `${lead.name} locked`;
+
+  root.innerHTML = `
+    <h2 style="text-align:center;color:var(--gold);">${escapeHtml(buzz.name)}</h2>
+    <div class="hint" style="text-align:center;">${escapeHtml(buzz.teamName || '')} · ${escapeHtml(buzz.code)}</div>
+    <div class="who-line" style="text-align:center;font-size:1.2rem;margin-top:12px;">${escapeHtml(status)}</div>
+    <button class="buzz-btn ${canBuzz ? 'armed-pulse' : ''} ${!canBuzz ? 'locked-out' : ''}"
+      id="buzzTap" ${canBuzz ? '' : 'disabled'}>BUZZ</button>`;
+  const btn = document.getElementById('buzzTap');
+  if (btn && canBuzz) {
+    btn.onclick = () => buzzSend({ type: 'buzz' });
+  }
+}
+
 /* ============================================================
    BOOT
 ============================================================ */
@@ -3926,6 +4287,11 @@ document.addEventListener('keydown', (e) => {
 
 (function boot() {
   normalizeRounds();
+  const join = getJoinCode();
+  if (join) {
+    renderBuzzJoin();
+    return;
+  }
   const saved = loadSavedGame();
   if (saved && saved.state) {
     // Keep the saved game around but land on setup so the host chooses.
