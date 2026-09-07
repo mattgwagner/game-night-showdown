@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#020a38">
 <title>Game Night Showdown</title>
 <style>
   :root {
@@ -14,29 +18,44 @@
     --red: #e74c3c;
     --purple: #8e44ad;
     --text: #f5f7ff;
+    --sb-h: 0px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; padding: 0; height: 100%;
     background: radial-gradient(circle at top, var(--navy) 0%, var(--navy-deep) 70%);
     color: var(--text);
     font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
     overflow-x: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
   }
-  #app { min-height: 100vh; display: flex; flex-direction: column; }
+  #app {
+    min-height: 100dvh;
+    height: 100dvh;
+    display: flex; flex-direction: column;
+    padding-top: calc(var(--sb-h) + var(--safe-top));
+    padding-bottom: var(--safe-bottom);
+  }
 
-  /* ---------- Scoreboard ---------- */
+  /* ---------- Scoreboard (stays visible over questions — AirPlay needs it) ---------- */
   #scoreboard {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 70;
     display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-    padding: 10px 14px; background: rgba(0,0,0,0.35);
+    padding: calc(8px + var(--safe-top)) 14px 10px;
+    background: rgba(0,0,0,0.82);
     border-bottom: 3px solid var(--gold);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
   .score-chip {
     background: rgba(255,255,255,0.06);
     border: 2px solid var(--gold-dim);
     border-radius: 10px;
-    padding: 6px 14px;
-    min-width: 110px;
+    padding: 8px 16px;
+    min-width: 120px;
     text-align: center;
     transition: transform .2s, box-shadow .2s;
   }
@@ -45,8 +64,8 @@
     box-shadow: 0 0 14px rgba(245,197,24,.7);
     transform: scale(1.05);
   }
-  .score-chip .name { font-weight: bold; font-size: 0.95rem; letter-spacing: .5px; }
-  .score-chip .pts { font-size: 1.4rem; font-weight: 900; color: var(--gold); }
+  .score-chip .name { font-weight: bold; font-size: clamp(0.95rem, 2.2vmin, 1.15rem); letter-spacing: .5px; }
+  .score-chip .pts { font-size: clamp(1.4rem, 3.5vmin, 1.9rem); font-weight: 900; color: var(--gold); }
 
   h1.title {
     text-align: center; margin: 14px 0 4px;
@@ -57,7 +76,7 @@
   }
   .subtitle { text-align: center; opacity: .7; margin-bottom: 10px; font-size: .95rem; }
 
-  main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 16px 30px; }
+  main { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding: 8px 12px 12px; width: 100%; }
 
   /* ---------- Setup Screen ---------- */
   .panel {
@@ -73,7 +92,7 @@
   .team-row { display: flex; gap: 8px; margin-bottom: 10px; }
   .team-row input {
     flex: 1; padding: 10px 12px; border-radius: 8px; border: none;
-    font-size: 1rem; background: rgba(255,255,255,0.9); color: #111;
+    font-size: 16px; background: rgba(255,255,255,0.9); color: #111;
   }
   #teamList { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
   .team-entry {
@@ -86,11 +105,11 @@
     transition: transform .1s, filter .1s;
   }
   button:active { transform: scale(0.96); }
-  .btn-primary { background: var(--gold); color: #1a1400; padding: 12px 20px; font-size: 1.05rem; }
+  .btn-primary { background: var(--gold); color: #1a1400; padding: 14px 22px; font-size: 1.1rem; min-height: 48px; }
   .btn-primary:hover { filter: brightness(1.1); }
-  .btn-secondary { background: rgba(255,255,255,0.15); color: var(--text); padding: 10px 16px; }
+  .btn-secondary { background: rgba(255,255,255,0.15); color: var(--text); padding: 12px 16px; min-height: 44px; }
   .btn-danger { background: var(--red); color: white; padding: 6px 12px; font-size: .85rem; }
-  .btn-full { width: 100%; margin-top: 10px; padding: 14px; font-size: 1.1rem; }
+  .btn-full { width: 100%; margin-top: 10px; padding: 16px; font-size: 1.15rem; min-height: 52px; }
   .btn-full:disabled { opacity: .4; cursor: not-allowed; }
   .hint { font-size: .85rem; opacity: .65; text-align: center; margin-top: 8px; }
 
@@ -153,21 +172,24 @@
 
   /* ---------- Overlay (question / wildcard) ---------- */
   #overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    position: fixed;
+    top: calc(var(--sb-h) + var(--safe-top)); left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.88);
     display: flex; align-items: center; justify-content: center;
-    padding: 20px; z-index: 50;
+    padding: 12px 16px calc(12px + var(--safe-bottom)); z-index: 50;
   }
   .card {
     background: linear-gradient(180deg, #0d1f8f, #040d54);
     border: 3px solid var(--gold);
     border-radius: 18px;
-    padding: 34px 30px;
-    max-width: 760px;
+    padding: 28px 24px;
+    max-width: min(920px, 96vw);
     width: 100%;
     text-align: center;
     box-shadow: 0 0 50px rgba(245,197,24,.35);
-    max-height: 88vh;
+    max-height: calc(100dvh - var(--sb-h) - var(--safe-top) - var(--safe-bottom) - 24px);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .card .tag {
     display: inline-block; background: var(--gold); color: #1a1400;
@@ -181,14 +203,18 @@
   .superlative-row .label { font-size: .9rem; opacity: .85; }
   .superlative-row .winner { font-weight: 900; color: var(--gold); }
   .card .catval { opacity: .75; margin-bottom: 6px; font-size: .95rem; letter-spacing: 1px; text-transform: uppercase; }
-  .card .qtext { font-size: clamp(1.2rem, 3vw, 1.7rem); font-weight: 700; margin: 14px 0 22px; line-height: 1.4; }
+  .card .qtext { font-size: clamp(1.35rem, 4.2vmin, 2.35rem); font-weight: 700; margin: 14px 0 22px; line-height: 1.35; }
   .card .atext {
-    font-size: clamp(1.1rem, 2.6vw, 1.4rem); color: var(--gold); font-weight: 900;
+    font-size: clamp(1.25rem, 3.6vmin, 1.9rem); color: var(--gold); font-weight: 900;
     margin: 10px 0 24px; padding-top: 16px; border-top: 2px dashed rgba(255,255,255,.2);
   }
-  .team-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 10px; margin-top: 10px; }
-  .team-btn { padding: 12px 8px; background: rgba(255,255,255,0.1); color: var(--text); border: 2px solid var(--gold-dim); border-radius: 10px; font-size: 1rem; }
-  .team-btn:hover { background: var(--green); color: #05330f; border-color: var(--green); }
+  .team-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; margin-top: 10px; }
+  .team-btn {
+    padding: 16px 10px; min-height: 56px;
+    background: rgba(255,255,255,0.1); color: var(--text);
+    border: 2px solid var(--gold-dim); border-radius: 12px; font-size: 1.1rem;
+  }
+  .team-btn:hover, .team-btn:active { background: var(--green); color: #05330f; border-color: var(--green); }
   .none-btn { margin-top: 14px; }
   .wild-desc { font-size: 1.1rem; margin: 16px 0; min-height: 60px; display:flex; align-items:center; justify-content:center; }
   .spin-text { font-size: 1.6rem; font-weight: 900; color: var(--gold); animation: pulse .3s infinite alternate; }
@@ -209,8 +235,8 @@
     margin: 10px 0; max-width: 620px; margin-left: auto; margin-right: auto;
   }
   .card .qtext.task {
-    font-size: clamp(1.1rem, 2.6vw, 1.5rem);
-    line-height: 1.45; font-weight: 600;
+    font-size: clamp(1.2rem, 3.6vmin, 1.85rem);
+    line-height: 1.4; font-weight: 600;
   }
   .judge-row { margin-top: 18px; }
   .vote-grid { grid-template-columns: 1fr 1fr; }
@@ -307,12 +333,13 @@
     padding: 14px; margin-bottom: 16px; background: rgba(46,204,113,.08);
   }
 
-  /* ---------- Board host bar ---------- */
+
+  /* ---------- Board host bar / AirPlay chrome ---------- */
   .host-bar {
     display: flex; flex-wrap: wrap; gap: 8px;
-    justify-content: center; margin-top: 10px;
+    justify-content: center; margin-top: 8px; flex-shrink: 0;
   }
-  .host-bar button { padding: 8px 14px; font-size: .85rem; }
+  .host-bar button { padding: 10px 14px; font-size: .9rem; min-height: 44px; }
   .gauntlet-badge {
     display: inline-block; font-size: .7rem; font-weight: 900;
     background: var(--purple); color: #fff; border-radius: 5px;
@@ -322,7 +349,8 @@
 
   /* ---------- Playability extras ---------- */
   #toast {
-    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+    position: fixed; left: 50%; bottom: calc(28px + var(--safe-bottom));
+    transform: translateX(-50%) translateY(20px);
     background: rgba(0,0,0,.88); border: 2px solid var(--gold); color: var(--text);
     padding: 12px 22px; border-radius: 999px; font-weight: 900; z-index: 80;
     opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
@@ -339,8 +367,89 @@
     border-radius: 10px; padding: 10px 14px; font-weight: 900; color: var(--gold);
     font-size: clamp(.85rem, 2vw, 1.05rem);
   }
-  .host-bar .muted-on { border: 2px solid var(--red); color: #ffb4ae; }
+  .host-bar .muted-on, .host-sheet .muted-on { border: 2px solid var(--red); color: #ffb4ae; }
   .key-hint { font-size: .75rem; opacity: .55; margin-top: 10px; }
+  @media (pointer: coarse) {
+    .key-hint { display: none; }
+  }
+
+  /* Host tools collapse so the TV sees board, not a button strip */
+  .host-fab {
+    position: fixed;
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(12px, env(safe-area-inset-bottom));
+    z-index: 65;
+    min-width: 56px; min-height: 56px;
+    border-radius: 999px;
+    background: var(--gold); color: #1a1400;
+    font-size: 1.05rem; font-weight: 900;
+    box-shadow: 0 4px 20px rgba(0,0,0,.45);
+    padding: 0 18px;
+  }
+  .host-sheet-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    z-index: 66;
+  }
+  .host-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 67;
+    background: linear-gradient(180deg, #0d1f8f, #040d54);
+    border-top: 3px solid var(--gold);
+    border-radius: 18px 18px 0 0;
+    padding: 16px 16px calc(18px + var(--safe-bottom));
+    box-shadow: 0 -8px 40px rgba(0,0,0,.5);
+    max-height: 70dvh; overflow-y: auto;
+  }
+  .host-sheet h3 {
+    margin: 0 0 12px; text-align: center; color: var(--gold); letter-spacing: 1px;
+  }
+  .host-sheet-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .host-sheet-grid button { width: 100%; min-height: 52px; font-size: 1rem; }
+  .host-sheet .sheet-wide { grid-column: 1 / -1; }
+
+  /* Landscape / AirPlay: board fills the TV, type scales with vmin */
+  body.on-board {
+    overflow: hidden;
+  }
+  body.on-board #main {
+    justify-content: stretch;
+  }
+  body.on-board .title.board-title {
+    margin: 2px 0 4px;
+    font-size: clamp(1.1rem, 3.2vmin, 1.8rem);
+    flex-shrink: 0;
+  }
+  body.on-board .reader-banner {
+    margin-bottom: 8px; padding: 6px 16px;
+    font-size: clamp(0.85rem, 2.4vmin, 1.15rem);
+    flex-shrink: 0;
+  }
+  body.on-board #board {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    gap: clamp(4px, 1vmin, 10px);
+    grid-template-rows: minmax(44px, auto) repeat(5, minmax(0, 1fr));
+  }
+  body.on-board .cat-header {
+    min-height: 44px;
+    padding: 6px 4px;
+    font-size: clamp(0.7rem, 2.4vmin, 1.2rem);
+  }
+  body.on-board .cell {
+    min-height: 0;
+    font-size: clamp(1.35rem, 5vmin, 2.6rem);
+  }
+  body.on-board #boardControls { display: none; }
+  body.on-board .host-bar { display: none; }
+
+  @media (orientation: landscape) and (max-height: 900px) {
+    body.on-board .title.board-title { font-size: clamp(1rem, 2.8vmin, 1.5rem); }
+    .card .qtext { font-size: clamp(1.3rem, 4.8vmin, 2.1rem); }
+  }
+
 </style>
 </head>
 <body>
@@ -2010,6 +2119,9 @@ const $scoreboard = document.getElementById('scoreboard');
 
 function render() {
   stopTimer();
+  closeHostSheet();
+  document.body.classList.toggle('on-board', state.screen === 'board' && !state.boardIntro);
+  document.body.dataset.screen = state.screen;
   renderScoreboard();
   if (state.screen === 'setup') renderSetup();
   else if (state.screen === 'roundselect') renderRoundSelect();
@@ -2022,6 +2134,7 @@ function render() {
 function renderScoreboard() {
   if (state.screen === 'setup' || state.teams.length === 0) {
     $scoreboard.style.display = 'none';
+    document.documentElement.style.setProperty('--sb-h', '0px');
     return;
   }
   $scoreboard.style.display = 'flex';
@@ -2032,6 +2145,11 @@ function renderScoreboard() {
       <div class="pts">${t.score}</div>
     </div>
   `).join('');
+  // Next frame so layout is real — keeps AirPlay score strip from covering the board.
+  requestAnimationFrame(() => {
+    const h = $scoreboard.getBoundingClientRect().height;
+    document.documentElement.style.setProperty('--sb-h', h + 'px');
+  });
 }
 
 function escapeHtml(str) {
@@ -2086,6 +2204,11 @@ function renderSetup() {
 
       <button class="btn-primary btn-full" id="startBtn" disabled>Start Game</button>
       <div class="hint">Need at least 2 teams. Works for couples, squads, or everyone solo.</div>
+      <div class="hint" style="margin-top:12px;line-height:1.45;">
+        <strong style="color:var(--gold);">iPad → AirPlay tip:</strong>
+        Landscape · Quick board (4 categories) · Safari AA menu → Hide Toolbar · then mirror to the TV.
+        Host controls tuck behind the ☰ button so the TV stays clean.
+      </div>
     </div>
     ${weekendStandingsHtml()}
   `;
@@ -2163,7 +2286,7 @@ function renderRoundSelect() {
             <span class="st-desc">${n} categories · ${time}</span>
           </button>`).join('')}
       </div>
-      <div class="hint">Four categories is the sweet spot. Same round twice still draws a different board.</div>
+      <div class="hint">Quick (4) is best for AirPlay — big cells the couch can read. Same round twice still draws a different board.</div>
 
       <h2 style="margin-top:24px;">Not Feeling a Board?</h2>
       <div id="modeList" style="display:flex;flex-direction:column;gap:10px;"></div>
@@ -2224,7 +2347,9 @@ function renderBoard() {
   // Board cleared — offer Final Showdown (or skip straight to the winner).
   if (usedCount === totalCells && totalCells > 0) {
     if (!state.finalDone && state.teams.length > 0) {
-      if (!state.finalOffered) { state.finalOffered = true; offerFinalOrSkip(); }
+      // Re-show if render ran again (refresh / host bar) so we never land on a blank board.
+      state.finalOffered = true;
+      offerFinalOrSkip();
       return;
     }
     state.screen = 'winner';
@@ -2252,36 +2377,64 @@ function renderBoard() {
   const canUndo = state.history && state.history.length > 0;
 
   $main.innerHTML = `
-    <h1 class="title" style="margin-top:4px;">🏆 ${escapeHtml(round.name)} 🏆</h1>
-    ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong>'s turn to pick &amp; read — anyone can still answer!</div>` : ''}
+    <h1 class="title board-title">🏆 ${escapeHtml(round.name)} 🏆</h1>
+    ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong> picks — anyone can answer</div>` : ''}
     <div id="board" style="grid-template-columns:repeat(${cols.length}, minmax(0, 1fr));">${cats}${rows}</div>
-    <div class="host-bar">
-      <button class="btn-primary" id="sideQuestBtn">🎯 Side Quest</button>
-      <button class="btn-secondary" id="randomBtn">🎲 Random Square</button>
-      <button class="btn-secondary" id="editScoreBtn">✏️ Scores</button>
-      <button class="btn-secondary" id="undoBtn" ${canUndo ? '' : 'disabled'}>↩ Undo</button>
-      <button class="btn-secondary ${soundMuted ? 'muted-on' : ''}" id="muteBtn">${soundMuted ? '🔇 Muted' : '🔊 Sound'}</button>
-      <button class="btn-secondary" id="fullBtn">⛶ Fullscreen</button>
-    </div>
-    <div id="boardControls">
-      <button class="btn-secondary" id="changeRoundBtn">Change Round</button>
-      <button class="btn-secondary" id="resetBtn">Reset Game</button>
-      <span class="hint" style="align-self:center;">${usedCount} / ${totalCells} squares revealed</span>
-    </div>
+    <button class="host-fab" id="hostFab" type="button">☰ Host</button>
   `;
 
   $main.querySelectorAll('.cell.clickable').forEach(cell => {
     cell.onclick = () => openSquare(cell.dataset.cat, parseInt(cell.dataset.val, 10));
   });
 
-  document.getElementById('sideQuestBtn').onclick = openSideQuest;
-  document.getElementById('editScoreBtn').onclick = openScoreEditor;
+  document.getElementById('hostFab').onclick = () => openHostSheet({ canUndo, usedCount, totalCells });
+}
+
+function closeHostSheet() {
+  document.getElementById('hostSheetBackdrop')?.remove();
+  document.getElementById('hostSheet')?.remove();
+}
+
+function openHostSheet({ canUndo, usedCount, totalCells }) {
+  closeHostSheet();
+  const backdrop = document.createElement('div');
+  backdrop.id = 'hostSheetBackdrop';
+  backdrop.className = 'host-sheet-backdrop';
+  const sheet = document.createElement('div');
+  sheet.id = 'hostSheet';
+  sheet.className = 'host-sheet';
+  sheet.innerHTML = `
+    <h3>Host Controls</h3>
+    <div class="hint" style="margin:-4px 0 12px;">${usedCount} / ${totalCells} squares · hidden on the TV until you need them</div>
+    <div class="host-sheet-grid">
+      <button class="btn-primary" id="sideQuestBtn">🎯 Side Quest</button>
+      <button class="btn-secondary" id="randomBtn">🎲 Random</button>
+      <button class="btn-secondary" id="editScoreBtn">✏️ Scores</button>
+      <button class="btn-secondary" id="undoBtn" ${canUndo ? '' : 'disabled'}>↩ Undo</button>
+      <button class="btn-secondary ${soundMuted ? 'muted-on' : ''}" id="muteBtn">${soundMuted ? '🔇 Muted' : '🔊 Sound'}</button>
+      <button class="btn-secondary" id="fullBtn">⛶ Fullscreen</button>
+      <button class="btn-secondary sheet-wide" id="changeRoundBtn">Change Round</button>
+      <button class="btn-secondary sheet-wide" id="resetBtn">Reset Round</button>
+      <button class="btn-primary sheet-wide" id="hostCloseBtn">Done</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.body.appendChild(sheet);
+  backdrop.onclick = closeHostSheet;
+  document.getElementById('hostCloseBtn').onclick = closeHostSheet;
+
+  document.getElementById('sideQuestBtn').onclick = () => { closeHostSheet(); openSideQuest(); };
+  document.getElementById('editScoreBtn').onclick = () => { closeHostSheet(); openScoreEditor(); };
   document.getElementById('undoBtn').onclick = () => {
-    if (undoLast()) render();
+    if (undoLast()) { closeHostSheet(); render(); }
   };
-  document.getElementById('muteBtn').onclick = () => { setMuted(!soundMuted); render(); };
-  document.getElementById('fullBtn').onclick = toggleFullscreen;
+  document.getElementById('muteBtn').onclick = () => {
+    setMuted(!soundMuted);
+    openHostSheet({ canUndo, usedCount, totalCells });
+  };
+  document.getElementById('fullBtn').onclick = () => { toggleFullscreen(); };
   document.getElementById('randomBtn').onclick = () => {
+    closeHostSheet();
     const open = [];
     activeCats().forEach(cat => VALUES.forEach(v => {
       if (!state.used[cat + '|' + v]) open.push([cat, v]);
@@ -2290,17 +2443,17 @@ function renderBoard() {
     const [cat, v] = open[Math.floor(Math.random() * open.length)];
     openSquare(cat, v);
   };
-
   document.getElementById('resetBtn').onclick = () => {
     if (confirm('Reset this round? Scores and revealed squares will be cleared.')) {
+      closeHostSheet();
       state.teams.forEach(resetTeamStats);
       startRound(state.roundIndex);
       render();
     }
   };
-
   document.getElementById('changeRoundBtn').onclick = () => {
-    if (confirm('Switch to a different round? This round\'s progress will be cleared (scores stay).')) {
+    if (confirm("Switch to a different round? This round's progress will be cleared (scores stay).")) {
+      closeHostSheet();
       state.used = {};
       state.readerIndex = 0;
       state.finalDone = false;
@@ -2314,10 +2467,16 @@ function renderBoard() {
 
 
 function toggleFullscreen() {
+  const el = document.documentElement;
   try {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-    else document.exitFullscreen();
-  } catch (e) { flashToast('Fullscreen not available here'); }
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      return;
+    }
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) { req.call(el); return; }
+  } catch (e) { /* fall through */ }
+  flashToast('On iPad: tap AA → Hide Toolbar, then AirPlay');
 }
 
 function renderBoardIntro(round, cols) {
@@ -2379,9 +2538,17 @@ function openSquare(cat, val) {
   else openQuestion(cat, val);
 }
 
+function prepareOverlayChrome() {
+  closeHostSheet();
+  const fab = document.getElementById('hostFab');
+  if (fab) fab.style.display = 'none';
+}
+
 function closeOverlay() {
   const ov = document.getElementById('overlay');
   if (ov) ov.remove();
+  const fab = document.getElementById('hostFab');
+  if (fab) fab.style.display = '';
 }
 
 function markUsedAndReturn(cat, val) {
@@ -2418,6 +2585,7 @@ const CATEGORY_HINTS = {
 function openQuestion(cat, val) {
   const item = currentRound().questions[cat][val];
   const hint = CATEGORY_HINTS[cat] || item.hint;
+  prepareOverlayChrome();
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `
@@ -2474,6 +2642,7 @@ function openDailyDouble(cat, val) {
   const reader = currentReader();
   const maxWager = Math.max(reader.score, 500);
   playDailyDouble();
+  prepareOverlayChrome();
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `
@@ -2535,6 +2704,7 @@ function openDailyDouble(cat, val) {
 }
 
 function openOverlayCard(inner) {
+  prepareOverlayChrome();
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `<div class="card">${inner || ''}</div>`;
@@ -3175,6 +3345,7 @@ function undoLast() {
    SCORE EDITOR — for when real life overrules the app
 ============================================================ */
 function openScoreEditor() {
+  prepareOverlayChrome();
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `
@@ -3212,6 +3383,7 @@ function openScoreEditor() {
    SIDE QUEST — pull a challenge out of thin air, any time
 ============================================================ */
 function openSideQuest() {
+  prepareOverlayChrome();
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `
@@ -3248,6 +3420,7 @@ function startFinalShowdown() {
   const players = eligible.length > 0 ? eligible : state.teams;
   let idx = 0;
 
+  prepareOverlayChrome();
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   document.body.appendChild(overlay);
@@ -3264,7 +3437,7 @@ function startFinalShowdown() {
         <div class="who-line"><strong>${escapeHtml(t.name)}</strong> — wager anything from 0 up to your whole score. Everybody else, look away. This is binding.</div>
         <div style="margin:16px 0;">
           <input type="number" id="fWager" min="0" max="${max}" value="${Math.min(500, max)}"
-            style="width:160px;padding:12px;border-radius:8px;border:none;font-size:1.3rem;text-align:center;">
+            style="width:160px;padding:12px;border-radius:8px;border:none;font-size:16px;text-align:center;">
         </div>
         <div class="row-gap">
           <button class="btn-secondary" data-fw="0">Nothing</button>
@@ -3662,6 +3835,12 @@ function renderPotato() {
 /* ============================================================
    BOOT
 ============================================================ */
+// iOS won't make a peep until a real tap.
+document.addEventListener('touchstart', function unlockAudioOnce() {
+  try { getAudioCtx(); } catch (e) {}
+  document.removeEventListener('touchstart', unlockAudioOnce, true);
+}, true);
+
 document.addEventListener('keydown', (e) => {
   const tag = (e.target && e.target.tagName) || '';
   if (tag === 'INPUT' || tag === 'TEXTAREA') return;
