@@ -4053,6 +4053,8 @@ function renderPotato() {
 ============================================================ */
 const BUZZ_API = 'https://game-night-buzz.mattgwagner.workers.dev';
 const BUZZ_WS = BUZZ_API.replace(/^http/, 'ws') + '/ws';
+// Fixed room for tonight so links can go out ahead of time.
+const BUZZ_ROOM = 'NITE';
 
 const buzz = {
   connected: false,
@@ -4069,6 +4071,8 @@ const buzz = {
   teamId: null,
   teamName: '',
   joinCode: '',
+  reconnectTimer: null,
+  intentionalClose: false,
 };
 
 function buzzSend(msg) {
@@ -4112,29 +4116,50 @@ function buzzApplyState(msg) {
   if (hostRoot) renderHostCompanionApp();
 }
 
+function scheduleBuzzReconnect(code, role, opts) {
+  if (buzz.intentionalClose) return;
+  if (buzz.reconnectTimer) clearTimeout(buzz.reconnectTimer);
+  buzz.reconnectTimer = setTimeout(() => {
+    connectBuzzSocket(code, role, opts).catch(() => scheduleBuzzReconnect(code, role, opts));
+  }, 1200);
+}
+
 function connectBuzzSocket(code, role, opts = {}) {
   return new Promise((resolve, reject) => {
+    if (!code || !/^[A-Z0-9]{4}$/.test(code)) {
+      reject(new Error('bad code'));
+      return;
+    }
+    if (buzz.reconnectTimer) {
+      clearTimeout(buzz.reconnectTimer);
+      buzz.reconnectTimer = null;
+    }
+    buzz.intentionalClose = false;
     if (buzz.ws) {
+      buzz.intentionalClose = true;
       try { buzz.ws.close(); } catch (e) {}
       buzz.ws = null;
       buzz.connected = false;
+      buzz.intentionalClose = false;
     }
     const ws = new WebSocket(`${BUZZ_WS}?room=${encodeURIComponent(code)}`);
     buzz.ws = ws;
     buzz.code = code;
     buzz.role = role;
     let opened = false;
+    let settled = false;
     ws.onopen = () => {
       opened = true;
       const defaultName = role === 'host' ? 'Stage' : role === 'controller' ? 'Host' : 'Player';
+      const name = opts.name || buzz.name || defaultName;
       buzzSend({
         type: 'hello',
         role,
-        name: opts.name || defaultName,
-        teamId: opts.teamId != null ? opts.teamId : null,
-        teamName: opts.teamName || '',
+        name,
+        teamId: opts.teamId != null ? opts.teamId : buzz.teamId,
+        teamName: opts.teamName || buzz.teamName || '',
       });
-      if (role === 'host') {
+      if (role === 'host' && state.teams && state.teams.length) {
         buzzSend({
           type: 'setTeams',
           teams: state.teams.map(t => ({ id: t.id, name: t.name, color: t.color })),
@@ -4148,7 +4173,7 @@ function connectBuzzSocket(code, role, opts = {}) {
         buzz.connected = true;
         buzz.myId = msg.id;
         buzzApplyState(msg);
-        resolve(msg);
+        if (!settled) { settled = true; resolve(msg); }
       } else if (msg.type === 'state') {
         buzzApplyState(msg);
       } else if (msg.type === 'remoteAward' && buzz.role === 'host') {
@@ -4166,31 +4191,41 @@ function connectBuzzSocket(code, role, opts = {}) {
       }
     };
     ws.onclose = () => {
+      const wasConnected = buzz.connected;
       buzz.connected = false;
       buzz.ws = null;
       buzz.armed = false;
-      if (!opened) reject(new Error('connect failed'));
+      if (!opened && !settled) {
+        settled = true;
+        reject(new Error('connect failed'));
+      }
       const joinRoot = document.getElementById('buzzJoinRoot');
       if (joinRoot) renderBuzzJoinApp();
       const hostRoot = document.getElementById('buzzHostRoot');
       if (hostRoot) renderHostCompanionApp();
+      if (wasConnected || opened) {
+        scheduleBuzzReconnect(code, role, opts);
+      }
     };
     ws.onerror = () => {
-      if (!opened) reject(new Error('ws error'));
+      if (!opened && !settled) {
+        settled = true;
+        reject(new Error('ws error'));
+      }
     };
   });
 }
 
 async function enableBuzzers() {
   try {
-    const res = await fetch(BUZZ_API + '/room', {
+    // Claim the fixed room (best-effort); always connect to BUZZ_ROOM.
+    fetch(BUZZ_API + '/room', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
-    });
-    const data = await res.json();
-    await connectBuzzSocket(data.code, 'host');
-    flashToast('Buzzers on — ' + data.code);
+      body: JSON.stringify({ code: BUZZ_ROOM }),
+    }).catch(() => {});
+    await connectBuzzSocket(BUZZ_ROOM, 'host');
+    flashToast('Buzzers on — ' + BUZZ_ROOM);
   } catch (e) {
     flashToast('Could not start buzzers');
   }
