@@ -239,8 +239,19 @@
     line-height: 1.4; font-weight: 600;
   }
   .judge-row { margin-top: 18px; }
-  .vote-grid { grid-template-columns: 1fr 1fr; }
-  .vote-opt { font-size: 1.05rem; padding: 18px 12px; }
+  .vote-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .vote-opt {
+    font-size: 1.05rem; padding: 18px 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    min-height: 110px; justify-content: center;
+  }
+  .vote-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.2rem; height: 2.2rem; border-radius: 50%;
+    background: var(--gold); color: #020a38;
+    font-weight: 900; font-size: 1.25rem; line-height: 1;
+  }
+  .vote-label { font-weight: 800; line-height: 1.25; }
   .btn-score {
     display: block; font-size: 1.25rem; font-weight: 900;
     color: var(--gold); margin-top: 3px; font-variant-numeric: tabular-nums;
@@ -3294,17 +3305,24 @@ function runVote(ctx) {
   card.innerHTML = `
     <div class="tag wild">🗳️ THE PEOPLE'S COURT</div>
     <div class="qtext">${escapeHtml(v.q)}</div>
-    <div class="who-line">Hands up on three. Tap the winning side.</div>
+    <div class="who-line">Hands up: <strong>1</strong> or <strong>2</strong>. Tap the winning side.</div>
     <div class="team-btn-grid vote-grid">
-      ${v.opts.map((o, i) => `<button class="team-btn vote-opt" data-opt="${i}">${escapeHtml(o)}</button>`).join('')}
+      ${v.opts.map((o, i) => {
+        const n = i + 1;
+        return `<button class="team-btn vote-opt" data-opt="${i}">
+          <span class="vote-num">${n}</span>
+          <span class="vote-label">${escapeHtml(o)}</span>
+        </button>`;
+      }).join('')}
     </div>
   `;
   card.querySelectorAll('[data-opt]').forEach(btn => {
     btn.onclick = () => {
-      const winning = v.opts[parseInt(btn.dataset.opt, 10)];
+      const idx = parseInt(btn.dataset.opt, 10);
+      const winning = v.opts[idx];
       card.innerHTML = `
         <div class="tag wild">🗳️ THE ROOM HAS SPOKEN</div>
-        <div class="atext">${escapeHtml(winning)}</div>
+        <div class="atext"><span class="vote-num" style="margin-right:10px;vertical-align:middle;">${idx + 1}</span>${escapeHtml(winning)}</div>
         <div class="who-line">Tap majority voters (+${val} each).</div>
         ${teamButtonsHtml('voteaward')}
         <button class="btn-primary btn-full" id="voteDoneBtn" style="margin-top:14px;">Done — Next Square</button>
