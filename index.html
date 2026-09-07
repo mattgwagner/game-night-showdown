@@ -319,6 +319,37 @@
   .drinks-opt { text-align: center; }
   .size-row { display: flex; gap: 8px; margin-bottom: 6px; }
   .size-row .spice-opt { flex: 1; }
+  .dual-box {
+    margin: 18px 0 8px; padding: 14px;
+    border: 2px solid rgba(245,197,24,.35); border-radius: 12px;
+    background: rgba(245,197,24,.06); text-align: left;
+  }
+  .dual-box h3 {
+    margin: 0 0 8px; color: var(--gold); font-size: 1rem; letter-spacing: .4px;
+  }
+  .dual-roles {
+    display: grid; grid-template-columns: 1fr; gap: 10px;
+  }
+  .dual-role {
+    padding: 12px; border-radius: 10px;
+    background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.12);
+  }
+  .dual-role .dr-title { font-weight: 900; color: var(--gold); margin-bottom: 4px; }
+  .dual-role .dr-desc { font-size: .85rem; opacity: .8; line-height: 1.35; margin-bottom: 8px; }
+  .dual-role .dr-url {
+    font-size: .72rem; word-break: break-all; opacity: .7;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    margin-bottom: 8px;
+  }
+  body.on-host {
+    background: radial-gradient(ellipse at top, #12205a 0%, #050b28 55%, #020617 100%);
+  }
+  body.on-host .panel { border-color: rgba(245,197,24,.45); }
+  .host-screen-badge {
+    display: inline-block; background: var(--gold); color: #020a38;
+    font-weight: 900; letter-spacing: 1px; font-size: .75rem;
+    padding: 4px 10px; border-radius: 999px; margin-bottom: 10px;
+  }
   .mode-btn { text-align: left; padding: 14px 16px; }
   .lightning-count {
     color: var(--gold); font-weight: 900; letter-spacing: 1px;
@@ -2108,7 +2139,8 @@ function freshState() {
     finalDone: false,
     finalWagers: {},
     boardIntro: false,
-    finalOffered: false
+    finalOffered: false,
+    dualScreen: true,   // TV = show, phone = host answers/controls
   };
 }
 
@@ -2345,13 +2377,49 @@ function renderSetup() {
         <span class="st-desc">${state.drinks ? 'Sips or forfeit' : 'Off'}</span>
       </button>
 
+      <div class="dual-box">
+        <h3>Two screens</h3>
+        <div class="hint" style="margin:0 0 10px;text-align:left;">TV runs the show. Your phone keeps the answers private.</div>
+        <div class="dual-roles">
+          <div class="dual-role">
+            <div class="dr-title">📺 Show (this iPad → TV)</div>
+            <div class="dr-desc">Board + questions. Answers stay hidden until you reveal them from the host phone.</div>
+          </div>
+          <div class="dual-role">
+            <div class="dr-title">📱 Host phone</div>
+            <div class="dr-desc">Answers, buzz queue, Correct / Wrong, award points.</div>
+            <div class="dr-url" id="dualHostUrl"></div>
+            <button class="btn-primary btn-full" id="copyHostLinkBtn" type="button">Copy Host Link</button>
+          </div>
+          <div class="dual-role">
+            <div class="dr-title">🔔 Player buzzers (optional)</div>
+            <div class="dr-desc">Everyone else opens this to ring in.</div>
+            <div class="dr-url" id="dualJoinUrl"></div>
+            <button class="btn-secondary btn-full" id="copyJoinLinkBtn" type="button">Copy Player Link</button>
+          </div>
+        </div>
+      </div>
+
       <button class="btn-primary btn-full" id="startBtn" disabled>Start Game</button>
-      <div class="hint">Need at least 2 teams.</div>
+      <div class="hint">Need at least 2 teams. Dual screen wires up automatically.</div>
     </div>
     ${weekendStandingsHtml()}
   `;
   const $list = document.getElementById('teamList');
   const $start = document.getElementById('startBtn');
+  const links = roomLinks(BUZZ_ROOM);
+  const hostUrlEl = document.getElementById('dualHostUrl');
+  const joinUrlEl = document.getElementById('dualJoinUrl');
+  if (hostUrlEl) hostUrlEl.textContent = links.host;
+  if (joinUrlEl) joinUrlEl.textContent = links.join;
+  document.getElementById('copyHostLinkBtn').onclick = async () => {
+    try { await navigator.clipboard.writeText(links.host); flashToast('Host link copied'); }
+    catch { flashToast(links.host); }
+  };
+  document.getElementById('copyJoinLinkBtn').onclick = async () => {
+    try { await navigator.clipboard.writeText(links.join); flashToast('Player link copied'); }
+    catch { flashToast(links.join); }
+  };
 
   if (saved) {
     document.getElementById('resumeBtn').onclick = () => {
@@ -2478,6 +2546,9 @@ function renderBoard() {
   const usedCount = Object.keys(state.used).length;
   const totalCells = totalCellsForRound();
 
+  // Dual-screen: keep the show device connected so answers stay on the host phone.
+  if (state.dualScreen !== false) ensureStageBuzz();
+
   // Board cleared — offer Final Showdown (or skip straight to the winner).
   if (usedCount === totalCells && totalCells > 0) {
     if (!state.finalDone && state.teams.length > 0) {
@@ -2547,7 +2618,7 @@ function openHostSheet({ canUndo, usedCount, totalCells }) {
       <button class="btn-secondary" id="undoBtn" ${canUndo ? '' : 'disabled'}>↩ Undo</button>
       <button class="btn-secondary ${soundMuted ? 'muted-on' : ''}" id="muteBtn">${soundMuted ? '🔇 Muted' : '🔊 Sound'}</button>
       <button class="btn-secondary" id="fullBtn">⛶ Fullscreen</button>
-      <button class="btn-secondary sheet-wide" id="buzzBtn">${buzz.connected ? '🔔 Buzzers: ' + buzz.code + ' (' + buzz.players.length + ')' : '🔔 Enable Buzzers'}</button>
+      <button class="btn-secondary sheet-wide" id="buzzBtn">${buzz.connected ? '📺 Dual screen: ' + buzz.code + ' (' + buzz.players.length + ' buzzers)' : '📺 Dual Screen / Buzzers'}</button>
       <button class="btn-secondary sheet-wide" id="changeRoundBtn">Change Round</button>
       <button class="btn-secondary sheet-wide" id="resetBtn">Reset Round</button>
       <button class="btn-primary sheet-wide" id="hostCloseBtn">Done</button>
@@ -4244,10 +4315,19 @@ async function enableBuzzers() {
       body: JSON.stringify({ code: BUZZ_ROOM }),
     }).catch(() => {});
     await connectBuzzSocket(BUZZ_ROOM, 'host');
-    flashToast('Buzzers on — ' + BUZZ_ROOM);
+    flashToast('Show live — host phone uses ' + BUZZ_ROOM);
   } catch (e) {
-    flashToast('Could not start buzzers');
+    flashToast('Could not start dual screen');
   }
+}
+
+let stageBuzzPromise = null;
+function ensureStageBuzz() {
+  if (getHostCode() || getJoinCode()) return;
+  if (buzz.connected && buzz.role === 'host') return;
+  if (stageBuzzPromise) return stageBuzzPromise;
+  stageBuzzPromise = enableBuzzers().finally(() => { stageBuzzPromise = null; });
+  return stageBuzzPromise;
 }
 
 let buzzQuestion = null;
@@ -4346,12 +4426,16 @@ function renderHostBuzzPanel() {
 
 function getJoinCode() {
   const q = new URLSearchParams(location.search);
-  return (q.get('join') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  if (!q.has('join')) return '';
+  const raw = (q.get('join') || BUZZ_ROOM).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  return /^[A-Z0-9]{4}$/.test(raw) ? raw : BUZZ_ROOM;
 }
 
 function getHostCode() {
   const q = new URLSearchParams(location.search);
-  return (q.get('host') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  if (!q.has('host')) return '';
+  const raw = (q.get('host') || BUZZ_ROOM).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  return /^[A-Z0-9]{4}$/.test(raw) ? raw : BUZZ_ROOM;
 }
 
 /* ---------- Player join (?join=CODE) ---------- */
@@ -4359,7 +4443,7 @@ function renderBuzzJoin() {
   document.body.classList.add('on-buzz');
   $scoreboard.style.display = 'none';
   document.documentElement.style.setProperty('--sb-h', '0px');
-  buzz.joinCode = getJoinCode();
+  buzz.joinCode = getJoinCode() || BUZZ_ROOM;
   $main.innerHTML = `<div id="buzzJoinRoot" class="panel" style="max-width:480px;margin-top:24px;"></div>`;
   renderBuzzJoinApp();
 }
@@ -4438,18 +4522,19 @@ function renderBuzzJoinApp() {
 
 /* ---------- Host companion (?host=CODE) — answers stay here, not on the TV ---------- */
 function renderHostCompanion() {
-  document.body.classList.add('on-buzz');
+  document.body.classList.add('on-buzz', 'on-host');
   $scoreboard.style.display = 'none';
   document.documentElement.style.setProperty('--sb-h', '0px');
-  buzz.joinCode = getHostCode();
+  buzz.joinCode = getHostCode() || BUZZ_ROOM;
   $main.innerHTML = `<div id="buzzHostRoot" class="panel" style="max-width:560px;margin-top:24px;"></div>`;
   connectBuzzSocket(buzz.joinCode, 'controller', { name: 'Host' })
     .then(() => renderHostCompanionApp())
     .catch(() => {
       document.getElementById('buzzHostRoot').innerHTML = `
-        <h2 style="text-align:center;color:var(--gold);">Host</h2>
+        <div class="host-screen-badge">HOST SCREEN</div>
+        <h2 style="text-align:center;color:var(--gold);">Connecting…</h2>
         <div class="buzz-code">${escapeHtml(buzz.joinCode)}</div>
-        <div class="who-line" style="text-align:center;">Enable buzzers on the TV first, then refresh.</div>
+        <div class="who-line" style="text-align:center;">Open the show on the TV, then tap Retry.</div>
         <button class="btn-primary btn-full" id="hostRetry">Retry</button>`;
       document.getElementById('hostRetry').onclick = () => location.reload();
     });
@@ -4459,7 +4544,9 @@ function renderHostCompanionApp() {
   const root = document.getElementById('buzzHostRoot');
   if (!root) return;
   if (!buzz.connected) {
-    root.innerHTML = `<div class="who-line" style="text-align:center;">Connecting…</div>`;
+    root.innerHTML = `
+      <div class="host-screen-badge">HOST SCREEN</div>
+      <div class="who-line" style="text-align:center;">Connecting…</div>`;
     return;
   }
 
@@ -4468,9 +4555,11 @@ function renderHostCompanionApp() {
 
   if (!p) {
     root.innerHTML = `
-      <h2 style="text-align:center;color:var(--gold);">Host</h2>
+      <div class="host-screen-badge">HOST SCREEN</div>
+      <h2 style="text-align:center;color:var(--gold);">Ready</h2>
       <div class="buzz-code">${escapeHtml(buzz.code)}</div>
       <div class="who-line" style="text-align:center;">Waiting for a question on the TV…</div>
+      <div class="hint" style="text-align:center;">Answers stay on this phone. TV is the show.</div>
       <div class="hint" style="text-align:center;">${buzz.players.length} player${buzz.players.length === 1 ? '' : 's'} · ${buzz.armed ? 'buzzers live' : 'idle'}</div>`;
     return;
   }
@@ -4483,6 +4572,7 @@ function renderHostCompanionApp() {
   const awardTeam = team || teamFromBuzz;
 
   root.innerHTML = `
+    <div class="host-screen-badge">HOST SCREEN</div>
     <div class="tag">${escapeHtml(p.cat)} — ${p.val}</div>
     ${p.hint ? `<div class="who-line">${escapeHtml(p.hint)}</div>` : ''}
     <div class="qtext">${escapeHtml(p.q)}</div>
