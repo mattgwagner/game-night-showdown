@@ -368,10 +368,6 @@
     font-size: clamp(.85rem, 2vw, 1.05rem);
   }
   .host-bar .muted-on, .host-sheet .muted-on { border: 2px solid var(--red); color: #ffb4ae; }
-  .key-hint { font-size: .75rem; opacity: .55; margin-top: 10px; }
-  @media (pointer: coarse) {
-    .key-hint { display: none; }
-  }
 
   /* Host tools collapse so the TV sees board, not a button strip */
   .host-fab {
@@ -477,11 +473,6 @@
     18% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
     100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
   }
-  .wake-dot {
-    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-    background: var(--green); margin-right: 6px; box-shadow: 0 0 8px var(--green);
-  }
-  .wake-dot.off { background: #666; box-shadow: none; }
 </style>
 </head>
 <body>
@@ -2250,7 +2241,7 @@ function renderSetup() {
   const saved = loadSavedGame();
   $main.innerHTML = `
     <h1 class="title">🏆 Game Night Showdown 🏆</h1>
-    <div class="subtitle">Add every team or player, pick your spice level, then hit Start</div>
+    <div class="subtitle">Add teams, then start</div>
     <div class="panel">
       ${saved ? `
         <div class="resume-box">
@@ -2274,29 +2265,21 @@ function renderSetup() {
       <div class="spice-toggle">
         <button class="spice-opt ${state.spice !== 'party' ? 'on' : ''}" data-spice="family">
           <span class="st-name">☀️ Family Friendly</span>
-          <span class="st-desc">Kids in the room, grandma on the couch</span>
+          <span class="st-desc">All ages</span>
         </button>
         <button class="spice-opt ${state.spice === 'party' ? 'on' : ''}" data-spice="party">
           <span class="st-name">🌙 After Dark</span>
-          <span class="st-desc">Kids in bed. Phones become evidence.</span>
+          <span class="st-desc">Adults only</span>
         </button>
       </div>
 
       <button class="spice-opt drinks-opt ${state.drinks ? 'on' : ''}" id="drinksBtn" style="width:100%;margin-bottom:14px;">
         <span class="st-name">${state.drinks ? '🍺 Drinking Games: ON' : '🥤 Drinking Games: OFF'}</span>
-        <span class="st-desc">${state.drinks
-          ? 'Sips only, never shots. Every card offers a forfeit instead, so nobody has to drink to play.'
-          : 'Switch on to add 22 drinking games. Independent of spice level.'}</span>
+        <span class="st-desc">${state.drinks ? 'Sips or forfeit' : 'Off'}</span>
       </button>
 
       <button class="btn-primary btn-full" id="startBtn" disabled>Start Game</button>
-      <div class="hint">Need at least 2 teams. Works for couples, squads, or everyone solo.</div>
-      <div class="hint" style="margin-top:12px;line-height:1.45;">
-        <strong style="color:var(--gold);">iPad → AirPlay:</strong>
-        Open <span style="color:var(--text);word-break:break-all;">mattgwagner.github.io/game-night-showdown</span>
-        · Landscape · Quick (4 cats) · Safari AA → Hide Toolbar · AirPlay to the TV.
-        Screen stays awake while you play. Host tools live under ☰.
-      </div>
+      <div class="hint">Need at least 2 teams.</div>
     </div>
     ${weekendStandingsHtml()}
   `;
@@ -2375,18 +2358,13 @@ function renderRoundSelect() {
             <span class="st-desc">${n} categories · ${time}</span>
           </button>`).join('')}
       </div>
-      <div class="hint">Quick (4) is best for AirPlay — big cells the couch can read. Same round twice still draws a different board.</div>
 
-      <h2 style="margin-top:24px;">Not Feeling a Board?</h2>
+      <h2 style="margin-top:24px;">Game Modes</h2>
       <div id="modeList" style="display:flex;flex-direction:column;gap:10px;"></div>
 
-      <h2 style="margin-top:24px;">Choose a Round</h2>
-      <button class="btn-primary btn-full" id="surpriseBtn" style="margin-bottom:12px;">🎲 Surprise Me — pick a random board</button>
+      <h2 style="margin-top:24px;">Rounds</h2>
+      <button class="btn-primary btn-full" id="surpriseBtn" style="margin-bottom:12px;">🎲 Random Round</button>
       <div id="roundList" style="display:flex;flex-direction:column;gap:12px;"></div>
-      <div class="hint" style="margin-top:14px;">
-        Every board hides unmarked wildcard squares — challenges, duels, dares and public votes.
-        Clear the board and it ends in a Final Showdown.
-      </div>
       <button class="btn-secondary btn-full" id="backSetupBtn" style="margin-top:14px;">← Back to Players</button>
     </div>
     ${weekendStandingsHtml()}
@@ -2467,7 +2445,7 @@ function renderBoard() {
 
   $main.innerHTML = `
     <h1 class="title board-title">🏆 ${escapeHtml(round.name)} 🏆</h1>
-    ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong> picks — anyone can answer</div>` : ''}
+    ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong></div>` : ''}
     <div id="board" style="grid-template-columns:repeat(${cols.length}, minmax(0, 1fr));">${cats}${rows}</div>
     <button class="host-fab" id="hostFab" type="button">☰ Host</button>
   `;
@@ -2493,11 +2471,8 @@ function openHostSheet({ canUndo, usedCount, totalCells }) {
   sheet.id = 'hostSheet';
   sheet.className = 'host-sheet';
   sheet.innerHTML = `
-    <h3>Host Controls</h3>
-    <div class="hint" style="margin:-4px 0 12px;">
-      <span class="wake-dot ${wakeLock ? '' : 'off'}"></span>${wakeLock ? 'Screen lock on — iPad won\'t sleep' : 'Tap anywhere if the screen dims'}
-      · ${usedCount}/${totalCells} squares
-    </div>
+    <h3>Host</h3>
+    <div class="hint" style="margin:-4px 0 12px;">${usedCount} / ${totalCells}</div>
     <div class="host-sheet-grid">
       <button class="btn-primary" id="sideQuestBtn">🎯 Side Quest</button>
       <button class="btn-secondary" id="randomBtn">🎲 Random</button>
@@ -2568,25 +2543,15 @@ function toggleFullscreen() {
     const req = el.requestFullscreen || el.webkitRequestFullscreen;
     if (req) { req.call(el); return; }
   } catch (e) { /* fall through */ }
-  flashToast('On iPad: tap AA → Hide Toolbar, then AirPlay');
 }
 
 function renderBoardIntro(round, cols) {
-  const wildCount = cols.reduce((n, c) => n + ((currentRound().wildValues[c] || []).length), 0);
   $main.innerHTML = `
     <h1 class="title" style="margin-top:4px;">🏆 ${escapeHtml(round.name)} 🏆</h1>
     <div class="panel" style="max-width:720px;text-align:center;">
-      <h2>Tonight's Categories</h2>
+      <h2>Categories</h2>
       <div class="intro-cats">${cols.map(c => `<div class="intro-cat">${escapeHtml(c)}</div>`).join('')}</div>
-      <div class="who-line">
-        ${wildCount} unmarked wildcard${wildCount === 1 ? '' : 's'} hiding on this board —
-        challenges, duels, votes, the works.
-        ${state.dd ? 'Plus one Daily Double.' : ''}
-      </div>
-      <div class="who-line" style="opacity:.7;">
-        ${escapeHtml(currentReader() ? currentReader().name : 'Somebody')}'s turn to pick first. Anyone can still shout the answer.
-      </div>
-      <button class="btn-primary btn-full" id="introGo">Let's Play</button>
+      <button class="btn-primary btn-full" id="introGo">Play</button>
     </div>`;
   document.getElementById('introGo').onclick = () => { state.boardIntro = false; render(); };
 }
@@ -2594,9 +2559,8 @@ function renderBoardIntro(round, cols) {
 function offerFinalOrSkip() {
   openOverlayCard(`
     <div class="tag dd">🏁 BOARD CLEARED 🏁</div>
-    <div class="who-line">Final Showdown time — category reveal, blind wagers, one hard question. Or skip straight to crowning someone.</div>
-    <button class="btn-primary btn-full" id="doFinal">🏁 Final Showdown</button>
-    <button class="btn-secondary btn-full" id="skipFinal">Skip to the Winner</button>
+    <button class="btn-primary btn-full" id="doFinal">Final Showdown</button>
+    <button class="btn-secondary btn-full" id="skipFinal">Skip to Winner</button>
   `);
   document.getElementById('doFinal').onclick = () => { closeOverlay(); startFinalShowdown(); };
   document.getElementById('skipFinal').onclick = () => {
@@ -2689,7 +2653,6 @@ function openQuestion(cat, val) {
       ${hint ? `<div class="who-line">${escapeHtml(hint)}</div>` : ''}
       <div class="qtext">${escapeHtml(item.q)}</div>
       <button class="btn-primary" id="revealBtn">Reveal Answer</button>
-      <div class="key-hint">Space = reveal · 1–${state.teams.length} = award that team · 0 = nobody</div>
       <div id="answerArea"></div>
     </div>
   `;
@@ -2699,11 +2662,10 @@ function openQuestion(cat, val) {
     const area = document.getElementById('answerArea');
     area.innerHTML = `
       <div class="atext">${escapeHtml(item.a)}</div>
-      <div>${stealMode ? 'Steal is open — who cleaned it up?' : 'Who got it right?'}</div>
+      <div>${stealMode ? 'Steal — who got it?' : 'Who got it?'}</div>
       ${teamButtonsHtml('award')}
-      ${stealMode ? '' : '<button class="btn-secondary" id="stealBtn" style="margin-top:10px;">First shout was wrong — open steals</button>'}
-      <button class="btn-secondary none-btn" id="noneBtn">${stealMode ? 'Still nobody' : 'Nobody Scored'}</button>
-      <div class="key-hint">Keys 1–${state.teams.length} award · 0 nobody</div>
+      ${stealMode ? '' : '<button class="btn-secondary" id="stealBtn" style="margin-top:10px;">Open steals</button>'}
+      <button class="btn-secondary none-btn" id="noneBtn">Nobody</button>
     `;
     document.querySelectorAll('[data-prefix="award"]').forEach(btn => {
       btn.onclick = () => {
@@ -2725,8 +2687,6 @@ function openQuestion(cat, val) {
 
   document.getElementById('revealBtn').onclick = () => {
     document.getElementById('revealBtn').remove();
-    const hintEl = overlay.querySelector('.key-hint');
-    if (hintEl) hintEl.remove();
     showAward(false);
   };
 }
@@ -2744,7 +2704,7 @@ function openDailyDouble(cat, val) {
     <div class="card">
       <div class="tag dd">🎯 DAILY DOUBLE! 🎯</div>
       <div class="catval">${escapeHtml(cat)}</div>
-      <div class="wild-desc"><strong>${escapeHtml(reader.name)}</strong>, you picked it — you wager, you answer. No steals.</div>
+      <div class="wild-desc"><strong>${escapeHtml(reader.name)}</strong> — wager, then answer.</div>
       <div style="margin:16px 0;">
         <input type="number" id="wagerInput" min="0" max="${maxWager}" value="${Math.min(reader.score || 200, 500) || 200}" style="width:140px;padding:10px;border-radius:8px;border:none;font-size:16px;text-align:center;">
       </div>
@@ -2811,7 +2771,7 @@ function openWildcard(cat, val) {
   const team = currentReader();
   openOverlayCard(`
     <div class="tag wild">★ WILDCARD ★</div>
-    <div class="who-line"><strong>${escapeHtml(team.name)}</strong> landed on it. Let's find out what it costs them.</div>
+    <div class="who-line"><strong>${escapeHtml(team.name)}</strong></div>
     <div class="wild-desc"><span class="spin-text" id="spinText">Spinning...</span></div>
   `);
   playWildcardSpin();
@@ -2832,7 +2792,7 @@ function openWildcard(cat, val) {
     card.innerHTML = `
       <div class="tag wild">${event.label}</div>
       ${event.blurb ? `<div class="wild-desc">${escapeHtml(event.blurb)}</div>` : ''}
-      <button class="btn-primary" id="wildGoBtn">Let's See It</button>
+      <button class="btn-primary" id="wildGoBtn">Go</button>
     `;
     playWildcardReveal();
     document.getElementById('wildGoBtn').onclick = () => {
@@ -3062,9 +3022,9 @@ function wireTimer(seconds) {
 ============================================================ */
 
 function whoLabel(who, team) {
-  if (who === 'room') return 'EVERYBODY PLAYS. Winner\'s team banks the points.';
-  if (who === 'team') return `${team.name} — the whole team. Beat it or get nothing.`;
-  return `${team.name} — one person. They do it, or this square pays nobody.`;
+  if (who === 'room') return 'Everyone — winner\'s team scores.';
+  if (who === 'team') return `${team.name} — whole team.`;
+  return `${team.name} — one person.`;
 }
 
 function runChallenge(ctx, filterType) {
@@ -3446,7 +3406,7 @@ function openScoreEditor() {
   overlay.innerHTML = `
     <div class="card">
       <div class="tag">Adjust Scores</div>
-      <div class="who-line">Nudge anybody's total. Rulings on the field are final, but the app isn't.</div>
+      <div class="who-line">Adjust scores</div>
       <div id="editRows"></div>
       <button class="btn-primary btn-full" id="closeEditBtn" style="margin-top:16px;">Done</button>
     </div>
@@ -3484,7 +3444,7 @@ function openSideQuest() {
   overlay.innerHTML = `
     <div class="card">
       <div class="tag wild">🎯 SIDE QUEST</div>
-      <div class="who-line">Off the board, no square burned. Worth 200. Who's taking it?</div>
+      <div class="who-line">Worth 200. Who's taking it?</div>
       ${teamButtonsHtml('sq')}
       <button class="btn-secondary none-btn" id="sqCancel">Never Mind</button>
     </div>
@@ -3529,7 +3489,7 @@ function startFinalShowdown() {
       <div class="card">
         <div class="tag dd">🏁 THE FINAL SHOWDOWN 🏁</div>
         <div class="catval">Category: ${escapeHtml(item.cat)}</div>
-        <div class="who-line"><strong>${escapeHtml(t.name)}</strong> — wager anything from 0 up to your whole score. Everybody else, look away. This is binding.</div>
+        <div class="who-line"><strong>${escapeHtml(t.name)}</strong> — wager 0 to ${max}</div>
         <div style="margin:16px 0;">
           <input type="number" id="fWager" min="0" max="${max}" value="${Math.min(500, max)}"
             style="width:160px;padding:12px;border-radius:8px;border:none;font-size:16px;text-align:center;">
@@ -3560,7 +3520,7 @@ function startFinalShowdown() {
       <div class="card">
         <div class="tag dd">🏁 ${escapeHtml(item.cat)} 🏁</div>
         <div class="qtext">${escapeHtml(item.q)}</div>
-        <div class="who-line">Everybody writes their answer down. No shouting. When every pen is down, reveal.</div>
+        <div class="who-line">Write answers down. Reveal when ready.</div>
         ${timerHtml(60)}
         <button class="btn-primary btn-full" id="revealF" style="margin-top:14px;">Reveal the Answer</button>
       </div>
@@ -3572,7 +3532,7 @@ function startFinalShowdown() {
         <div class="card">
           <div class="tag dd">🏁 THE ANSWER 🏁</div>
           <div class="atext">${escapeHtml(item.a)}</div>
-          <div class="who-line">Tap each team that got it. Tap again to flip them back.</div>
+          <div class="who-line">Tap teams that got it.</div>
           <div id="finalJudge"></div>
           <button class="btn-primary btn-full" id="finishF" style="margin-top:16px;">Settle Up</button>
         </div>
