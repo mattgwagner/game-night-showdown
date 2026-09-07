@@ -115,6 +115,9 @@
     min-height: 64px;
     color: var(--gold);
     text-transform: uppercase;
+    line-height: 1.15;
+    hyphens: auto;
+    overflow-wrap: anywhere;
   }
   .cell {
     background: linear-gradient(180deg, #0b1f8a, #081770);
@@ -316,6 +319,28 @@
     padding: 2px 7px; margin-left: 8px; vertical-align: middle;
     letter-spacing: 1px;
   }
+
+  /* ---------- Playability extras ---------- */
+  #toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,.88); border: 2px solid var(--gold); color: var(--text);
+    padding: 12px 22px; border-radius: 999px; font-weight: 900; z-index: 80;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    max-width: 90vw; text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .score-chip .shield { display: inline-block; margin-left: 4px; font-size: .85rem; }
+  .intro-cats {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin: 16px 0 8px;
+  }
+  .intro-cat {
+    background: rgba(245,197,24,.12); border: 2px solid var(--gold-dim);
+    border-radius: 10px; padding: 10px 14px; font-weight: 900; color: var(--gold);
+    font-size: clamp(.85rem, 2vw, 1.05rem);
+  }
+  .host-bar .muted-on { border: 2px solid var(--red); color: #ffb4ae; }
+  .key-hint { font-size: .75rem; opacity: .55; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -324,6 +349,7 @@
   <main id="main"></main>
 </div>
 <div id="confettiWrap"></div>
+<div id="toast"></div>
 
 <script>
 /* ============================================================
@@ -1748,6 +1774,23 @@ function getLeader(state, excludeTeam) {
    SOUND ENGINE (Web Audio API — no audio files needed)
 ============================================================ */
 let audioCtx = null;
+let soundMuted = false;
+try { soundMuted = localStorage.getItem('gns.mute') === '1'; } catch (e) {}
+
+function setMuted(on) {
+  soundMuted = !!on;
+  try { localStorage.setItem('gns.mute', soundMuted ? '1' : '0'); } catch (e) {}
+}
+
+function flashToast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(flashToast._t);
+  flashToast._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
 function getAudioCtx() {
   if (!audioCtx) {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -1758,6 +1801,7 @@ function getAudioCtx() {
 }
 
 function tone(freq, startTime, duration, opts = {}) {
+  if (soundMuted) return;
   const ctx = getAudioCtx();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -1830,7 +1874,9 @@ function freshState() {
     drawn: {},          // deckName -> indices already used this game
     history: [],        // undo snapshots
     finalDone: false,
-    finalWagers: {}
+    finalWagers: {},
+    boardIntro: false,
+    finalOffered: false
   };
 }
 
@@ -1897,6 +1943,8 @@ function startRound(roundIndex) {
   state.lastCorrectTeamId = null;
   state.history = [];
   state.finalDone = false;
+  state.finalOffered = false;
+  state.boardIntro = true;
   state.modeState = null;
   // Daily Double has to land on a real question that's actually on this board.
   state.dd = null;
@@ -1939,6 +1987,7 @@ function scoreEvent(team, delta, opts = {}) {
   // An Insurance Policy eats exactly one negative swing, then burns out.
   if (delta < 0 && team.shield) {
     team.shield = false;
+    flashToast('🛡️ ' + team.name + "'s shield ate that hit");
     delta = 0;
   }
   team.score += delta;
@@ -1979,7 +2028,7 @@ function renderScoreboard() {
   const maxScore = Math.max(...state.teams.map(t => t.score));
   $scoreboard.innerHTML = state.teams.map(t => `
     <div class="score-chip ${t.score === maxScore && maxScore > 0 ? 'leader' : ''}">
-      <div class="name">${escapeHtml(t.name)}</div>
+      <div class="name">${escapeHtml(t.name)}${t.shield ? '<span class="shield" title="Insurance Policy">🛡️</span>' : ''}</div>
       <div class="pts">${t.score}</div>
     </div>
   `).join('');
@@ -2172,15 +2221,23 @@ function renderBoard() {
   const usedCount = Object.keys(state.used).length;
   const totalCells = totalCellsForRound();
 
-  // Board cleared — go to the Final Showdown before crowning anyone.
+  // Board cleared — offer Final Showdown (or skip straight to the winner).
   if (usedCount === totalCells && totalCells > 0) {
-    if (!state.finalDone && state.teams.length > 0) { startFinalShowdown(); return; }
+    if (!state.finalDone && state.teams.length > 0) {
+      if (!state.finalOffered) { state.finalOffered = true; offerFinalOrSkip(); }
+      return;
+    }
     state.screen = 'winner';
     render();
     return;
   }
 
   const cols = activeCats();
+  if (state.boardIntro) {
+    renderBoardIntro(round, cols);
+    return;
+  }
+
   const cats = cols.map(c => `<div class="cat-header">${escapeHtml(c)}</div>`).join('');
   const rows = VALUES.map(v => {
     return cols.map(cat => {
@@ -2203,6 +2260,8 @@ function renderBoard() {
       <button class="btn-secondary" id="randomBtn">🎲 Random Square</button>
       <button class="btn-secondary" id="editScoreBtn">✏️ Scores</button>
       <button class="btn-secondary" id="undoBtn" ${canUndo ? '' : 'disabled'}>↩ Undo</button>
+      <button class="btn-secondary ${soundMuted ? 'muted-on' : ''}" id="muteBtn">${soundMuted ? '🔇 Muted' : '🔊 Sound'}</button>
+      <button class="btn-secondary" id="fullBtn">⛶ Fullscreen</button>
     </div>
     <div id="boardControls">
       <button class="btn-secondary" id="changeRoundBtn">Change Round</button>
@@ -2220,6 +2279,8 @@ function renderBoard() {
   document.getElementById('undoBtn').onclick = () => {
     if (undoLast()) render();
   };
+  document.getElementById('muteBtn').onclick = () => { setMuted(!soundMuted); render(); };
+  document.getElementById('fullBtn').onclick = toggleFullscreen;
   document.getElementById('randomBtn').onclick = () => {
     const open = [];
     activeCats().forEach(cat => VALUES.forEach(v => {
@@ -2243,9 +2304,55 @@ function renderBoard() {
       state.used = {};
       state.readerIndex = 0;
       state.finalDone = false;
+      state.finalOffered = false;
+      state.boardIntro = false;
       state.screen = 'roundselect';
       render();
     }
+  };
+}
+
+
+function toggleFullscreen() {
+  try {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  } catch (e) { flashToast('Fullscreen not available here'); }
+}
+
+function renderBoardIntro(round, cols) {
+  const wildCount = cols.reduce((n, c) => n + ((currentRound().wildValues[c] || []).length), 0);
+  $main.innerHTML = `
+    <h1 class="title" style="margin-top:4px;">🏆 ${escapeHtml(round.name)} 🏆</h1>
+    <div class="panel" style="max-width:720px;text-align:center;">
+      <h2>Tonight's Categories</h2>
+      <div class="intro-cats">${cols.map(c => `<div class="intro-cat">${escapeHtml(c)}</div>`).join('')}</div>
+      <div class="who-line">
+        ${wildCount} unmarked wildcard${wildCount === 1 ? '' : 's'} hiding on this board —
+        challenges, duels, votes, the works.
+        ${state.dd ? 'Plus one Daily Double.' : ''}
+      </div>
+      <div class="who-line" style="opacity:.7;">
+        ${escapeHtml(currentReader() ? currentReader().name : 'Somebody')}'s turn to pick first. Anyone can still shout the answer.
+      </div>
+      <button class="btn-primary btn-full" id="introGo">Let's Play</button>
+    </div>`;
+  document.getElementById('introGo').onclick = () => { state.boardIntro = false; render(); };
+}
+
+function offerFinalOrSkip() {
+  openOverlayCard(`
+    <div class="tag dd">🏁 BOARD CLEARED 🏁</div>
+    <div class="who-line">Final Showdown time — category reveal, blind wagers, one hard question. Or skip straight to crowning someone.</div>
+    <button class="btn-primary btn-full" id="doFinal">🏁 Final Showdown</button>
+    <button class="btn-secondary btn-full" id="skipFinal">Skip to the Winner</button>
+  `);
+  document.getElementById('doFinal').onclick = () => { closeOverlay(); startFinalShowdown(); };
+  document.getElementById('skipFinal').onclick = () => {
+    state.finalDone = true;
+    closeOverlay();
+    state.screen = 'winner';
+    render();
   };
 }
 
@@ -2319,31 +2426,45 @@ function openQuestion(cat, val) {
       ${hint ? `<div class="who-line">${escapeHtml(hint)}</div>` : ''}
       <div class="qtext">${escapeHtml(item.q)}</div>
       <button class="btn-primary" id="revealBtn">Reveal Answer</button>
+      <div class="key-hint">Space = reveal · 1–${state.teams.length} = award that team · 0 = nobody</div>
       <div id="answerArea"></div>
     </div>
   `;
   document.body.appendChild(overlay);
 
-  document.getElementById('revealBtn').onclick = () => {
-    document.getElementById('revealBtn').remove();
-    document.getElementById('answerArea').innerHTML = `
+  const showAward = (stealMode) => {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = `
       <div class="atext">${escapeHtml(item.a)}</div>
-      <div>Who got it right?</div>
+      <div>${stealMode ? 'Steal is open — who cleaned it up?' : 'Who got it right?'}</div>
       ${teamButtonsHtml('award')}
-      <button class="btn-secondary none-btn" id="noneBtn">Nobody Scored</button>
+      ${stealMode ? '' : '<button class="btn-secondary" id="stealBtn" style="margin-top:10px;">First shout was wrong — open steals</button>'}
+      <button class="btn-secondary none-btn" id="noneBtn">${stealMode ? 'Still nobody' : 'Nobody Scored'}</button>
+      <div class="key-hint">Keys 1–${state.teams.length} award · 0 nobody</div>
     `;
     document.querySelectorAll('[data-prefix="award"]').forEach(btn => {
       btn.onclick = () => {
+        if (btn.dataset.locked) return;
+        btn.dataset.locked = '1';
         const team = state.teams.find(t => t.id == btn.dataset.team);
         scoreEvent(team, val, { isAnswer: true });
         playCorrect();
         markUsedAndReturn(cat, val);
       };
     });
+    const $steal = document.getElementById('stealBtn');
+    if ($steal) $steal.onclick = () => showAward(true);
     document.getElementById('noneBtn').onclick = () => {
       playWrong();
       markUsedAndReturn(cat, val);
     };
+  };
+
+  document.getElementById('revealBtn').onclick = () => {
+    document.getElementById('revealBtn').remove();
+    const hintEl = overlay.querySelector('.key-hint');
+    if (hintEl) hintEl.remove();
+    showAward(false);
   };
 }
 
@@ -2621,6 +2742,10 @@ let activeTimer = null;
 
 function stopTimer() {
   if (activeTimer) { clearInterval(activeTimer); activeTimer = null; }
+  if (typeof timerAutoStart !== 'undefined' && timerAutoStart) {
+    clearTimeout(timerAutoStart);
+    timerAutoStart = null;
+  }
 }
 
 function timerHtml(seconds) {
@@ -2633,10 +2758,14 @@ function timerHtml(seconds) {
   `;
 }
 
+let timerAutoStart = null;
 function wireTimer(seconds) {
   const btn = document.getElementById('timerStartBtn');
   if (!btn) return;
-  btn.onclick = () => {
+  const begin = () => {
+    if (!document.getElementById('timerStartBtn')) return;
+    clearTimeout(timerAutoStart);
+    timerAutoStart = null;
     btn.remove();
     let left = seconds;
     const $num = document.getElementById('timerNum');
@@ -2654,6 +2783,10 @@ function wireTimer(seconds) {
       }
     }, 1000);
   };
+  btn.onclick = begin;
+  // Living rooms forget to tap Start. Auto-kick after a beat; host can still mash it early.
+  clearTimeout(timerAutoStart);
+  timerAutoStart = setTimeout(begin, 1600);
 }
 
 /* ============================================================
@@ -3529,6 +3662,34 @@ function renderPotato() {
 /* ============================================================
    BOOT
 ============================================================ */
+document.addEventListener('keydown', (e) => {
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  const ov = document.getElementById('overlay');
+  if (!ov) return;
+  if (e.code === 'Space') {
+    const reveal = document.getElementById('revealBtn')
+      || document.getElementById('revealDDBtn')
+      || document.getElementById('revealF')
+      || document.getElementById('sReveal')
+      || document.getElementById('wildGoBtn');
+    if (reveal) { e.preventDefault(); reveal.click(); }
+    return;
+  }
+  if (e.key >= '1' && e.key <= '9') {
+    const btns = [...ov.querySelectorAll('[data-prefix="award"], [data-prefix="chalaward"], [data-prefix="bq"]')];
+    const i = parseInt(e.key, 10) - 1;
+    if (btns[i]) { e.preventDefault(); btns[i].click(); }
+    return;
+  }
+  if (e.key === '0') {
+    const none = document.getElementById('noneBtn')
+      || document.getElementById('chalNoneBtn')
+      || document.getElementById('bqNone');
+    if (none) { e.preventDefault(); none.click(); }
+  }
+});
+
 (function boot() {
   normalizeRounds();
   const saved = loadSavedGame();
