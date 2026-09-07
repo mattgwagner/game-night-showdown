@@ -4354,13 +4354,14 @@ function openBuzzHostCard() {
   overlay.id = 'overlay';
   overlay.innerHTML = `
     <div class="card">
-      <div class="tag">🔔 Buzzers</div>
+      <div class="tag">📺 Dual Screen</div>
       <div class="buzz-code">${escapeHtml(buzz.code)}</div>
-      <div class="who-line"><strong>Players</strong></div>
-      <div class="buzz-join-url">${escapeHtml(links.join)}</div>
-      <div class="who-line" style="margin-top:12px;"><strong>Host phone (answers)</strong></div>
+      <div class="who-line"><strong>Host phone (answers)</strong></div>
       <div class="buzz-join-url">${escapeHtml(links.host)}</div>
+      <div class="who-line" style="margin-top:12px;"><strong>Players (buzz in)</strong></div>
+      <div class="buzz-join-url">${escapeHtml(links.join)}</div>
       <div class="who-line">${buzz.players.length} player${buzz.players.length === 1 ? '' : 's'} connected</div>
+      <div class="hint" style="margin-top:10px;">TV = questions. Host phone = answers + scoring.</div>
       <button class="btn-primary btn-full" id="buzzCopyHost" style="margin-top:14px;">Copy Host Link</button>
       <button class="btn-secondary btn-full" id="buzzCopyJoin">Copy Player Link</button>
       <button class="btn-secondary btn-full" id="buzzCloseBtn">Done</button>
