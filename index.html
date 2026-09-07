@@ -4072,7 +4072,7 @@ const buzz = {
   teamName: '',
   joinCode: '',
   reconnectTimer: null,
-  intentionalClose: false,
+  gen: 0,
 };
 
 function buzzSend(msg) {
@@ -4116,11 +4116,12 @@ function buzzApplyState(msg) {
   if (hostRoot) renderHostCompanionApp();
 }
 
-function scheduleBuzzReconnect(code, role, opts) {
-  if (buzz.intentionalClose) return;
+function scheduleBuzzReconnect(code, role, opts, gen) {
+  if (gen !== buzz.gen) return;
   if (buzz.reconnectTimer) clearTimeout(buzz.reconnectTimer);
   buzz.reconnectTimer = setTimeout(() => {
-    connectBuzzSocket(code, role, opts).catch(() => scheduleBuzzReconnect(code, role, opts));
+    if (gen !== buzz.gen) return;
+    connectBuzzSocket(code, role, opts).catch(() => scheduleBuzzReconnect(code, role, opts, buzz.gen));
   }, 1200);
 }
 
@@ -4134,13 +4135,11 @@ function connectBuzzSocket(code, role, opts = {}) {
       clearTimeout(buzz.reconnectTimer);
       buzz.reconnectTimer = null;
     }
-    buzz.intentionalClose = false;
+    const gen = ++buzz.gen;
     if (buzz.ws) {
-      buzz.intentionalClose = true;
       try { buzz.ws.close(); } catch (e) {}
       buzz.ws = null;
       buzz.connected = false;
-      buzz.intentionalClose = false;
     }
     const ws = new WebSocket(`${BUZZ_WS}?room=${encodeURIComponent(code)}`);
     buzz.ws = ws;
@@ -4149,6 +4148,7 @@ function connectBuzzSocket(code, role, opts = {}) {
     let opened = false;
     let settled = false;
     ws.onopen = () => {
+      if (gen !== buzz.gen) return;
       opened = true;
       const defaultName = role === 'host' ? 'Stage' : role === 'controller' ? 'Host' : 'Player';
       const name = opts.name || buzz.name || defaultName;
@@ -4167,6 +4167,7 @@ function connectBuzzSocket(code, role, opts = {}) {
       }
     };
     ws.onmessage = (ev) => {
+      if (gen !== buzz.gen) return;
       let msg;
       try { msg = JSON.parse(ev.data); } catch { return; }
       if (msg.type === 'welcome') {
@@ -4191,7 +4192,8 @@ function connectBuzzSocket(code, role, opts = {}) {
       }
     };
     ws.onclose = () => {
-      const wasConnected = buzz.connected;
+      if (gen !== buzz.gen) return;
+      const wasOpen = opened;
       buzz.connected = false;
       buzz.ws = null;
       buzz.armed = false;
@@ -4203,11 +4205,10 @@ function connectBuzzSocket(code, role, opts = {}) {
       if (joinRoot) renderBuzzJoinApp();
       const hostRoot = document.getElementById('buzzHostRoot');
       if (hostRoot) renderHostCompanionApp();
-      if (wasConnected || opened) {
-        scheduleBuzzReconnect(code, role, opts);
-      }
+      if (wasOpen) scheduleBuzzReconnect(code, role, opts, gen);
     };
     ws.onerror = () => {
+      if (gen !== buzz.gen) return;
       if (!opened && !settled) {
         settled = true;
         reject(new Error('ws error'));
