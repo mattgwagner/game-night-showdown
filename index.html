@@ -2607,15 +2607,54 @@ function toggleFullscreen() {
   } catch (e) { /* fall through */ }
 }
 
-function renderBoardIntro(round, cols) {
-  $main.innerHTML = `
-    <h1 class="title" style="margin-top:4px;">🏆 ${escapeHtml(round.name)} 🏆</h1>
-    <div class="panel" style="max-width:720px;text-align:center;">
-      <h2>Categories</h2>
-      <div class="intro-cats">${cols.map(c => `<div class="intro-cat">${escapeHtml(c)}</div>`).join('')}</div>
-      <button class="btn-primary btn-full" id="introGo">Play</button>
-    </div>`;
-  document.getElementById('introGo').onclick = () => { state.boardIntro = false; render(); };
+function renderBoardIntro(round) {
+  const max = Math.min(state.boardSize || 4, round.categories.length);
+  const selected = new Set(state.activeCategories || []);
+
+  function paint() {
+    const count = selected.size;
+    $main.innerHTML = `
+      <h1 class="title" style="margin-top:4px;">${escapeHtml(round.name)}</h1>
+      <div class="panel" style="max-width:720px;text-align:center;">
+        <h2>Categories</h2>
+        <div class="hint">${count} selected · tap to toggle · up to ${max}</div>
+        <div class="intro-cats" id="catPick"></div>
+        <button class="btn-secondary btn-full" id="introRandom" style="margin-top:8px;">Random ${max}</button>
+        <button class="btn-primary btn-full" id="introGo" ${count < 1 ? 'disabled' : ''}>Play (${count})</button>
+      </div>`;
+    const box = document.getElementById('catPick');
+    box.innerHTML = round.categories.map(c => {
+      const on = selected.has(c);
+      return `<button type="button" class="intro-cat ${on ? 'on' : 'off'}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`;
+    }).join('');
+    box.querySelectorAll('[data-cat]').forEach(btn => {
+      btn.onclick = () => {
+        const c = btn.dataset.cat;
+        if (selected.has(c)) selected.delete(c);
+        else {
+          if (selected.size >= max) {
+            // Drop the oldest pick so tapping another category swaps in.
+            const first = selected.values().next().value;
+            selected.delete(first);
+          }
+          selected.add(c);
+        }
+        state.activeCategories = [...selected];
+        paint();
+      };
+    });
+    document.getElementById('introRandom').onclick = () => {
+      state.activeCategories = shuffle(round.categories).slice(0, max);
+      selected.clear();
+      state.activeCategories.forEach(c => selected.add(c));
+      paint();
+    };
+    document.getElementById('introGo').onclick = () => {
+      if (!selected.size) return;
+      lockInCategories([...selected]);
+    };
+  }
+  paint();
 }
 
 function offerFinalOrSkip() {
