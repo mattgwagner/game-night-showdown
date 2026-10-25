@@ -4190,9 +4190,17 @@ function buzzApplyState(msg) {
   if (msg.teams) buzz.teams = msg.teams;
   if (msg.prompt !== undefined) buzz.prompt = msg.prompt;
 
-  // Stage: remote reveal landed
+  // Player: the room still carries last game's teams until the TV sends tonight's.
+  // If my pick isn't on the new list, ask again rather than scoring a different team.
+  if (buzz.role === 'player' && buzz.teamName && buzz.teams.length &&
+      !buzz.teams.some(t => t.id == buzz.teamId && t.name === buzz.teamName)) {
+    buzz.teamId = null;
+    buzz.teamName = '';
+  }
+
+  // Stage: remote reveal landed (skip the echo of a reveal tapped on the TV itself)
   if (buzz.role === 'host' && buzz.prompt && buzz.prompt.revealed && !prevRevealed) {
-    if (typeof window.__stageShowAnswer === 'function' && document.getElementById('overlay')) {
+    if (typeof window.__stageShowAnswer === 'function' && document.getElementById('revealBtn')) {
       window.__stageShowAnswer(buzz.prompt.a);
     }
   }
@@ -4253,6 +4261,12 @@ function connectBuzzSocket(code, role, opts = {}) {
           type: 'setTeams',
           teams: state.teams.map(t => ({ id: t.id, name: t.name, color: t.color })),
         });
+      }
+      // The room outlives the tab. If the TV isn't on a question, drop any
+      // armed question left over from a reload or last game night.
+      if (role === 'host' && !document.getElementById('buzzPanelHost')) {
+        buzzSend({ type: 'disarm' });
+        buzzSend({ type: 'clearPrompt' });
       }
     };
     ws.onmessage = (ev) => {
