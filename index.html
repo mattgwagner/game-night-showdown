@@ -481,7 +481,8 @@
   body.on-board .cat-header {
     min-height: 44px;
     padding: 6px 4px;
-    font-size: clamp(0.7rem, 2.4vmin, 1.2rem);
+    /* Shrink with column width so a 12-letter word still fits on 8 columns. */
+    font-size: min(clamp(0.7rem, 2.4vmin, 1.2rem), calc(((100vw - 24px) / var(--cols, 4) - 12px) / 10));
   }
   body.on-board .cell {
     min-height: 0;
@@ -489,6 +490,12 @@
   }
   body.on-board #boardControls { display: none; }
   body.on-board .host-bar { display: none; }
+  /* Bottom-right sat on the last 500 square; the title band has room. */
+  body.on-board .host-fab {
+    top: calc(var(--sb-h, 0px) + 8px);
+    bottom: auto;
+    min-height: 44px;
+  }
 
   @media (orientation: landscape) and (max-height: 900px) {
     body.on-board .title.board-title { font-size: clamp(1rem, 2.8vmin, 1.5rem); }
@@ -2584,7 +2591,7 @@ function renderBoard() {
   $main.innerHTML = `
     <h1 class="title board-title">🏆 ${escapeHtml(round.name)} 🏆</h1>
     ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong></div>` : ''}
-    <div id="board" style="grid-template-columns:repeat(${cols.length}, minmax(0, 1fr));">${cats}${rows}</div>
+    <div id="board" style="grid-template-columns:repeat(${cols.length}, minmax(0, 1fr));--cols:${cols.length};">${cats}${rows}</div>
     <button class="host-fab" id="hostFab" type="button">☰ Host</button>
   `;
 
