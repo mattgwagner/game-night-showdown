@@ -239,19 +239,6 @@
     line-height: 1.4; font-weight: 600;
   }
   .judge-row { margin-top: 18px; }
-  .vote-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-  .vote-opt {
-    font-size: 1.05rem; padding: 18px 12px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    min-height: 110px; justify-content: center;
-  }
-  .vote-num {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 2.2rem; height: 2.2rem; border-radius: 50%;
-    background: var(--gold); color: #020a38;
-    font-weight: 900; font-size: 1.25rem; line-height: 1;
-  }
-  .vote-label { font-weight: 800; line-height: 1.25; }
   .btn-score {
     display: block; font-size: 1.25rem; font-weight: 900;
     color: var(--gold); margin-top: 3px; font-variant-numeric: tabular-nums;
@@ -408,7 +395,6 @@
     max-width: 90vw; text-align: center;
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .score-chip .shield { display: inline-block; margin-left: 4px; font-size: .85rem; }
   .intro-cats {
     display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
     margin: 16px 0 8px;
@@ -1169,10 +1155,10 @@ const ROUNDS = [
     id: "r9",
     type: "gauntlet",
     name: "Round 9: The Reckoning",
-    tagline: "No trivia. Forty squares of tasks, dares, duels and public judgment.",
+    tagline: "No trivia. Forty squares of tasks, dares, duels and push-ups.",
     categories: [
       "Physical Feats", "Center Stage", "Fast Hands", "Head to Head",
-      "The People Decide", "Dealer's Choice", "Dares", "All In"
+      "Feel the Burn", "Dealer's Choice", "Dares", "All In"
     ],
     wildcardSlots: {},
     // Every square draws live from the decks — the board is never the same twice.
@@ -1181,7 +1167,7 @@ const ROUNDS = [
       "Center Stage":      { deck: "challenge", type: "performance" },
       "Fast Hands":        { deck: "challenge", type: "speed" },
       "Head to Head":      { deck: "duel" },
-      "The People Decide": { deck: "vote" },
+      "Feel the Burn":     { deck: "challenge", type: "burn" },
       "Dealer's Choice":   { deck: "challenge" },
       "Dares":             { deck: "challenge", type: ["social", "drink"] },
       "All In":            { deck: "challenge", type: "room" }
@@ -1698,46 +1684,8 @@ const CHALLENGES = [
   { t: "Plank Standoff", d: "One person from your team holds a plank. The room counts out loud. Make it to the buzzer and the points are yours.", timer: 45, who: "one", type: "physical" },
   { t: "Wall Sit", d: "Back flat on a wall, thighs parallel to the floor. Hold it. No hands on knees, no sliding down.", timer: 45, who: "one", type: "physical" },
   { t: "Flamingo", d: "Stand on one foot with your eyes closed and your arms crossed. Put a foot down and it's over.", timer: 30, who: "one", type: "physical" },
-  { t: "Ice Fist", d: "Hold an ice cube in a closed fist until the buzzer. You may not put it down, and you may not stop making eye contact with the room.", timer: 45, who: "one", type: "physical" },
-  { t: "Steady Hand", d: "Hold a full cup of water straight out at arm's length. Elbow locked. Spill it or bend it and you get nothing.", timer: 60, who: "one", type: "physical" },
-  { t: "Bottle Flip", d: "Land a partly-full water bottle upright. Three attempts. That's it.", timer: 0, who: "one", type: "physical" },
-  { t: "Cap Shot", d: "Toss a bottle cap into a cup from six feet away. Three attempts.", timer: 0, who: "one", type: "physical" },
-  { t: "Sock Hoops", d: "Roll up a sock and sink it into a trash can from across the room. Three attempts.", timer: 0, who: "one", type: "physical" },
-  { t: "Pack Mule", d: "Stack five household objects, carry them across the room and back without dropping a single one.", timer: 45, who: "one", type: "physical" },
   { t: "The Blind Crossing", d: "One player closes their eyes. A teammate talks them across the room and back using words only. No touching.", timer: 60, who: "team", type: "physical" },
-  { t: "Cup Pyramid", d: "Build a pyramid out of at least six cups and get it standing before the buzzer.", timer: 30, who: "one", type: "physical" },
-  { t: "The Limbo", d: "Someone holds a broom. You go under it. It gets lower. Knees don't touch, hands don't touch.", timer: 0, who: "one", type: "physical" },
   { t: "Beast of Burden", d: "Piggyback a teammate one full lap around the room. Both feet down early and you're done.", timer: 45, who: "team", type: "physical" },
-  { t: "Spoon Walk", d: "Balance a lime on a spoon, held in your mouth, and walk a lap. Drop it and you're out.", timer: 45, who: "one", type: "physical" },
-  { t: "Elbow Coins", d: "Stack three coins on your elbow, drop your arm, and catch them all. Three attempts.", timer: 0, who: "one", type: "physical" },
-  { t: "Knee Pillow", d: "Walk a lap with a couch pillow pinched between your knees. Hands off. Drop it and you're done.", timer: 45, who: "one", type: "physical" },
-  { t: "Chin Fruit", d: "Tuck a lime or orange under your chin and pass it to a teammate, chin to chin. No hands. Two successful passes.", timer: 60, who: "team", type: "physical" },
-  { t: "Oven Mitts", d: "Put oven mitts or socks on your hands and unwrap a piece of candy. Eat it before the buzzer.", timer: 45, who: "one", type: "physical" },
-  { t: "Balloon Elbows", d: "Keep a balloon in the air using only your elbows. Ten touches. If it hits the floor, start over.", timer: 45, who: "one", type: "physical" },
-  { t: "Forehead Balloon", d: "Hold a balloon against the wall with only your forehead. No hands. Make it to the buzzer.", timer: 20, who: "one", type: "physical" },
-  { t: "The Waiter", d: "Walk a lap with a paper plate or book and a half-full cup on top of it. Spill it and you're out.", timer: 45, who: "one", type: "physical" },
-  { t: "Shoe Bowling", d: "Stand a water bottle up. Knock it over with a thrown shoe from across the room. Three attempts.", timer: 0, who: "one", type: "physical" },
-  { t: "Card Flick", d: "Flick three playing cards — or loyalty cards — into a bowl from five feet. Land two.", timer: 0, who: "one", type: "physical" },
-  { t: "Cookie Face", d: "Put a cookie or a cracker on your forehead. Get it to your mouth. No hands.", timer: 45, who: "one", type: "physical" },
-  { t: "Jacket Puzzle", d: "Take your jacket or hoodie off, turn it inside out, and put it back on. Before the buzzer.", timer: 40, who: "one", type: "physical" },
-  { t: "One-Foot Lace", d: "Stand on one foot and untie, then retie, the other shoe. Second foot down and it's over.", timer: 45, who: "one", type: "physical" },
-  { t: "Tower of Junk", d: "Thirty seconds. Tallest free-standing stack from whatever is on the table. It has to stay up when you step back.", timer: 30, who: "one", type: "physical" },
-  { t: "Sock Kick", d: "Kick a balled-up sock into a trash can or laundry basket from six feet. Three attempts.", timer: 0, who: "one", type: "physical" },
-  { t: "Phone Head", d: "Walk a lap with a phone balanced on your head, screen up. Catch it and you're done.", timer: 40, who: "one", type: "physical" },
-  { t: "Nose Chip", d: "Balance a chip or a pretzel on your nose for ten straight seconds. The room counts.", timer: 20, who: "one", type: "physical" },
-  { t: "Furniture Islands", d: "Cross the room stepping only on cushions, pillows, or furniture. Feet on the actual floor and you're out.", timer: 45, who: "one", type: "physical" },
-  { t: "Human Burrito", d: "Wrap a teammate in a blanket like a burrito. They have to be able to hop once when you're done.", timer: 45, who: "team", type: "physical" },
-  { t: "Penny Hockey", d: "Slide a coin down the table and into a cup on the far end. Three attempts.", timer: 0, who: "one", type: "physical" },
-  { t: "Keepy-Uppy", d: "Keep a balloon off the floor for fifteen hits. Hands only. If it drops, start the count over.", timer: 40, who: "one", type: "physical" },
-  { t: "Backwards Waiter", d: "Walk a lap backwards with a half-full cup. Spill it or look over your shoulder and you're out.", timer: 45, who: "one", type: "physical" },
-  { t: "Twister Reach", d: "Left hand on the remote. Right foot on the couch. Hold it until the buzzer. Fall and it's over.", timer: 20, who: "one", type: "physical" },
-  { t: "Tissue Feet", d: "Empty a tissue box using only your feet. Ten tissues. No hands.", timer: 45, who: "one", type: "physical" },
-  { t: "Candy Mitts", d: "A teammate puts the mitts or socks on you. You feed them a piece of candy. Nobody uses bare hands.", timer: 40, who: "team", type: "physical" },
-  { t: "Balloon Knees", d: "Walk a lap with a balloon between your knees. Pop it or drop it and you're done.", timer: 40, who: "one", type: "physical" },
-  { t: "Paper Plane", d: "Fold a paper airplane and land it in a laundry basket or box from across the room. Three throws.", timer: 0, who: "one", type: "physical" },
-  { t: "Clip Collector", d: "Clip five chip clips, clothespins, or binder clips onto your own shirt before the buzzer.", timer: 25, who: "one", type: "physical" },
-  { t: "No-Hands Sip", d: "Pick a cup up off the table and take a sip using only your mouth. No hands. Set it back down.", timer: 30, who: "one", type: "physical" },
-  { t: "Three-Legged Lap", d: "Tie two teammates' inside legs together with a dish towel. Walk a lap. Untie early and you're out.", timer: 60, who: "team", type: "physical" },
 
   /* ---------- performance ---------- */
   { t: "Do The Voice", d: "Do an impression of somebody in this room. Say nothing about who it is. If three or more people correctly name them, you score.", timer: 45, who: "one", type: "performance" },
@@ -1748,8 +1696,6 @@ const CHALLENGES = [
   { t: "Villain Reading", d: "Recite a nursery rhyme as a Shakespearean villain. Full menace. No laughing — if you break, you lose it.", timer: 40, who: "one", type: "performance" },
   { t: "Silent Movie", d: "Act out a famous movie scene with zero words. The room gets one minute to guess it.", timer: 60, who: "one", type: "performance" },
   { t: "Name That Hum", d: "Hum a song. The room has forty-five seconds to name it. No words, no rhythm tapping.", timer: 45, who: "one", type: "performance" },
-  { t: "Pep Talk", d: "Deliver a locker-room speech to whichever team is in last place. Make them believe. The room votes on whether it worked.", timer: 45, who: "one", type: "performance" },
-  { t: "Runway", d: "Strut a full lap of the room like it's fashion week. The room scores you on confidence alone.", timer: 30, who: "one", type: "performance" },
   { t: "Dance Break", d: "The host plays twenty seconds of anything. You dance for all twenty. Stopping early is a forfeit.", timer: 25, who: "one", type: "performance" },
   { t: "Accent Reading", d: "Read your most recent text message out loud in a British accent. It has to survive the whole message.", timer: 30, who: "one", type: "performance" },
   { t: "One-Man Band", d: "Perform the chorus of a song the room picks. Every word correct or no points.", timer: 45, who: "one", type: "performance" },
@@ -1774,7 +1720,6 @@ const CHALLENGES = [
   { t: "Say Something Nice", d: "Give a genuine, specific compliment to every single person in this room. Generic doesn't count and the room will call it.", timer: 90, who: "one", type: "social" },
   { t: "Interrogation", d: "Speak only in questions until your team's next turn. Slip once and the points come back off.", timer: 0, who: "one", type: "social" },
   { t: "On Your Feet", d: "You are standing for the rest of this round. Sit down and it's a forfeit.", timer: 0, who: "one", type: "social" },
-  { t: "Storytime", d: "Tell a genuinely embarrassing story about yourself. The room votes on whether it was worth the points.", timer: 90, who: "one", spice: "party", type: "social" },
   { t: "Camera Roll", d: "Show the room the most recent photo in your camera roll. No scrolling, no choosing.", timer: 20, who: "one", spice: "party", type: "social" },
   { t: "Read It Aloud", d: "Read your most recent sent text message out loud. Whole thing.", timer: 20, who: "one", spice: "party", type: "social" },
   { t: "I've Made A Huge Mistake", d: "Text the fifth person in your recent messages exactly: \"I've made a huge mistake.\" Nothing else. Show the room the send.", timer: 45, who: "one", spice: "party", type: "social" },
@@ -1791,15 +1736,23 @@ const CHALLENGES = [
   { t: "Human Knot", d: "EVERYBODY. Grab two hands that aren't next to you. Untangle without letting go. Beat the clock and every team scores.", timer: 120, who: "room", type: "room" },
   { t: "Freeze", d: "EVERYBODY. Freeze in place. Nobody moves, nobody laughs. First to break is out, last one frozen scores.", timer: 0, who: "room", type: "room" },
   /* ---------- more quirky physical ---------- */
-  { t: "The Broom Balance", d: "Stand a broom upright on your open palm and keep it there until the buzzer. Walking is allowed. Panicking is expected.", timer: 30, who: "one", type: "physical" },
   { t: "Dizzy Line", d: "Spin in place ten times, then walk a straight line across the room. Nobody has ever looked good doing this.", timer: 45, who: "one", type: "physical" },
   { t: "One Foot Hop", d: "Hop across the room and back on one foot. Second foot touches down, you're done.", timer: 45, who: "one", type: "physical" },
-  { t: "Farmer Carry", d: "Pick up the two heaviest things you can safely hold and carry them a full lap without setting them down.", timer: 45, who: "one", type: "physical" },
-  { t: "Library Posture", d: "Stack at least three books on your head and walk a lap. They all have to survive.", timer: 45, who: "one", type: "physical" },
-  { t: "Juggle Something", d: "Juggle any three objects for fifteen straight seconds. Fruit, socks, remotes, whatever's close.", timer: 20, who: "one", type: "physical" },
-  { t: "Weighted Plank", d: "Plank with a full cup of water balanced on your back. Spill it and it's over.", timer: 30, who: "one", type: "physical" },
   { t: "Wheelbarrow Lap", d: "One teammate on their hands, the other holding their ankles. One lap. Nobody eats carpet.", timer: 45, who: "team", type: "physical" },
   { t: "Crab Walk", d: "Crab walk a lap of the room. Belly up the whole way. This is the only animal walk we kept, because it looks ridiculous.", timer: 45, who: "one", type: "physical" },
+
+  /* ---------- burn — bodyweight only, nothing to fetch ---------- */
+  { t: "Push-Up Count", d: "Fifteen clean push-ups before the buzzer. Chest near the floor or it doesn't count. The room counts out loud.", timer: 40, who: "one", type: "burn" },
+  { t: "Burpees", d: "Ten burpees before the buzzer. Chest to the floor, jump at the top.", timer: 45, who: "one", type: "burn" },
+  { t: "Air Squats", d: "Twenty-five air squats before the buzzer. Hips below the knees or the room won't count it.", timer: 45, who: "one", type: "burn" },
+  { t: "Side Plank", d: "Side plank on either side until the buzzer. Hips stay up the whole time.", timer: 40, who: "one", type: "burn" },
+  { t: "Superman", d: "Face down, arms and legs off the floor. Hold it until the buzzer.", timer: 40, who: "one", type: "burn" },
+  { t: "Hollow Hold", d: "On your back, shoulders and heels off the floor, arms overhead. Hold it until the buzzer.", timer: 30, who: "one", type: "burn" },
+  { t: "Jumping Jack Alphabet", d: "One jumping jack per letter, saying the alphabet out loud. Lose your place and you start over at A.", timer: 45, who: "one", type: "burn" },
+  { t: "Mountain Climbers", d: "Forty mountain climbers before the buzzer. The room counts.", timer: 40, who: "one", type: "burn" },
+  { t: "Lunge Lap", d: "Walking lunges, one full lap of the room. Back knee nearly touches the floor every step.", timer: 60, who: "one", type: "burn" },
+  { t: "Team Push-Ups", d: "Whole team drops. Thirty push-ups combined before the buzzer. The room counts.", timer: 40, who: "team", type: "burn" },
+  { t: "Push-Up Standoff", d: "EVERYBODY drops into the top of a push-up, arms straight. Last one still up wins it for their team.", timer: 0, who: "room", type: "room" },
 
   /* ---------- physical, with an audience problem ---------- */
   { t: "Plank and Publish", d: "Hold a plank while the person on your left reads your three most recent text messages out loud. Break the plank early and you forfeit.", timer: 45, who: "one", type: "physical", spice: "party" },
@@ -1815,7 +1768,6 @@ const CHALLENGES = [
   { t: "Ten Seconds", d: "Hand your phone to the person across from you. They get ten seconds in your camera roll and full narration rights.", timer: 20, who: "one", type: "social", spice: "party" },
   { t: "Cryptic", d: "Send a single unexplained emoji to your largest group chat. Do not answer any follow-up questions for the rest of the round.", timer: 40, who: "one", type: "social", spice: "party" },
   { t: "Old Voicemail", d: "Find the oldest saved voicemail on your phone and play it for the room.", timer: 60, who: "one", type: "social", spice: "party" },
-  { t: "The Confession", d: "Admit something you have genuinely never told anybody in this room. The room votes on whether it counted.", timer: 60, who: "one", type: "social", spice: "party" },
   { t: "Worst Purchase", d: "Tell the room about the dumbest thing you have ever spent real money on. Amount included.", timer: 60, who: "one", type: "social", spice: "party" },
   { t: "Unsent", d: "Describe — no names — the pettiest message you have ever typed out and then deleted without sending.", timer: 60, who: "one", type: "social", spice: "party" },
 
@@ -1825,7 +1777,6 @@ const CHALLENGES = [
      its own toggle so a room with somebody sober, pregnant or driving can
      still play everything else. */
   { t: "Never Have I Ever", d: "Everybody holds up three fingers. Go around the room with a 'never have I ever' — drop a finger and take a sip if you've done it. First person out of fingers loses the square for their team.", timer: 0, who: "room", type: "drink", drinks: true },
-  { t: "Most Likely To", d: "The host reads a 'most likely to.' On three, everybody points. Whoever gets the most fingers takes a sip and owes the room an explanation.", timer: 0, who: "room", type: "drink", drinks: true },
   { t: "Categories", d: "Picker names a category. Go around the circle naming things in it. Repeat, stall, or blank out and you take a sip.", timer: 0, who: "room", type: "drink", drinks: true },
   { t: "Rule Master", d: "The picking team invents one rule that binds the entire room until their next turn. Break the rule, take a sip. Choose something petty.", timer: 0, who: "team", type: "drink", drinks: true },
   { t: "Thumb Master", d: "At any point before your next turn, put your thumb on the table without saying a word. Last person to notice and copy you takes a sip.", timer: 0, who: "one", type: "drink", drinks: true },
@@ -1852,57 +1803,16 @@ const CHALLENGES = [
   { t: "The Compliment Circle", d: "EVERYBODY. Go around the room — each person gives the person on their left one genuine compliment. Ten seconds each. Anybody who phones it in gets sent around again.", timer: 0, who: "room", type: "room" },
   { t: "Copycat", d: "EVERYBODY. The picking team starts a motion. Each person around the circle repeats every motion before it and adds one. First to break the chain ends it.", timer: 0, who: "room", type: "room" },
   { t: "Air Band", d: "EVERYBODY. Host plays fifteen seconds of anything. Every person picks an instrument and commits. No two people on the same instrument.", timer: 20, who: "room", type: "room" },
-  { t: "Same Face", d: "EVERYBODY. Host names an emotion. On three, the whole room makes that face at each other. Funniest face takes it.", timer: 0, who: "room", type: "room" },
   { t: "Desert Island", d: "EVERYBODY. Go around the room naming one thing you'd take to a desert island. No repeats, no hesitating. First person to stall is out.", timer: 0, who: "room", type: "room" },
   { t: "Stand Up, Sit Down", d: "EVERYBODY on your feet. The host calls out things — 'sit down if you've never been on a cruise.' Last person standing scores.", timer: 0, who: "room", type: "room" },
   { t: "The Wave", d: "EVERYBODY. Get a clean stadium wave all the way around the room three times without a single gap. Sounds easy. It is not.", timer: 45, who: "room", type: "room" },
   { t: "Guess Who Wrote It", d: "EVERYBODY writes one word describing this group on their phone and hands it to the host. Host reads them out. The room guesses who wrote which.", timer: 60, who: "room", type: "room" },
   { t: "Group Tongue Twister", d: "EVERYBODY, in unison, three times fast: 'red leather, yellow leather.' If the room falls apart, the room falls apart together.", timer: 25, who: "room", type: "room" },
-  { t: "Team Chant", d: "EVERY TEAM huddles up and invents a five-second chant. Perform them one at a time. Loudest room reaction wins it.", timer: 60, who: "room", type: "room" },
   { t: "Pass the Face", d: "EVERYBODY. Picker makes a face at the person on their left, who copies it exactly and passes their own new one on. All the way around.", timer: 0, who: "room", type: "room" },
   { t: "Count to Ten", d: "EVERYBODY. As a room, count to ten out loud — but nobody can plan who says which number, and if two people speak at once you start over.", timer: 60, who: "room", type: "room" },
-  { t: "Worst Haircut", d: "EVERYBODY. Go around the room, everyone describes their worst haircut era in one sentence. Room votes on the champion.", timer: 90, who: "room", type: "room" },
   { t: "Category Chain", d: "EVERYBODY. Picker names a category. Go around the room, one item each, no repeats. First to stall sits down. Keep going until one is left.", timer: 0, who: "room", type: "room" },
-  { t: "Everybody Points", d: "EVERYBODY. The host reads a question about the room. On three, everybody points at their answer. Whoever gets the most fingers has to accept it.", timer: 0, who: "room", type: "room" },
   { t: "Two Line Standoff", d: "EVERYBODY. Split into two lines facing each other. Staring contest with the person opposite. Winners step forward and pair up again until one is left.", timer: 0, who: "room", type: "room" },
   { t: "Group Portrait", d: "EVERYBODY. The host names a theme — 'a band album cover,' 'a family in 1987.' The room has twenty seconds to arrange itself and hold it for a photo.", timer: 25, who: "room", type: "room" }
-];
-
-const GROUP_VOTES = [
-  { q: "Is a hot dog a sandwich?", opts: ["It's a sandwich", "It absolutely is not"] },
-  { q: "Pineapple on pizza:", opts: ["Delicacy", "War crime"] },
-  { q: "Superior cookout side:", opts: ["Potato salad", "Mac and cheese"] },
-  { q: "Cooking outdoors, the only correct answer:", opts: ["Charcoal", "Gas"] },
-  { q: "Ketchup on a hot dog is:", opts: ["Perfectly fine", "A felony"] },
-  { q: "The better long weekend:", opts: ["Memorial Day", "Labor Day"] },
-  { q: "Where are you spending the day?", opts: ["Pool", "Lake"] },
-  { q: "Toilet paper hangs:", opts: ["Over", "Under"] },
-  { q: "Is cereal a soup?", opts: ["Yes, technically", "Absolutely not"] },
-  { q: "Is a Pop-Tart a ravioli?", opts: ["Structurally, yes", "Get out"] },
-  { q: "Do you rinse dishes before the dishwasher?", opts: ["Always rinse", "That's what it's for"] },
-  { q: "Shoes on inside the house:", opts: ["Fine", "Absolutely not"] },
-  { q: "Better breakfast:", opts: ["Pancakes", "Waffles"] },
-  { q: "The one true tea:", opts: ["Sweet", "Unsweet"] },
-  { q: "A straw has:", opts: ["One hole", "Two holes"] },
-  { q: "Better road trip role:", opts: ["Driver", "Passenger with aux"] },
-  { q: "Socks in bed:", opts: ["Yes", "Never"] },
-  { q: "Is Die Hard a Christmas movie?", opts: ["Yes", "No"] },
-  { q: "Better to watch live:", opts: ["Football", "Baseball"] },
-  { q: "The superior chip:", opts: ["Doritos", "Lay's"] },
-  { q: "Vacation of choice:", opts: ["Beach", "Mountains"] },
-  { q: "Better condiment:", opts: ["Mayo", "Mustard"] },
-  { q: "Correct pizza technique:", opts: ["Fold it", "Keep it flat"] },
-  { q: "Participation trophies for kids:", opts: ["Fine, they're kids", "Absolutely not"] },
-  { q: "Cutting the grass:", opts: ["Weirdly therapeutic", "A chore and nothing more"] },
-  { q: "Better seat on a plane:", opts: ["Window", "Aisle"] },
-  { q: "The better summer drink:", opts: ["Cold beer", "Hard seltzer"] },
-  { q: "Camping means:", opts: ["A tent", "A camper with air conditioning"] },
-  { q: "Is water wet?", opts: ["Yes", "No, it makes things wet"] },
-  { q: "Best way to cook a burger:", opts: ["Smashed thin", "Thick and juicy"] },
-  { q: "Fireworks:", opts: ["Never gets old", "Loud and overrated"] },
-  { q: "Better dog:", opts: ["Big dog", "Small dog"] },
-  { q: "When the alarm goes off:", opts: ["Up immediately", "Snooze is a lifestyle"] },
-  { q: "Group texts:", opts: ["Love them", "Mute them instantly"] }
 ];
 
 const DUELS = [
@@ -1922,10 +1832,8 @@ const DUELS = [
   { t: "Tap Room Volley", d: "Alternate naming beer brands. First to stall or repeat loses." },
   { t: "Hero Volley", d: "Alternate naming Marvel characters. First to stall or repeat loses." },
   { t: "Backwards Race", d: "Both say the alphabet backwards. First one through, cleanly, wins.", timer: 45 },
-  { t: "Call It", d: "Coin flip, called in the air. Best of three." },
   { t: "Split The Difference", d: "The host writes down a number between 1 and 100. Both duelists write a guess down, then reveal together. Closest wins." },
   { t: "Sudden Death", d: "The host reads one trivia question. First correct answer wins it." },
-  { t: "House Hunt", d: "Both find something red, something metal, and something older than you are. Walking only. First one back with all three wins.", timer: 90 },
   { t: "Weather Check", d: "Both unlock your phone and open the weather app. First to read the current temperature out loud wins." },
   { t: "Battery Roulette", d: "Both hold up your phone. Lower battery percentage wins. Pure fate." },
   { t: "Middle Names", d: "Alternate naming middle names of people in this room. First to stall loses." },
@@ -1988,7 +1896,6 @@ const FORFEITS = [
   { d: "Speak only in questions until somebody else takes a forfeit." },
   { d: "Teach the room a completely useless fact you happen to know." },
   { d: "Do your best impression of somebody famous ordering at a drive-thru." },
-  { d: "Let the room vote on one rule you have to follow until your next turn." },
   { d: "Say the most sincere thing you can about the person to your right. Ten seconds." }
 ];
 
@@ -1998,40 +1905,18 @@ function drawForfeit() {
 
 // ============================================================
 // WILDCARD EVENTS
-// Unmarked squares that hijack the board. `weight` biases the
-// draw — the live-action events show up more often than the
-// plain point swings, because watching your friend attempt a
-// wall sit is the entire reason we're here.
+// A few unmarked squares per board hijack the game. Only two
+// flavors survive: a live challenge, or points walking out the
+// door. `weight` biases the draw toward the live-action ones.
 // ============================================================
 const WILDCARD_EVENTS = [
   {
-    key: "challenge", label: "🔥 Challenge Accepted", weight: 7, kind: "challenge",
+    key: "challenge", label: "🔥 Challenge Accepted", weight: 5, kind: "challenge",
     blurb: "Put the phone down. Beat it and the points are yours."
   },
   {
-    key: "houserules", label: "🍺 House Rules", weight: 5, kind: "drink", drinks: true,
-    blurb: "Somebody's about to invent a rule everyone regrets."
-  },
-  {
-    key: "duel", label: "⚔️ Duel", weight: 4, kind: "duel",
+    key: "duel", label: "⚔️ Duel", weight: 3, kind: "duel",
     blurb: "Pick an opponent. Only one of you walks away with points."
-  },
-  {
-    key: "vote", label: "🗳️ The People's Court", weight: 4, kind: "vote",
-    blurb: "The room votes. The majority gets paid."
-  },
-  {
-    key: "crowdsave", label: "📣 Crowd Save", weight: 2, kind: "bonusq",
-    describe: () => `Free-for-all — this one is open to EVERY team. First correct answer shouted out takes it.`
-  },
-  {
-    key: "doubledown", label: "🎲 Double Down", weight: 2, kind: "bonusq", penalize: true,
-    describe: (v) => `High stakes. Right answer pays double. If nobody gets it, the picking team eats ${v}.`
-  },
-  {
-    key: "lucky", label: "🍀 Lucky Break", weight: 2, kind: "instant",
-    describe: (v) => `Pure windfall. You bank a bonus +${v * 2}, and you didn't have to do a thing.`,
-    apply: (state, team, v) => { team.score += v * 2; }
   },
   {
     key: "tab", label: "🍻 Bar Tab", weight: 2, kind: "instant",
@@ -2058,11 +1943,6 @@ const WILDCARD_EVENTS = [
       const cut = Math.round(v / 2);
       state.teams.forEach(t => { if (t !== team) t.score -= cut; });
     }
-  },
-  {
-    key: "insurance", label: "🛡️ Insurance Policy", weight: 2, kind: "instant",
-    describe: () => `A shield. The next time this team would lose points — a blown Daily Double, a failed dare, anything — it costs you nothing. One use.`,
-    apply: (state, team) => { team.shield = true; }
   }
 ];
 
@@ -2224,7 +2104,7 @@ document.addEventListener('pointerdown', () => { if (!wakeLock) syncWakeLock(); 
 ============================================================ */
 function freshState() {
   return {
-    teams: [],          // { id, name, score, wildcardGain, biggestSwing, maxStreak, currentStreak, challengesWon, shield }
+    teams: [],          // { id, name, score, wildcardGain, biggestSwing, maxStreak, currentStreak, challengesWon }
     used: {},           // "Category|Value" -> true
     screen: "setup",    // setup | roundselect | board | winner
     roundIndex: 0,
@@ -2235,6 +2115,7 @@ function freshState() {
     boardSize: 4,       // how many of a round's categories actually go on the board
     activeCategories: null, // this game's slice of them
     dd: null,           // this game's Daily Double square
+    fillers: {},        // "cat|val" -> bonus question on an empty square that isn't a wildcard
     modeState: null,    // non-Jeopardy game in progress
     drawn: {},          // deckName -> indices already used this game
     history: [],        // undo snapshots
@@ -2311,6 +2192,7 @@ function startRound(roundIndex) {
   state.finalOffered = false;
   state.modeState = null;
   state.dd = null;
+  state.fillers = {};
 
   if (r.type === 'gauntlet') {
     state.activeCategories = r.categories.slice();
@@ -2332,12 +2214,19 @@ function lockInCategories(selected) {
   state.activeCategories = picks;
   state.boardIntro = false;
   state.dd = null;
+  state.fillers = {};
   if (r.type !== 'gauntlet') {
     const opts = [];
     picks.forEach(c => VALUES.forEach(v => {
       if (r.questions[c] && r.questions[c][v] !== undefined) opts.push({ category: c, value: v });
     }));
     if (opts.length) state.dd = opts[Math.floor(Math.random() * opts.length)];
+    // Every category has one empty square. Most of them play as plain bonus
+    // trivia so the wildcards stay rare — about one per three categories.
+    const wild = [];
+    picks.forEach(c => VALUES.forEach(v => { if (isWildSquare(r, c, v)) wild.push(c + '|' + v); }));
+    const keep = Math.max(1, Math.round(picks.length / 3));
+    shuffle(wild).slice(keep).forEach(k => { state.fillers[k] = drawFrom(BONUS_QUESTIONS, 'bonus'); });
   }
   render();
 }
@@ -2368,12 +2257,6 @@ function resetTeamStats(team) {
 // Records a scoring event on a team and updates streak/wildcard/swing stats
 // used for the end-of-game superlatives. opts: { isAnswer, isWildcard }
 function scoreEvent(team, delta, opts = {}) {
-  // An Insurance Policy eats exactly one negative swing, then burns out.
-  if (delta < 0 && team.shield) {
-    team.shield = false;
-    flashToast('🛡️ ' + team.name + "'s shield ate that hit");
-    delta = 0;
-  }
   if (delta) flashScorePop(delta);
   team.score += delta;
   if (delta > (team.biggestSwing || 0)) team.biggestSwing = delta;
@@ -2419,7 +2302,7 @@ function renderScoreboard() {
   ensureTeamColors();
   $scoreboard.innerHTML = state.teams.map(t => `
     <div class="score-chip ${t.score === maxScore && maxScore > 0 ? 'leader' : ''}" style="border-color:${teamColor(t)};border-left-color:${teamColor(t)};">
-      <div class="name">${escapeHtml(t.name)}${t.shield ? '<span class="shield" title="Insurance Policy">🛡️</span>' : ''}</div>
+      <div class="name">${escapeHtml(t.name)}</div>
       <div class="pts">${t.score}</div>
       ${t.currentStreak >= 2 ? `<div class="streak">🔥 ${t.currentStreak} streak</div>` : ''}
     </div>
@@ -2547,6 +2430,7 @@ function renderSetup() {
   if (saved) {
     document.getElementById('resumeBtn').onclick = () => {
       state = saved.state;
+      state.fillers = state.fillers || {}; // saves from before fillers existed
       nextTeamId = saved.nextTeamId || (Math.max(0, ...state.teams.map(t => t.id)) + 1);
       render();
     };
@@ -2889,14 +2773,13 @@ function openSquare(cat, val) {
     openOverlayCard();
     const ctx = { cat, val, team, done: () => markUsedAndReturn(cat, val) };
     if (spec.deck === 'duel') runDuel(ctx);
-    else if (spec.deck === 'vote') runVote(ctx);
     else runChallenge(ctx, spec.type);
     return;
   }
 
   const dd = state.dd;
   if (dd && dd.category === cat && dd.value === val) { openDailyDouble(cat, val); return; }
-  if (isWildSquare(round, cat, val)) openWildcard(cat, val);
+  if (isWildSquare(round, cat, val) && !state.fillers[cat + '|' + val]) openWildcard(cat, val);
   else openQuestion(cat, val);
 }
 
@@ -2952,8 +2835,9 @@ const CATEGORY_HINTS = {
 };
 
 function openQuestion(cat, val) {
-  const item = currentRound().questions[cat][val];
-  const hint = CATEGORY_HINTS[cat] || item.hint;
+  const filler = state.fillers[cat + '|' + val];
+  const item = filler || currentRound().questions[cat][val];
+  const hint = filler ? 'Bonus trivia — off-category, anything goes.' : (CATEGORY_HINTS[cat] || item.hint);
   prepareOverlayChrome();
   const split = buzz.connected; // TV/stage hides answers until host phone reveals
   if (split) {
@@ -3396,9 +3280,9 @@ function runChallenge(ctx, filterType) {
   const { val, team, done } = ctx;
   const types = filterType ? [].concat(filterType) : null;
   const mixed = types && types.length > 1 && types.indexOf('physical') !== -1;
-  // On a normal board, quirky physical should show up more often than poems.
+  // On a normal board, physical should show up more often than poems.
   const ch = (mixed && Math.random() < 0.6)
-    ? drawFrom(CHALLENGES, 'challenge', c => c.type === 'physical')
+    ? drawFrom(CHALLENGES, 'challenge', c => c.type === 'physical' || c.type === 'burn')
     : drawFrom(CHALLENGES, 'challenge', types ? (c => types.indexOf(c.type) !== -1) : null);
   const room = ch.who === 'room';
   const footer = room ? `
@@ -3492,114 +3376,10 @@ function runDuel(ctx) {
   });
 }
 
-function runVote(ctx) {
-  const { val, team, done } = ctx;
-  const v = drawFrom(GROUP_VOTES, 'vote');
-  const card = document.querySelector('#overlay .card');
-  card.innerHTML = `
-    <div class="tag wild">🗳️ THE PEOPLE'S COURT</div>
-    <div class="qtext">${escapeHtml(v.q)}</div>
-    <div class="who-line">Hands up: <strong>1</strong> or <strong>2</strong>. Tap the winning side.</div>
-    <div class="team-btn-grid vote-grid">
-      ${v.opts.map((o, i) => {
-        const n = i + 1;
-        return `<button class="team-btn vote-opt" data-opt="${i}">
-          <span class="vote-num">${n}</span>
-          <span class="vote-label">${escapeHtml(o)}</span>
-        </button>`;
-      }).join('')}
-    </div>
-  `;
-  card.querySelectorAll('[data-opt]').forEach(btn => {
-    btn.onclick = () => {
-      const idx = parseInt(btn.dataset.opt, 10);
-      const winning = v.opts[idx];
-      card.innerHTML = `
-        <div class="tag wild">🗳️ THE ROOM HAS SPOKEN</div>
-        <div class="atext"><span class="vote-num" style="margin-right:10px;vertical-align:middle;">${idx + 1}</span>${escapeHtml(winning)}</div>
-        <div class="who-line">Tap majority voters (+${val} each).</div>
-        ${teamButtonsHtml('voteaward')}
-        <button class="btn-primary btn-full" id="voteDoneBtn" style="margin-top:14px;">Done — Next Square</button>
-      `;
-      const awarded = {};
-      card.querySelectorAll('[data-prefix="voteaward"]').forEach(b => {
-        b.onclick = () => {
-          const t = state.teams.find(x => x.id == b.dataset.team);
-          if (awarded[t.id]) return;
-          awarded[t.id] = true;
-          scoreEvent(t, val, { isAnswer: true });
-          b.classList.add('awarded');
-          b.textContent = t.name + ' ✓';
-          playCorrect();
-          renderScoreboard();
-        };
-      });
-      document.getElementById('voteDoneBtn').onclick = done;
-    };
-  });
-}
-
-function runBonusQuestion(ctx, event) {
-  const { val, team, done } = ctx;
-  const bonus = drawFrom(BONUS_QUESTIONS, 'bonus');
-  const card = document.querySelector('#overlay .card');
-  card.innerHTML = `
-    <div class="tag wild">${event.label}</div>
-    <div class="wild-desc">${escapeHtml(event.describe(val, state, team))}</div>
-    <div class="qtext">${escapeHtml(bonus.q)}</div>
-    <button class="btn-primary" id="revealBonusBtn">Reveal Answer</button>
-    <div id="bonusAnswerArea"></div>
-  `;
-  document.getElementById('revealBonusBtn').onclick = () => {
-    document.getElementById('revealBonusBtn').remove();
-    document.getElementById('bonusAnswerArea').innerHTML = `
-      <div class="atext">${escapeHtml(bonus.a)}</div>
-      <div class="who-line">Who got it?</div>
-      ${teamButtonsHtml('bonusaward')}
-      <button class="btn-secondary none-btn" id="bonusNoneBtn">Nobody Got It</button>
-    `;
-    document.querySelectorAll('[data-prefix="bonusaward"]').forEach(btn => {
-      btn.onclick = () => {
-        const winner = state.teams.find(t => t.id == btn.dataset.team);
-        scoreEvent(winner, val * 2, { isAnswer: true, isWildcard: true });
-        playCorrect();
-        done();
-      };
-    });
-    document.getElementById('bonusNoneBtn').onclick = () => {
-      if (event.penalize) scoreEvent(team, -val, { isWildcard: true });
-      playWrong();
-      done();
-    };
-  };
-}
-
 function runInstant(ctx, event) {
   const { val, team, done } = ctx;
   const card = document.querySelector('#overlay .card');
   const descText = event.describe(val, state, team);
-
-  if (event.needsTarget) {
-    const others = state.teams.filter(t => t !== team);
-    card.innerHTML = `
-      <div class="tag wild">${event.label}</div>
-      <div class="wild-desc">${escapeHtml(descText)}</div>
-      <div class="team-btn-grid">${others.map(t =>
-        teamBtn(t, `data-target="${t.id}"`)
-      ).join('')}</div>
-    `;
-    card.querySelectorAll('[data-target]').forEach(btn => {
-      btn.onclick = () => {
-        const targetTeam = state.teams.find(t => t.id == btn.dataset.target);
-        const before = team.score;
-        event.apply(state, team, val, targetTeam);
-        team.wildcardGain = (team.wildcardGain || 0) + (team.score - before);
-        team.biggestSwing = Math.max(team.biggestSwing || 0, team.score - before);
-        done();
-      };
-    });
-    return;
-  }
 
   const scoreBefore = team.score;
   event.apply(state, team, val);
@@ -3617,11 +3397,8 @@ function runInstant(ctx, event) {
 /* Dispatch a drawn wildcard event to its runner. */
 function runEvent(event, ctx) {
   playWildcardReveal();
-  if (event.kind === 'challenge') return runChallenge(ctx, ['physical', 'performance', 'speed', 'social', 'room']);
-  if (event.kind === 'drink') return runChallenge(ctx, 'drink');
+  if (event.kind === 'challenge') return runChallenge(ctx, ['physical', 'burn', 'performance', 'speed', 'social', 'room']);
   if (event.kind === 'duel') return runDuel(ctx);
-  if (event.kind === 'vote') return runVote(ctx);
-  if (event.kind === 'bonusq') return runBonusQuestion(ctx, event);
   return runInstant(ctx, event);
 }
 

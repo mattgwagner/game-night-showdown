@@ -4,7 +4,7 @@ A Jeopardy-style party game built for one specific friend group — no build ste
 backend, no accounts. One HTML file. Open it and play.
 
 Built for a long weekend in a house full of people, which is why it is not only trivia:
-roughly a fifth of every board is live-action — challenges, dares, duels and public votes.
+a few squares on every board are live-action — challenges, duels and point swings.
 
 ## Run it
 
@@ -57,24 +57,26 @@ that get people shouting — emoji decode, riddles, Before & After, brand slogan
 Out. And one is different from all of them:
 
 > **Round 9: The Reckoning** — no trivia at all. Forty squares of physical feats,
-> performances, speed rounds, duels, group votes, hot seats and dares. Every square
+> push-ups, performances, speed rounds, duels, hot seats and dares. Every square
 > draws live from the decks, so the board is never the same twice.
 
 **Play** — turn to pick and read rotates automatically, so nobody gets stuck operating
 the board all night. Anyone can still shout out the answer.
 
-**Wildcards** — eight unmarked squares per board hijack the game:
+**Daily Double** — one hidden square per board. Wager, then answer.
+
+**Wildcards** — about one unmarked square per three categories hijacks the game:
 
 | | |
 |---|---|
 | 🔥 Challenge Accepted | Some are yours alone — beat it or get nothing. Some are the whole room, and the winner scores. |
 | ⚔️ Duel | Pick an opponent. Only one of you walks away with points. |
-| 🗳️ The People's Court | The room votes. The majority gets paid. |
+| 🍻 Bar Tab | Down the square's value. |
 | 🏹 Robin Hood | Take points straight off the leader. |
-| 🍺 House Rules | A drinking game, when that toggle is on. |
 | 💸 Everybody Pays | You're exempt. Everyone else isn't. |
-| 🛡️ Insurance Policy | A shield that eats your next loss. |
-| 🍀 Lucky Break · 🍻 Bar Tab · 📣 Crowd Save · 🎲 Double Down | Point swings and free-for-alls. |
+
+Challenges need nothing but bodies and phones — no props to hunt down — and nothing is
+decided by a room vote.
 
 Challenges and duels come with a real countdown timer that beeps at you.
 
@@ -106,13 +108,14 @@ Adding a category is just adding an entry to `categories` and a matching block i
 `questions`. **You do not maintain the wildcard slots** — at load, any square with no
 question automatically becomes a wildcard, and a Daily Double that lands on one slides
 to the richest real question in its category. Give a category four questions and the
-fifth square becomes the surprise on its own.
-- `CHALLENGES` — 152 tasks, tagged `physical` / `performance` / `speed` / `social` / `room` / `drink`
-- `GROUP_VOTES`, `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`, `LIST_PROMPTS`, `FORFEITS`
+fifth square becomes the surprise on its own. At game start only about one empty square
+per three categories stays a wildcard; the rest play as off-category `BONUS_QUESTIONS`.
+- `CHALLENGES` — 111 tasks, tagged `physical` / `burn` / `performance` / `speed` / `social` / `room` / `drink`
+- `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`, `LIST_PROMPTS`, `FORFEITS`
 - `WILDCARD_EVENTS` — each carries a `weight` that biases the draw
 
 Add `spice: "party"` to hide an item in Family Friendly mode, or `drinks: true` to put
 it behind the drinking toggle. Set `who` to `"room"` for a challenge the whole party plays
-at once — 42 of the 138 are whole-room or whole-team, which are the ones that actually get
+at once — 39 of the 111 are whole-room or whole-team, which are the ones that actually get
 people laughing. Decks draw without
 repeats until exhausted, so you won't get the same dare twice in a night.
