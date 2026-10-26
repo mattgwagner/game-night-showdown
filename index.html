@@ -504,6 +504,13 @@
   .score-chip .streak {
     display: block; font-size: .72rem; color: var(--gold); opacity: .9; margin-top: 2px;
   }
+  .score-chip.picking {
+    box-shadow: 0 0 0 2px #fff, 0 0 14px rgba(245,197,24,.55);
+  }
+  .score-chip .picks {
+    display: block; font-size: .68rem; letter-spacing: .6px; text-transform: uppercase;
+    color: var(--gold); opacity: .95; margin-top: 2px;
+  }
   .team-btn {
     border-left-width: 6px;
   }
@@ -2108,7 +2115,7 @@ function freshState() {
     used: {},           // "Category|Value" -> true
     screen: "setup",    // setup | roundselect | board | winner
     roundIndex: 0,
-    readerIndex: 0,     // whose turn it is to pick & read
+    readerIndex: 0,     // who picks next — the team that last answered a question correctly
     lastCorrectTeamId: null,
     spice: "family",    // family | party
     drinks: false,      // drinking games are their own opt-in, separate from spice
@@ -2240,9 +2247,12 @@ function currentReader() {
   return state.teams[state.readerIndex % state.teams.length];
 }
 
-function advanceReader() {
-  if (state.teams.length === 0) return;
-  state.readerIndex = (state.readerIndex + 1) % state.teams.length;
+// Control follows the last correct answer. A miss, a wildcard, or a challenge
+// leaves the pick with whoever already has it.
+function giveControl(team) {
+  if (!team || state.teams.length === 0) return;
+  const idx = state.teams.findIndex(t => t.id === team.id);
+  if (idx !== -1) state.readerIndex = idx;
 }
 let nextTeamId = 1;
 
@@ -2299,11 +2309,13 @@ function renderScoreboard() {
   }
   $scoreboard.style.display = 'flex';
   const maxScore = Math.max(...state.teams.map(t => t.score));
+  const picker = (state.screen === 'board' && !state.boardIntro) ? currentReader() : null;
   ensureTeamColors();
   $scoreboard.innerHTML = state.teams.map(t => `
-    <div class="score-chip ${t.score === maxScore && maxScore > 0 ? 'leader' : ''}" style="border-color:${teamColor(t)};border-left-color:${teamColor(t)};">
+    <div class="score-chip ${t.score === maxScore && maxScore > 0 ? 'leader' : ''} ${picker && picker.id === t.id ? 'picking' : ''}" style="border-color:${teamColor(t)};border-left-color:${teamColor(t)};">
       <div class="name">${escapeHtml(t.name)}</div>
       <div class="pts">${t.score}</div>
+      ${picker && picker.id === t.id ? `<div class="picks">picks next</div>` : ''}
       ${t.currentStreak >= 2 ? `<div class="streak">🔥 ${t.currentStreak} streak</div>` : ''}
     </div>
   `).join('');
@@ -2590,7 +2602,7 @@ function renderBoard() {
 
   $main.innerHTML = `
     <h1 class="title board-title">🏆 ${escapeHtml(round.name)} 🏆</h1>
-    ${reader ? `<div class="reader-banner">🎤 <strong>${escapeHtml(reader.name)}</strong></div>` : ''}
+    ${reader ? `<div class="reader-banner">🎯 <strong>${escapeHtml(reader.name)}</strong> picks next</div>` : ''}
     <div id="board" style="grid-template-columns:repeat(${cols.length}, minmax(0, 1fr));--cols:${cols.length};">${cats}${rows}</div>
     <button class="host-fab" id="hostFab" type="button">☰ Host</button>
   `;
@@ -2804,7 +2816,6 @@ function closeOverlay() {
 
 function markUsedAndReturn(cat, val) {
   state.used[cat + '|' + val] = true;
-  advanceReader();
   closeOverlay();
   render();
 }
@@ -2875,6 +2886,7 @@ function openQuestion(cat, val) {
       buzzSend({ type: 'clearPrompt' });
     }
     scoreEvent(team, val, { isAnswer: true });
+    giveControl(team);
     playCorrect();
     markUsedAndReturn(cat, val);
   };
@@ -2995,6 +3007,7 @@ function openDailyDouble(cat, val) {
       `;
       document.getElementById('ddRightBtn').onclick = () => {
         scoreEvent(reader, wager, { isAnswer: true });
+        giveControl(reader);
         playCorrect();
         markUsedAndReturn(cat, val);
       };
@@ -4198,6 +4211,7 @@ function connectBuzzSocket(code, role, opts = {}) {
         const team = state.teams.find(t => t.id == msg.teamId);
         if (team) {
           scoreEvent(team, msg.val, { isAnswer: true });
+          giveControl(team);
           playCorrect();
           markUsedAndReturn(msg.cat, msg.val);
         }
@@ -4345,6 +4359,7 @@ function renderHostBuzzPanel() {
       buzzSend({ type: 'clearPrompt' });
     }
     scoreEvent(t, points, { isAnswer: true });
+    giveControl(t);
     playCorrect();
     markUsedAndReturn(cat, points);
   };

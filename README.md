@@ -60,8 +60,9 @@ Out. And one is different from all of them:
 > push-ups, performances, speed rounds, duels, hot seats and dares. Every square
 > draws live from the decks, so the board is never the same twice.
 
-**Play** — turn to pick and read rotates automatically, so nobody gets stuck operating
-the board all night. Anyone can still shout out the answer.
+**Play** — whoever got the last question right picks the next square (and reads it).
+A miss leaves the pick where it was, so the board doesn't just rotate. Anyone can
+still shout out the answer.
 
 **Daily Double** — one hidden square per board. Wager, then answer.
 
