@@ -106,11 +106,9 @@ Everything lives in plain JS objects at the top of `index.html`:
 - `ROUNDS` — the boards, categories, questions and Daily Doubles
 
 Adding a category is just adding an entry to `categories` and a matching block in
-`questions`. **You do not maintain the wildcard slots** — at load, any square with no
-question automatically becomes a wildcard, and a Daily Double that lands on one slides
-to the richest real question in its category. Give a category four questions and the
-fifth square becomes the surprise on its own. At game start only about one empty square
-per three categories stays a wildcard; the rest play as off-category `BONUS_QUESTIONS`.
+`questions`, with all five values filled. **You do not pick wildcard squares** — at game
+start, about one random square per three categories becomes a wildcard (never the Daily
+Double). A square that's missing a question plays as an off-category `BONUS_QUESTIONS` item.
 - `CHALLENGES` — 111 tasks, tagged `physical` / `burn` / `performance` / `speed` / `social` / `room` / `drink`
 - `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`, `LIST_PROMPTS`, `FORFEITS`
 - `WILDCARD_EVENTS` — each carries a `weight` that biases the draw
