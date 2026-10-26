@@ -4190,6 +4190,7 @@ const buzz = {
   role: null,
   armed: false,
   queue: [],
+  missed: [],
   players: [],
   teams: [],
   prompt: null,
@@ -4221,8 +4222,21 @@ function resolveBuzzTeam(entry) {
 
 function buzzApplyState(msg) {
   const prevRevealed = !!(buzz.prompt && buzz.prompt.revealed);
+  const wasLead = !!(buzz.myId && buzz.queue[0] && buzz.queue[0].id === buzz.myId);
+  const nextQueue = msg.queue || [];
+  const becomingArmed = !buzz.armed && !!msg.armed;
+  // A fresh clue starts when the buzzers arm. Otherwise, getting pulled off the
+  // front of the queue while they stay armed means that answer was wrong.
+  let missed = Array.isArray(msg.missed) ? msg.missed.slice() : (buzz.missed || []).slice();
+  if (becomingArmed && !Array.isArray(msg.missed)) missed = [];
+  if (!becomingArmed && buzz.role === 'player' && wasLead && msg.armed &&
+      !nextQueue.some(q => q.id === buzz.myId) && missed.indexOf(buzz.myId) === -1) {
+    missed.push(buzz.myId);
+  }
+  if (!msg.armed && !Array.isArray(msg.missed)) missed = [];
   buzz.armed = !!msg.armed;
-  buzz.queue = msg.queue || [];
+  buzz.queue = nextQueue;
+  buzz.missed = missed;
   buzz.players = msg.players || [];
   if (msg.teams) buzz.teams = msg.teams;
   if (msg.prompt !== undefined) buzz.prompt = msg.prompt;
@@ -4589,9 +4603,11 @@ function renderBuzzJoinApp() {
 
   const lead = buzz.queue[0];
   const myPos = buzz.queue.findIndex(q => q.id === buzz.myId);
-  const canBuzz = buzz.armed && myPos === -1;
+  const tried = (buzz.missed || []).indexOf(buzz.myId) !== -1;
+  const canBuzz = buzz.armed && myPos === -1 && !tried;
   let status = 'Wait';
-  if (canBuzz) status = 'Buzz in!';
+  if (tried) status = 'Out this question';
+  else if (canBuzz) status = 'Buzz in!';
   else if (myPos === 0) status = "You're up";
   else if (myPos > 0) status = `#${myPos + 1}`;
   else if (lead) status = `${lead.name} locked`;
@@ -4601,7 +4617,7 @@ function renderBuzzJoinApp() {
     <div class="hint" style="text-align:center;">${escapeHtml(buzz.teamName || '')} · ${escapeHtml(buzz.code)}</div>
     <div class="who-line" style="text-align:center;font-size:1.2rem;margin-top:12px;">${escapeHtml(status)}</div>
     <button class="buzz-btn ${canBuzz ? 'armed-pulse' : ''} ${!canBuzz ? 'locked-out' : ''}"
-      id="buzzTap" ${canBuzz ? '' : 'disabled'}>BUZZ</button>`;
+      id="buzzTap" ${canBuzz ? '' : 'disabled'}>${tried ? 'OUT' : 'BUZZ'}</button>`;
   const btn = document.getElementById('buzzTap');
   if (btn && canBuzz) btn.onclick = () => buzzSend({ type: 'buzz' });
 }
