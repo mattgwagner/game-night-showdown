@@ -74,6 +74,13 @@ export function resolveBuzzTeam<T extends TeamInfo>(entry: BuzzEntry | undefined
   return null;
 }
 
+/** The room's clock on ours. Every message re-anchors it, so ignore drift of a few ms. */
+function answerDeadline(msg: RoomState, prev: number | null) {
+  if (msg.answerLeft == null) return null;
+  const next = Date.now() + msg.answerLeft;
+  return prev !== null && Math.abs(next - prev) < 250 ? prev : next;
+}
+
 function applyState(msg: RoomState) {
   const b = view();
   const wasLead = !!(b.myId && b.queue[0] && b.queue[0].id === b.myId);
@@ -96,7 +103,7 @@ function applyState(msg: RoomState) {
     players: msg.players || [],
     teams: msg.teams || b.teams,
     prompt: msg.prompt !== undefined ? msg.prompt : b.prompt,
-    answerBy: msg.answerLeft == null ? null : Date.now() + msg.answerLeft,
+    answerBy: answerDeadline(msg, b.answerBy),
     answerTotal: msg.answerTotal || b.answerTotal,
   };
   // Player: the room still carries last game's teams until the TV sends tonight's.
@@ -168,7 +175,9 @@ export function connectBuzzSocket(code: string, role: Role, opts: ConnectOpts = 
     sock.onclose = () => {
       if (g !== gen) return;
       ws = null;
-      patch({ connected: false, armed: false, answerBy: null });
+      // Keep the last answer clock: a blip mid-answer mustn't drop the TV back to its
+      // own 15s and close the clue on whoever buzzed. The reconnect re-syncs it.
+      patch({ connected: false, armed: false });
       if (!opened && !settled) { settled = true; reject(new Error('connect failed')); }
       if (opened) scheduleReconnect(code, role, opts, g);
     };

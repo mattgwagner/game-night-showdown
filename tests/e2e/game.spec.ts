@@ -243,12 +243,17 @@ test('answer clock: every screen counts down, a late buzz gets time, and running
   await rig(page);
   const host = await (await browser.newContext()).newPage();
   await host.goto(`/?host=${code}`);
-  const player = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
-  await player.goto(`/?join=${code}`);
-  await player.getByPlaceholder('Your name').fill('Pat');
-  await player.getByRole('button', { name: 'Join' }).click();
-  await player.getByRole('button', { name: 'Bravo' }).click();
-  await player.getByRole('button', { name: 'Continue' }).click();
+  const join = async (name: string, team: string) => {
+    const p = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+    await p.goto(`/?join=${code}`);
+    await p.getByPlaceholder('Your name').fill(name);
+    await p.getByRole('button', { name: 'Join' }).click();
+    await p.getByRole('button', { name: team }).click();
+    await p.getByRole('button', { name: 'Continue' }).click();
+    return p;
+  };
+  const player = await join('Pat', 'Bravo');
+  const late = await join('Sam', 'Alpha');
 
   const { cell, cat, val } = await firstSquare(page);
   await cell.click();
@@ -264,8 +269,14 @@ test('answer clock: every screen counts down, a late buzz gets time, and running
   await expect(host.locator('.buzz-lead')).toHaveText('Pat · Bravo');
   await page.waitForTimeout(16_000 - (Date.now() - opened));
   await expect(page.locator('#overlay .qtext')).toBeVisible();
+  // Pat's wrong. Nobody else is in line, so the clock runs on from Pat's 8s.
+  await host.getByRole('button', { name: 'Wrong' }).click();
+  await expect(host.locator('.buzz-lead')).toHaveCount(0);
 
-  await expect(page.locator('#overlay')).toHaveCount(0, { timeout: 5_000 });
+  // A buzz after the horn would normally earn 8s; it mustn't reopen the clue.
+  await expect(page.locator('#overlay .timer-num.done')).toBeVisible({ timeout: 5_000 });
+  await late.getByRole('button', { name: 'BUZZ' }).click();
+  await expect(page.locator('#overlay')).toHaveCount(0, { timeout: 2_000 });
   expect(Date.now() - opened).toBeGreaterThan(17_500);
   await expect(page.locator(`.cell[data-cat="${cat}"][data-val="${val}"]`)).toHaveClass(/used/);
   await expect(score(page, 'Bravo')).toHaveText('0');

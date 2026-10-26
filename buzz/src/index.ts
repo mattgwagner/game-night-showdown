@@ -239,6 +239,11 @@ export class BuzzRoom extends DurableObject<Env> {
         this.send(ws, { type: "error", message: "already tried this one" });
         return;
       }
+      // Time's up: the TV is closing the clue, so a late buzz mustn't reopen it.
+      if (this.answerBy !== null && Date.now() >= this.answerBy) {
+        this.send(ws, { type: "error", message: "time's up" });
+        return;
+      }
       this.queue.push({
         id: att.id,
         name: att.name,
