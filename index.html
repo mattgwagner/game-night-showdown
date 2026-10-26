@@ -557,6 +557,22 @@
   }
   .buzz-btn.locked-out { background: #555; }
   .buzz-btn.armed-pulse { animation: pulse .7s infinite alternate; }
+  /* Player phone: the button is the whole screen — no aiming mid-question. */
+  #buzzJoinRoot.buzz-live {
+    flex: 1; min-height: 0; margin-top: 0; padding: 14px;
+    display: flex; flex-direction: column;
+  }
+  .buzz-live h2 { margin-bottom: 2px; }
+  .buzz-live .buzz-btn {
+    flex: 1; width: 100%; min-height: 240px; margin: 12px 0 0;
+    border-radius: 32px; font-size: clamp(3.5rem, 20vw, 7rem);
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  }
+  .buzz-live .buzz-btn.armed-pulse { animation: buzzGlow .7s infinite alternate; }
+  @keyframes buzzGlow {
+    from { box-shadow: 0 0 20px rgba(231,76,60,.4); filter: brightness(.9); }
+    to { box-shadow: 0 0 60px rgba(231,76,60,.9); filter: brightness(1.1); }
+  }
   .buzz-panel {
     margin-top: 14px; padding: 12px; border: 2px solid var(--gold-dim);
     border-radius: 12px; background: rgba(0,0,0,.25);
@@ -2177,7 +2193,8 @@ function flashScorePop(delta) {
   el.className = 'show ' + (delta > 0 ? 'gain' : 'loss');
 }
 
-/* Keep the iPad awake while AirPlaying — blank screen mid-question kills the room. */
+/* Keep the iPad awake while AirPlaying — blank screen mid-question kills the room.
+   Player and host phones stay awake for the whole game. */
 let wakeLock = null;
 async function requestWakeLock() {
   if (!('wakeLock' in navigator)) return;
@@ -2191,13 +2208,16 @@ function releaseWakeLock() {
   wakeLock = null;
 }
 async function syncWakeLock() {
-  const want = state.screen === 'board' || state.screen === 'mode' || !!document.getElementById('overlay');
+  const want = !!(getHostCode() || getJoinCode())
+    || state.screen === 'board' || state.screen === 'mode' || !!document.getElementById('overlay');
   if (want) await requestWakeLock();
   else releaseWakeLock();
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') syncWakeLock();
 });
+// Safari can refuse the lock until the user has tapped; retry on the next tap.
+document.addEventListener('pointerdown', () => { if (!wakeLock) syncWakeLock(); });
 
 /* ============================================================
    STATE
@@ -4610,6 +4630,7 @@ function renderBuzzJoinApp() {
       <div class="buzz-code">${escapeHtml(buzz.joinCode || '————')}</div>
       <div class="team-row"><input id="buzzName" type="text" placeholder="Your name" maxlength="24" style="font-size:16px;" /></div>
       <button class="btn-primary btn-full" id="buzzJoinBtn">Join</button>`;
+    root.classList.remove('buzz-live');
     document.getElementById('buzzJoinBtn').onclick = async () => {
       const name = (document.getElementById('buzzName').value || '').trim();
       if (!name) { flashToast('Enter your name'); return; }
@@ -4630,6 +4651,7 @@ function renderBuzzJoinApp() {
       <div class="who-line" style="text-align:center;">Your team</div>
       <div id="buzzTeamPick" style="margin:10px 0;"></div>
       <button class="btn-primary btn-full" id="buzzTeamGo" disabled>Continue</button>`;
+    root.classList.remove('buzz-live');
     const box = document.getElementById('buzzTeamPick');
     box.innerHTML = `<div class="team-btn-grid">${buzz.teams.map(tm =>
       `<button class="team-btn" data-team="${tm.id}" style="border-color:${tm.color || 'var(--gold)'}">${escapeHtml(tm.name)}</button>`
@@ -4662,6 +4684,7 @@ function renderBuzzJoinApp() {
   else if (myPos > 0) status = `#${myPos + 1}`;
   else if (lead) status = `${lead.name} locked`;
 
+  root.classList.add('buzz-live');
   root.innerHTML = `
     <h2 style="text-align:center;color:var(--gold);">${escapeHtml(buzz.name)}</h2>
     <div class="hint" style="text-align:center;">${escapeHtml(buzz.teamName || '')} · ${escapeHtml(buzz.code)}</div>
@@ -4807,11 +4830,13 @@ document.addEventListener('keydown', (e) => {
   const hostCode = getHostCode();
   if (hostCode) {
     renderHostCompanion();
+    syncWakeLock();
     return;
   }
   const join = getJoinCode();
   if (join) {
     renderBuzzJoin();
+    syncWakeLock();
     return;
   }
   const saved = loadSavedGame();
