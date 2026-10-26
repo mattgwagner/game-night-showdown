@@ -15,6 +15,7 @@ type Attachment = {
 };
 
 type BuzzEntry = { id: string; name: string; teamId: number | null; teamName: string; at: number };
+type Lockout = { id: string; name: string; teamId: number | null };
 type TeamInfo = { id: number; name: string; color?: string };
 
 type Prompt = {
@@ -47,6 +48,7 @@ type ServerMsg =
       code: string;
       armed: boolean;
       queue: BuzzEntry[];
+      missed: string[];
       players: { id: string; name: string; teamName: string }[];
       teams: TeamInfo[];
       prompt: Prompt | null;
@@ -55,6 +57,7 @@ type ServerMsg =
       type: "state";
       armed: boolean;
       queue: BuzzEntry[];
+      missed: string[];
       players: { id: string; name: string; teamName: string }[];
       teams: TeamInfo[];
       prompt: Prompt | null;
@@ -123,6 +126,8 @@ export default {
 export class BuzzRoom extends DurableObject<Env> {
   armed = false;
   queue: BuzzEntry[] = [];
+  // Players ruled wrong on the current clue. They cannot buzz again until the next one.
+  missed: Lockout[] = [];
   teams: TeamInfo[] = [];
   prompt: Prompt | null = null;
   code = "";
@@ -133,6 +138,7 @@ export class BuzzRoom extends DurableObject<Env> {
     this.ctx.blockConcurrencyWhile(async () => {
       this.armed = (await this.ctx.storage.get<boolean>("armed")) || false;
       this.queue = (await this.ctx.storage.get<BuzzEntry[]>("queue")) || [];
+      this.missed = (await this.ctx.storage.get<Lockout[]>("missed")) || [];
       this.teams = (await this.ctx.storage.get<TeamInfo[]>("teams")) || [];
       this.prompt = (await this.ctx.storage.get<Prompt | null>("prompt")) || null;
       this.code = (await this.ctx.storage.get<string>("code")) || "";
@@ -183,12 +189,18 @@ export class BuzzRoom extends DurableObject<Env> {
       if (msg.teamId != null) att.teamId = msg.teamId;
       if (msg.teamName) att.teamName = String(msg.teamName).slice(0, 24);
       ws.serializeAttachment(att);
+      // A dropped phone reconnects with a new socket id. Keep the lockout on the person.
+      if (role === "player" && this.isLocked(att) && !this.missed.some((m) => m.id === att.id)) {
+        this.missed.push({ id: att.id, name: att.name, teamId: att.teamId });
+        await this.persist();
+      }
       this.send(ws, {
         type: "welcome",
         id: att.id,
         code: this.code,
         armed: this.armed,
         queue: this.queue,
+        missed: this.missedIds(),
         players: this.playerList(),
         teams: this.teams,
         prompt: this.promptFor(att.role),
@@ -204,6 +216,10 @@ export class BuzzRoom extends DurableObject<Env> {
       }
       if (att.role !== "player") return;
       if (this.queue.some((q) => q.id === att.id)) return;
+      if (this.isLocked(att)) {
+        this.send(ws, { type: "error", message: "already tried this one" });
+        return;
+      }
       this.queue.push({
         id: att.id,
         name: att.name,
@@ -232,6 +248,7 @@ export class BuzzRoom extends DurableObject<Env> {
     if (msg.type === "arm" && att.role === "host") {
       this.armed = true;
       this.queue = [];
+      this.missed = [];
       await this.persist();
       this.broadcastState();
       return;
@@ -260,6 +277,7 @@ export class BuzzRoom extends DurableObject<Env> {
 
     if (msg.type === "clearPrompt" && att.role === "host") {
       this.prompt = null;
+      this.missed = [];
       await this.persist();
       this.broadcastState();
       return;
@@ -267,7 +285,10 @@ export class BuzzRoom extends DurableObject<Env> {
 
     // Staff (stage or controller)
     if (msg.type === "pop") {
-      this.queue.shift();
+      const wrong = this.queue.shift();
+      if (wrong && !this.isLocked(wrong)) {
+        this.missed.push({ id: wrong.id, name: wrong.name, teamId: wrong.teamId });
+      }
       await this.persist();
       this.broadcastState();
       return;
@@ -296,6 +317,7 @@ export class BuzzRoom extends DurableObject<Env> {
       const teamId = Number(msg.teamId);
       this.armed = false;
       this.queue = [];
+      this.missed = [];
       this.prompt = null;
       await this.persist();
       this.broadcastAll({ type: "remoteAward", teamId, val, cat });
@@ -309,6 +331,7 @@ export class BuzzRoom extends DurableObject<Env> {
       const val = this.prompt.val;
       this.armed = false;
       this.queue = [];
+      this.missed = [];
       this.prompt = null;
       await this.persist();
       this.broadcastAll({ type: "remoteNobody", cat, val });
@@ -333,6 +356,19 @@ export class BuzzRoom extends DurableObject<Env> {
     }
   }
 
+  private missedIds() {
+    return this.missed.map((m) => m.id);
+  }
+
+  private isLocked(who: { id: string; name: string; teamId: number | null }) {
+    const name = (who.name || "").trim().toLowerCase();
+    return this.missed.some((m) => {
+      if (m.id === who.id) return true;
+      const lockedName = (m.name || "").trim().toLowerCase();
+      return !!name && name === lockedName && m.teamId === who.teamId;
+    });
+  }
+
   /** Controllers get the answer; stage/players get it blank until revealed. */
   private promptFor(role: Role): Prompt | null {
     if (!this.prompt) return null;
@@ -354,6 +390,7 @@ export class BuzzRoom extends DurableObject<Env> {
     await this.ctx.storage.put({
       armed: this.armed,
       queue: this.queue,
+      missed: this.missed,
       teams: this.teams,
       prompt: this.prompt,
     });
@@ -386,6 +423,7 @@ export class BuzzRoom extends DurableObject<Env> {
         type: "state",
         armed: this.armed,
         queue: this.queue,
+        missed: this.missedIds(),
         players: this.playerList(),
         teams: this.teams,
         prompt: this.promptFor(role),
