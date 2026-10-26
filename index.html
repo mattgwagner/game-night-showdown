@@ -1501,13 +1501,16 @@ const ROUNDS = [
   {
     id: "r15",
     name: "Round 15: Robot Combat",
-    tagline: "BattleBots, from the BattleBox to the build bench",
+    tagline: "BattleBots, robots, and anything that smashes",
     categories: [
-      "BattleBots Legends", "Weapons Check", "Inside the BattleBox", "Build Your Bot"
+      "BattleBots Legends", "Weapons Check", "Inside the BattleBox", "Build Your Bot",
+      "Robot Wars", "Movie Robots", "Real-World Robots", "Monster Jam"
     ],
     wildcardSlots: {
       "BattleBots Legends": 400, "Weapons Check": 300,
-      "Inside the BattleBox": 200, "Build Your Bot": 200
+      "Inside the BattleBox": 200, "Build Your Bot": 200,
+      "Robot Wars": 500, "Movie Robots": 400,
+      "Real-World Robots": 400, "Monster Jam": 500
     },
     dailyDouble: { category: "Inside the BattleBox", value: 500 },
     questions: {
@@ -1534,6 +1537,30 @@ const ROUNDS = [
         300: { q: "Most combat bots run on the same kind of rechargeable battery as drones. What type?", a: "LiPo (lithium polymer)" },
         400: { q: "Light, crazy strong, used in jet engines, and builders love it for armor. What metal?", a: "Titanium" },
         500: { q: "A big spinner makes a bot hard to turn because the spinning weapon fights back. What's that physics effect called?", a: "The gyroscopic effect" }
+      },
+      "Robot Wars": {
+        100: { q: "Robot Wars' scariest house robot had a lance and giant crushing claws. Sir who?", a: "Sir Killalot" },
+        200: { q: "Robot Wars was BattleBots' older cousin. What country made it?", a: "The United Kingdom (Britain)" },
+        300: { q: "Robot Wars had a hole in the arena floor that swallowed losing bots. What was it called?", a: "The Pit" },
+        400: { q: "Which flipper won the Robot Wars championship two series in a row?", a: "Chaos 2" }
+      },
+      "Movie Robots": {
+        100: { q: "Pixar's little trash-compacting robot who falls for EVE. Name him.", a: "WALL-E" },
+        200: { q: "Star Wars droid who only beeps and whistles, best friends with C-3PO.", a: "R2-D2" },
+        300: { q: "Big Hero 6's puffy, inflatable healthcare robot. Name him.", a: "Baymax" },
+        500: { q: "1999 movie: a giant metal-eating robot from space makes friends with a kid named Hogarth. Title?", a: "The Iron Giant" }
+      },
+      "Real-World Robots": {
+        100: { q: "Round robot vacuum that bumps around the living room, made by iRobot. What's it called?", a: "Roomba" },
+        200: { q: "NASA's Mars rover that landed in 2021 with a tiny helicopter tucked underneath. Name the rover.", a: "Perseverance" },
+        300: { q: "The word 'robot' comes from a 1920 play. What language was it written in?", a: "Czech" },
+        500: { q: "Which science fiction writer came up with the Three Laws of Robotics?", a: "Isaac Asimov" }
+      },
+      "Monster Jam": {
+        100: { q: "The most famous monster truck of all: black, green flames, a graveyard on the side. Name it.", a: "Grave Digger" },
+        200: { q: "El Toro Loco is painted to look like what animal?", a: "A bull" },
+        300: { q: "Which monster truck is built to look like a giant prehistoric shark?", a: "Megalodon" },
+        400: { q: "Who built and first drove Grave Digger?", a: "Dennis Anderson" }
       }
     }
   }

@@ -50,7 +50,7 @@ nobody can agree.
 | 🥔 **Hot Potato** | One category, teams alternate naming things. Stall or repeat and you're eliminated. |
 
 **Pick a board** — fifteen boards, listed in a fresh order every session. Fourteen are
-trivia, spanning 108 categories: beer, BattleBots, firearms, Disney, AI, college football, grilling,
+trivia, spanning 112 categories: beer, BattleBots, firearms, Disney, AI, college football, grilling,
 boats, Labor Day, NBA, golf, soccer, the Olympics, Star Wars, horror, dinosaurs, sharks,
 bourbon, presidents, Field Artillery, and a lot more. One board is nothing but formats
 that get people shouting — emoji decode, riddles, Before & After, brand slogans, Odd One
