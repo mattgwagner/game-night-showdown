@@ -327,6 +327,15 @@
   .dual-box h3 {
     margin: 0 0 8px; color: var(--gold); font-size: 1rem; letter-spacing: .4px;
   }
+  .room-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .room-row label { font-weight: 900; color: var(--gold); font-size: .9rem; white-space: nowrap; }
+  .room-row input {
+    flex: 1; min-width: 0; padding: 10px 12px; border-radius: 8px; border: none;
+    font-size: 16px; background: rgba(255,255,255,0.9); color: #111;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase; letter-spacing: 3px; text-align: center;
+  }
+  .room-row button { padding: 10px 12px; min-height: 44px; }
   .dual-roles {
     display: grid; grid-template-columns: 1fr; gap: 10px;
   }
@@ -2387,6 +2396,12 @@ function renderSetup() {
       <div class="dual-box">
         <h3>Two screens</h3>
         <div class="hint" style="margin:0 0 10px;text-align:left;">TV runs the show. Your phone keeps the answers private.</div>
+        <div class="room-row">
+          <label for="roomCodeInput">Game code</label>
+          <input id="roomCodeInput" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false" value="${escapeHtml(getStageCode())}">
+          <button class="btn-secondary" id="roomCodeSetBtn" type="button">Set</button>
+          <button class="btn-secondary" id="roomCodeNewBtn" type="button">New</button>
+        </div>
         <div class="dual-roles">
           <div class="dual-role">
             <div class="dr-title">📺 Show (this iPad → TV)</div>
@@ -2414,11 +2429,26 @@ function renderSetup() {
   `;
   const $list = document.getElementById('teamList');
   const $start = document.getElementById('startBtn');
-  const links = roomLinks(BUZZ_ROOM);
+  let links = roomLinks(getStageCode());
   const hostUrlEl = document.getElementById('dualHostUrl');
   const joinUrlEl = document.getElementById('dualJoinUrl');
-  if (hostUrlEl) hostUrlEl.textContent = links.host;
-  if (joinUrlEl) joinUrlEl.textContent = links.join;
+  const showLinks = () => {
+    links = roomLinks(getStageCode());
+    if (hostUrlEl) hostUrlEl.textContent = links.host;
+    if (joinUrlEl) joinUrlEl.textContent = links.join;
+  };
+  showLinks();
+  const $roomInput = document.getElementById('roomCodeInput');
+  const applyRoom = (raw) => {
+    const code = setStageCode(raw);
+    if (!code) { flashToast('Game code is 4 letters or numbers'); return; }
+    $roomInput.value = code;
+    showLinks();
+    flashToast('Game code: ' + code);
+  };
+  document.getElementById('roomCodeSetBtn').onclick = () => applyRoom($roomInput.value);
+  document.getElementById('roomCodeNewBtn').onclick = () => applyRoom(randomRoomCode());
+  $roomInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); applyRoom($roomInput.value); } };
   document.getElementById('copyHostLinkBtn').onclick = async () => {
     try { await navigator.clipboard.writeText(links.host); flashToast('Host link copied'); }
     catch { flashToast(links.host); }
@@ -4329,14 +4359,15 @@ function connectBuzzSocket(code, role, opts = {}) {
 
 async function enableBuzzers() {
   try {
-    // Claim the fixed room (best-effort); always connect to BUZZ_ROOM.
+    // Claim the room (best-effort); always connect to the stage code.
+    const code = getStageCode();
     fetch(BUZZ_API + '/room', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: BUZZ_ROOM }),
+      body: JSON.stringify({ code }),
     }).catch(() => {});
-    await connectBuzzSocket(BUZZ_ROOM, 'host');
-    flashToast('Show live — host phone uses ' + BUZZ_ROOM);
+    await connectBuzzSocket(code, 'host');
+    flashToast('Show live — host phone uses ' + code);
   } catch (e) {
     flashToast('Could not start dual screen');
   }
@@ -4345,7 +4376,7 @@ async function enableBuzzers() {
 let stageBuzzPromise = null;
 function ensureStageBuzz() {
   if (getHostCode() || getJoinCode()) return;
-  if (buzz.connected && buzz.role === 'host') return;
+  if (buzz.connected && buzz.role === 'host' && buzz.code === getStageCode()) return;
   if (stageBuzzPromise) return stageBuzzPromise;
   stageBuzzPromise = enableBuzzers().finally(() => { stageBuzzPromise = null; });
   return stageBuzzPromise;
@@ -4451,6 +4482,39 @@ function getJoinCode() {
   if (!q.has('join')) return '';
   const raw = (q.get('join') || BUZZ_ROOM).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
   return /^[A-Z0-9]{4}$/.test(raw) ? raw : BUZZ_ROOM;
+}
+
+/* Stage room: ?room=CODE wins, then the last code set on this device, then NITE. */
+const STAGE_ROOM_KEY = 'gns.room';
+function cleanRoomCode(raw) {
+  const code = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  return /^[A-Z0-9]{4}$/.test(code) ? code : '';
+}
+
+function getStageCode() {
+  const fromUrl = cleanRoomCode(new URLSearchParams(location.search).get('room'));
+  if (fromUrl) return fromUrl;
+  let saved = '';
+  try { saved = cleanRoomCode(localStorage.getItem(STAGE_ROOM_KEY)); } catch (e) {}
+  return saved || BUZZ_ROOM;
+}
+
+function setStageCode(raw) {
+  const code = cleanRoomCode(raw);
+  if (!code) return '';
+  try { localStorage.setItem(STAGE_ROOM_KEY, code); } catch (e) {}
+  // Keep the URL in step so a reload (or a bookmark) lands in the same room.
+  const url = new URL(location.href);
+  url.searchParams.set('room', code);
+  history.replaceState(null, '', url);
+  // Already live in another room? Move the stage over.
+  if (buzz.role === 'host' && buzz.code !== code) ensureStageBuzz();
+  return code;
+}
+
+function randomRoomCode() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({ length: 4 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
 }
 
 function getHostCode() {
