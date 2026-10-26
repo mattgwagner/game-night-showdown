@@ -278,6 +278,13 @@
   }
   .timer-fill { height: 100%; background: var(--gold); transition: width 1s linear; }
   .timer-btn { margin-top: 4px; }
+  .timer-caption {
+    font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+    opacity: .7; margin-top: 4px;
+  }
+  .answer-clock[hidden] { display: none !important; }
+  .buzz-live .answer-clock { margin: 4px auto 0; }
+  .buzz-live .answer-clock .timer-num { font-size: 2.6rem; }
 
   /* ---------- Score editor ---------- */
   .edit-row {
@@ -2908,6 +2915,7 @@ function prepareOverlayChrome() {
 }
 
 function closeOverlay() {
+  stopClueClock();
   const ov = document.getElementById('overlay');
   if (ov) ov.remove();
   const fab = document.getElementById('hostFab');
@@ -2974,6 +2982,7 @@ function openQuestion(cat, val) {
       <div class="tag">${escapeHtml(cat)} — ${val} pts</div>
       ${hint ? `<div class="who-line">${escapeHtml(hint)}</div>` : ''}
       <div class="qtext">${escapeHtml(item.q)}</div>
+      ${answerClockHtml()}
       <div id="buzzPanelHost"></div>
       <div id="answerArea"></div>
       ${split
@@ -2986,6 +2995,7 @@ function openQuestion(cat, val) {
   renderHostBuzzPanel();
 
   const finishAward = (team) => {
+    stopClueClock();
     if (buzz.connected) {
       buzzDisarm();
       buzzSend({ type: 'clearPrompt' });
@@ -2994,16 +3004,19 @@ function openQuestion(cat, val) {
     playCorrect();
     markUsedAndReturn(cat, val);
   };
-  const finishNobody = () => {
+  const finishNobody = (fromClock) => {
+    stopClueClock();
     if (buzz.connected) {
       buzzDisarm();
       buzzSend({ type: 'clearPrompt' });
     }
-    playWrong();
+    if (!fromClock) playWrong();
     markUsedAndReturn(cat, val);
   };
 
   const showAward = (stealMode, answerText) => {
+    stopClueClock();
+    if (buzz.connected) buzzSend({ type: 'holdClock' });
     const area = document.getElementById('answerArea');
     const lead = buzz.queue[0];
     let suggest = '';
@@ -3054,6 +3067,10 @@ function openQuestion(cat, val) {
     if (split) buzzSend({ type: 'revealAnswer' });
     window.__stageShowAnswer(item.a);
   };
+  startClueClock(() => {
+    if (!document.getElementById('revealBtn')) return;
+    finishNobody(true);
+  });
 }
 
 /* ---------- Daily Double ---------- */
@@ -3097,10 +3114,13 @@ function openDailyDouble(cat, val) {
     card.innerHTML = `
       <div class="tag dd">🎯 DAILY DOUBLE — ${wager} PTS 🎯</div>
       <div class="qtext">${escapeHtml(item.q)}</div>
+      ${answerClockHtml()}
       <button class="btn-primary" id="revealDDBtn">Reveal Answer</button>
       <div id="ddAnswerArea"></div>
     `;
     document.getElementById('revealDDBtn').onclick = () => {
+      stopClueClock();
+      if (buzz.connected) buzzSend({ type: 'holdClock' });
       document.getElementById('revealDDBtn').remove();
       document.getElementById('ddAnswerArea').innerHTML = `
         <div class="atext">${escapeHtml(item.a)}</div>
@@ -3110,16 +3130,23 @@ function openDailyDouble(cat, val) {
         </div>
       `;
       document.getElementById('ddRightBtn').onclick = () => {
+        stopClueClock();
         scoreEvent(reader, wager, { isAnswer: true });
         playCorrect();
         markUsedAndReturn(cat, val);
       };
       document.getElementById('ddWrongBtn').onclick = () => {
+        stopClueClock();
         scoreEvent(reader, -wager, { isAnswer: false });
         playWrong();
         markUsedAndReturn(cat, val);
       };
     };
+    startClueClock(() => {
+      if (!document.getElementById('overlay')) return;
+      scoreEvent(reader, -wager, { isAnswer: false });
+      markUsedAndReturn(cat, val);
+    });
   };
 }
 
@@ -4267,6 +4294,8 @@ const BUZZ_API = 'https://game-night-buzz.mattgwagner.workers.dev';
 const BUZZ_WS = BUZZ_API.replace(/^http/, 'ws') + '/ws';
 // Fixed room for tonight so links can go out ahead of time.
 const BUZZ_ROOM = 'NITE';
+const ANSWER_SECONDS = 15;
+const BUZZ_ANSWER_SECONDS = 8;
 
 const buzz = {
   connected: false,
@@ -4279,6 +4308,13 @@ const buzz = {
   players: [],
   teams: [],
   prompt: null,
+  answerBy: null,
+  answerTotal: ANSWER_SECONDS,
+  answerSynced: false,
+  holdAnswerClock: false,
+  clueExpire: null,
+  clueToken: 0,
+  answerLeadId: '',
   name: '',
   teamId: null,
   teamName: '',
@@ -4290,6 +4326,108 @@ const buzz = {
 function buzzSend(msg) {
   if (buzz.ws && buzz.ws.readyState === 1) buzz.ws.send(JSON.stringify(msg));
 }
+
+function answerSecondsLeft() {
+  if (!buzz.answerBy) return null;
+  return Math.max(0, Math.ceil((buzz.answerBy - Date.now()) / 1000));
+}
+
+function answerClockHtml() {
+  const left = answerSecondsLeft();
+  const label = left == null ? '' : (left <= 0 ? 'TIME' : String(left));
+  const total = buzz.answerTotal || ANSWER_SECONDS;
+  const width = left == null ? 0 : Math.max(0, Math.min(100, (left / total) * 100));
+  return `<div class="timer-wrap answer-clock" data-answer-clock ${left == null ? 'hidden' : ''}>
+    <div class="timer-num${left != null && left <= 5 ? ' urgent' : ''}" data-answer-num>${label}</div>
+    <div class="timer-caption" data-answer-cap>${left != null && left <= 0 ? "time's up" : 'to answer'}</div>
+    <div class="timer-track"><div class="timer-fill" data-answer-fill style="width:${width}%"></div></div>
+  </div>`;
+}
+
+function paintAnswerClocks() {
+  const left = answerSecondsLeft();
+  const total = buzz.answerTotal || ANSWER_SECONDS;
+  document.querySelectorAll('[data-answer-clock]').forEach(el => {
+    if (left == null) { el.hidden = true; return; }
+    el.hidden = false;
+    const num = el.querySelector('[data-answer-num]');
+    const fill = el.querySelector('[data-answer-fill]');
+    const cap = el.querySelector('[data-answer-cap]');
+    if (num) {
+      num.textContent = left <= 0 ? 'TIME' : String(left);
+      num.classList.toggle('urgent', left > 0 && left <= 5);
+      num.classList.toggle('done', left <= 0);
+    }
+    if (cap) cap.textContent = left <= 0 ? "time's up" : 'to answer';
+    if (fill) fill.style.width = Math.max(0, Math.min(100, (left / total) * 100)) + '%';
+  });
+}
+
+// Without a synced room clock, a buzz-in still gets a few seconds to answer.
+function extendLocalAnswerWindow() {
+  if (buzz.answerSynced || !buzz.answerBy) return;
+  const lead = buzz.queue && buzz.queue[0];
+  if (lead && lead.id !== buzz.answerLeadId) {
+    buzz.answerLeadId = lead.id;
+    const need = Date.now() + BUZZ_ANSWER_SECONDS * 1000;
+    if (buzz.answerBy < need) {
+      buzz.answerBy = need;
+      buzz.answerTotal = BUZZ_ANSWER_SECONDS;
+    }
+  } else if (!lead) {
+    buzz.answerLeadId = '';
+  }
+}
+
+let clueToken = 0;
+let lastTickSecond = null;
+function startClueClock(onExpire) {
+  const token = ++clueToken;
+  buzz.clueToken = token;
+  buzz.holdAnswerClock = false;
+  buzz.clueExpire = onExpire;
+  buzz.answerLeadId = '';
+  // A new clue always gets a full window. Keep a server deadline only when
+  // it is still that full window (the prompt just landed).
+  const full = Date.now() + ANSWER_SECONDS * 1000;
+  if (!buzz.answerBy || buzz.answerBy < full - 1500) {
+    buzz.answerBy = full;
+    buzz.answerTotal = ANSWER_SECONDS;
+  }
+  lastTickSecond = null;
+  paintAnswerClocks();
+}
+
+function stopClueClock() {
+  clueToken++;
+  buzz.clueExpire = null;
+  buzz.answerBy = null;
+  buzz.answerLeadId = '';
+  buzz.holdAnswerClock = true;
+  paintAnswerClocks();
+}
+
+setInterval(() => {
+  if (buzz.clueExpire) extendLocalAnswerWindow();
+  const left = answerSecondsLeft();
+  if (buzz.clueExpire && left != null && left > 0 && left <= 5 && left !== lastTickSecond) {
+    lastTickSecond = left;
+    try { playTick(); } catch (e) {}
+  }
+  if (left == null || left > 5) lastTickSecond = null;
+  paintAnswerClocks();
+  if (!(buzz.clueExpire && buzz.answerBy && Date.now() >= buzz.answerBy)) return;
+  const fn = buzz.clueExpire;
+  const token = buzz.clueToken;
+  buzz.clueExpire = null;
+  paintAnswerClocks();
+  try { playBuzzer(); } catch (e) {}
+  setTimeout(() => {
+    if (token !== clueToken) return;
+    stopClueClock();
+    fn();
+  }, 700);
+}, 200);
 
 function resolveBuzzTeam(entry) {
   if (!entry) return null;
@@ -4307,11 +4445,32 @@ function resolveBuzzTeam(entry) {
 
 function buzzApplyState(msg) {
   const prevRevealed = !!(buzz.prompt && buzz.prompt.revealed);
+  const prevPrompt = !!buzz.prompt;
   buzz.armed = !!msg.armed;
   buzz.queue = msg.queue || [];
   buzz.players = msg.players || [];
   if (msg.teams) buzz.teams = msg.teams;
   if (msg.prompt !== undefined) buzz.prompt = msg.prompt;
+  if (!buzz.holdAnswerClock && Object.prototype.hasOwnProperty.call(msg, 'answerBy')) {
+    if (typeof msg.answerBy === 'number' && msg.answerBy > Date.now()) {
+      buzz.answerSynced = true;
+      // Later deadline wins, so a late buzz can add time and a stale one cannot cut it.
+      if (!buzz.answerBy || msg.answerBy > buzz.answerBy) {
+        buzz.answerBy = msg.answerBy;
+        if (msg.answerTotal) buzz.answerTotal = msg.answerTotal;
+      }
+    } else if (!buzz.clueExpire) {
+      buzz.answerSynced = true;
+      buzz.answerBy = null;
+    }
+  } else if (!buzz.answerSynced && !buzz.holdAnswerClock) {
+    if (buzz.prompt && !prevPrompt && !buzz.answerBy) {
+      buzz.answerBy = Date.now() + ANSWER_SECONDS * 1000;
+      buzz.answerTotal = ANSWER_SECONDS;
+    }
+    if (!buzz.prompt && prevPrompt) buzz.answerBy = null;
+    extendLocalAnswerWindow();
+  }
 
   // Player: the room still carries last game's teams until the TV sends tonight's.
   // If my pick isn't on the new list, ask again rather than scoring a different team.
@@ -4328,6 +4487,7 @@ function buzzApplyState(msg) {
     }
   }
 
+  paintAnswerClocks();
   const panel = document.getElementById('buzzPanelHost');
   if (panel) renderHostBuzzPanel();
   const joinRoot = document.getElementById('buzzJoinRoot');
@@ -4689,6 +4849,7 @@ function renderBuzzJoinApp() {
     <h2 style="text-align:center;color:var(--gold);">${escapeHtml(buzz.name)}</h2>
     <div class="hint" style="text-align:center;">${escapeHtml(buzz.teamName || '')} · ${escapeHtml(buzz.code)}</div>
     <div class="who-line" style="text-align:center;font-size:1.2rem;margin-top:12px;">${escapeHtml(status)}</div>
+    ${answerClockHtml()}
     <button class="buzz-btn ${canBuzz ? 'armed-pulse' : ''} ${!canBuzz ? 'locked-out' : ''}"
       id="buzzTap" ${canBuzz ? '' : 'disabled'}>BUZZ</button>`;
   const btn = document.getElementById('buzzTap');
@@ -4751,6 +4912,7 @@ function renderHostCompanionApp() {
     <div class="tag">${escapeHtml(p.cat)} — ${p.val}</div>
     ${p.hint ? `<div class="who-line">${escapeHtml(p.hint)}</div>` : ''}
     <div class="qtext">${escapeHtml(p.q)}</div>
+    ${answerClockHtml()}
     <div class="atext">${escapeHtml(p.a)}</div>
     ${lead ? `
       <div class="buzz-panel">

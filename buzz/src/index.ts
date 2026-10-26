@@ -37,6 +37,7 @@ type ClientMsg =
   | { type: "prompt"; cat: string; val: number; q: string; a: string; hint?: string }
   | { type: "revealAnswer" }
   | { type: "clearPrompt" }
+  | { type: "holdClock" }
   | { type: "remoteAward"; teamId: number }
   | { type: "remoteNobody" };
 
@@ -47,6 +48,8 @@ type ServerMsg =
       code: string;
       armed: boolean;
       queue: BuzzEntry[];
+      answerBy: number | null;
+      answerTotal: number;
       players: { id: string; name: string; teamName: string }[];
       teams: TeamInfo[];
       prompt: Prompt | null;
@@ -55,6 +58,8 @@ type ServerMsg =
       type: "state";
       armed: boolean;
       queue: BuzzEntry[];
+      answerBy: number | null;
+      answerTotal: number;
       players: { id: string; name: string; teamName: string }[];
       teams: TeamInfo[];
       prompt: Prompt | null;
@@ -125,6 +130,8 @@ export class BuzzRoom extends DurableObject<Env> {
   queue: BuzzEntry[] = [];
   teams: TeamInfo[] = [];
   prompt: Prompt | null = null;
+  answerBy: number | null = null;
+  answerTotal = 15;
   code = "";
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -135,6 +142,8 @@ export class BuzzRoom extends DurableObject<Env> {
       this.queue = (await this.ctx.storage.get<BuzzEntry[]>("queue")) || [];
       this.teams = (await this.ctx.storage.get<TeamInfo[]>("teams")) || [];
       this.prompt = (await this.ctx.storage.get<Prompt | null>("prompt")) || null;
+      this.answerBy = (await this.ctx.storage.get<number | null>("answerBy")) ?? null;
+      this.answerTotal = (await this.ctx.storage.get<number>("answerTotal")) || 15;
       this.code = (await this.ctx.storage.get<string>("code")) || "";
     });
   }
@@ -189,6 +198,8 @@ export class BuzzRoom extends DurableObject<Env> {
         code: this.code,
         armed: this.armed,
         queue: this.queue,
+        answerBy: this.answerBy,
+        answerTotal: this.answerTotal,
         players: this.playerList(),
         teams: this.teams,
         prompt: this.promptFor(att.role),
@@ -204,6 +215,7 @@ export class BuzzRoom extends DurableObject<Env> {
       }
       if (att.role !== "player") return;
       if (this.queue.some((q) => q.id === att.id)) return;
+      const takesLead = this.queue.length === 0;
       this.queue.push({
         id: att.id,
         name: att.name,
@@ -211,6 +223,7 @@ export class BuzzRoom extends DurableObject<Env> {
         teamName: att.teamName || "",
         at: Date.now(),
       });
+      if (takesLead) this.ensureAnswerWindow(8);
       await this.persist();
       this.broadcastState();
       return;
@@ -232,6 +245,7 @@ export class BuzzRoom extends DurableObject<Env> {
     if (msg.type === "arm" && att.role === "host") {
       this.armed = true;
       this.queue = [];
+      this.answerBy = null;
       await this.persist();
       this.broadcastState();
       return;
@@ -239,6 +253,7 @@ export class BuzzRoom extends DurableObject<Env> {
 
     if (msg.type === "disarm" && att.role === "host") {
       this.armed = false;
+      this.answerBy = null;
       await this.persist();
       this.broadcastState();
       return;
@@ -253,6 +268,8 @@ export class BuzzRoom extends DurableObject<Env> {
         hint: msg.hint ? String(msg.hint).slice(0, 200) : undefined,
         revealed: false,
       };
+      this.answerBy = Date.now() + 15_000;
+      this.answerTotal = 15;
       await this.persist();
       this.broadcastState();
       return;
@@ -260,6 +277,7 @@ export class BuzzRoom extends DurableObject<Env> {
 
     if (msg.type === "clearPrompt" && att.role === "host") {
       this.prompt = null;
+      this.answerBy = null;
       await this.persist();
       this.broadcastState();
       return;
@@ -268,6 +286,14 @@ export class BuzzRoom extends DurableObject<Env> {
     // Staff (stage or controller)
     if (msg.type === "pop") {
       this.queue.shift();
+      if (this.queue[0]) this.ensureAnswerWindow(8);
+      await this.persist();
+      this.broadcastState();
+      return;
+    }
+
+    if (msg.type === "holdClock") {
+      this.answerBy = null;
       await this.persist();
       this.broadcastState();
       return;
@@ -297,6 +323,7 @@ export class BuzzRoom extends DurableObject<Env> {
       this.armed = false;
       this.queue = [];
       this.prompt = null;
+      this.answerBy = null;
       await this.persist();
       this.broadcastAll({ type: "remoteAward", teamId, val, cat });
       this.broadcastState();
@@ -310,6 +337,7 @@ export class BuzzRoom extends DurableObject<Env> {
       this.armed = false;
       this.queue = [];
       this.prompt = null;
+      this.answerBy = null;
       await this.persist();
       this.broadcastAll({ type: "remoteNobody", cat, val });
       this.broadcastState();
@@ -330,6 +358,15 @@ export class BuzzRoom extends DurableObject<Env> {
       ws.close(1011, "error");
     } catch {
       /* ignore */
+    }
+  }
+
+  /** A buzz-in gets at least `seconds` to answer, without shortening a longer clock. */
+  private ensureAnswerWindow(seconds: number) {
+    const next = Date.now() + seconds * 1000;
+    if (!this.answerBy || this.answerBy < next) {
+      this.answerBy = next;
+      this.answerTotal = seconds;
     }
   }
 
@@ -356,6 +393,8 @@ export class BuzzRoom extends DurableObject<Env> {
       queue: this.queue,
       teams: this.teams,
       prompt: this.prompt,
+      answerBy: this.answerBy,
+      answerTotal: this.answerTotal,
     });
   }
 
@@ -386,6 +425,8 @@ export class BuzzRoom extends DurableObject<Env> {
         type: "state",
         armed: this.armed,
         queue: this.queue,
+        answerBy: this.answerBy,
+        answerTotal: this.answerTotal,
         players: this.playerList(),
         teams: this.teams,
         prompt: this.promptFor(role),
