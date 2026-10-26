@@ -189,3 +189,50 @@ test('Lightning Round tallies and pays 100 a question', async ({ page }) => {
   await expect(page.getByText('Team 2 of 2')).toBeVisible();
   await expect(score(page, 'Alpha')).toHaveText('200');
 });
+
+test('the TV reconnects on its own after the buzz relay drops out', async ({ page }) => {
+  let down = false;
+  const sockets: { close: () => Promise<void> }[] = [];
+  await page.routeWebSocket(/\/ws/, ws => {
+    if (down) { ws.close(); return; }
+    ws.connectToServer();
+    sockets.push(ws);
+  });
+  await startBoard(page, room());
+  await rig(page);
+  await expect(page.getByText(/Show live/)).toBeVisible();
+
+  // Drop the connection, and refuse the first few reconnects.
+  down = true;
+  await Promise.all(sockets.map(s => s.close()));
+  await page.waitForTimeout(4000);
+  down = false;
+
+  // Retries run every few seconds; then a question should go to the host phone again.
+  await page.waitForTimeout(5000);
+  const { cell } = await firstSquare(page);
+  await cell.click();
+  await expect(page.getByText('Answer is on the host phone')).toBeVisible();
+  expect(sockets.length).toBeGreaterThan(1);
+});
+
+test('an award for a team that isn\'t playing tonight changes nothing', async ({ page }) => {
+  const code = room();
+  await startBoard(page, code);
+  await rig(page);
+  const { cell } = await firstSquare(page);
+  await cell.click();
+  await expect(page.getByText('Answer is on the host phone')).toBeVisible();
+  // A stale host phone still holding last game's team id 999.
+  await page.evaluate(code => new Promise<void>(resolve => {
+    const ws = new WebSocket(`ws://127.0.0.1:8788/ws?room=${code}`);
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'hello', role: 'controller', name: 'Old host' }));
+      ws.send(JSON.stringify({ type: 'remoteAward', teamId: 999 }));
+      setTimeout(resolve, 500);
+    };
+  }), code);
+  await expect(page.locator('#overlay')).toBeVisible();
+  await expect(score(page, 'Alpha')).toHaveText('0');
+  await expect(score(page, 'Bravo')).toHaveText('0');
+});

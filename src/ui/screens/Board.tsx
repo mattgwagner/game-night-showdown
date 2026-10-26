@@ -17,7 +17,13 @@ export function Board() {
   const cleared = boardCleared(s);
 
   // Dual screen: keep the show connected so answers stay on the host phone.
-  useEffect(() => { if (!buzz.connected) act.keepStageConnected(); }, [buzz.connected]);
+  // Retries every few seconds while offline: a Wi-Fi blip mustn't drop the TV to single-screen for the rest of the board.
+  useEffect(() => {
+    if (buzz.connected) return;
+    act.keepStageConnected();
+    const id = setInterval(act.keepStageConnected, 3000);
+    return () => clearInterval(id);
+  }, [buzz.connected]);
   useEffect(() => { if (cleared && s.finalDone) update(d => { d.screen = 'winner'; }); }, [cleared, s.finalDone]);
 
   if (!round) return null;

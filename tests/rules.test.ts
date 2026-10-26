@@ -143,8 +143,36 @@ describe('saved games', () => {
     expect(loadSavedGame()).toMatchObject({ roundId: null, screen: 'roundselect' });
   });
 
+  test('an old save from before random wildcards gets this board\'s wildcards drawn', () => {
+    const r = ROUNDS[0];
+    memory.set('gns.save.v1', JSON.stringify({ state: {
+      teams: [{ id: 1, name: 'A', score: 0 }], screen: 'board', roundIndex: 0,
+      activeCategories: Object.keys(r.categories).slice(0, 6), used: {},
+    } }));
+    expect(Object.keys(loadSavedGame()!.wild)).toHaveLength(2);
+  });
+
+  test('undo after resuming an old save converts its drawn positions too', () => {
+    let s = produce(game(), d => {
+      d.history.push(JSON.stringify({ teams: d.teams, used: {}, readerIndex: 0, lastCorrectTeamId: null, drawn: { bonus: [0] } }));
+    });
+    s = produce(s, d => { rules.undoLast(d); });
+    expect(s.drawn.bonus).toEqual([BONUS_QUESTIONS[0].q]);
+  });
+
   test('nothing to resume from the setup screen', () => {
     memory.set('gns.save.v2', JSON.stringify({ ...freshState(), teams: [{ id: 1, name: 'A', score: 0 }] }));
     expect(loadSavedGame()).toBeNull();
+  });
+});
+
+describe('new game', () => {
+  test('team ids keep counting, so last game\'s phones can\'t match tonight\'s teams', async () => {
+    const store = await import('../src/game/store');
+    store.update(d => { rules.addTeam(d, 'A'); rules.addTeam(d, 'B'); });
+    const before = Math.max(...store.getState().teams.map(t => t.id));
+    store.resetGame();
+    store.update(d => { rules.addTeam(d, 'C'); });
+    expect(store.getState().teams[0].id).toBeGreaterThan(before);
   });
 });

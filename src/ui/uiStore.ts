@@ -6,7 +6,8 @@ import { createStore } from '../game/store';
 export type Done = { kind: 'square'; cat: string; val: number } | { kind: 'close' };
 
 export type Overlay =
-  | { kind: 'question'; cat: string; val: number; item: Question; hint?: string }
+  /** split: the TV hides the answer and the host phone has it (decided when the square opens) */
+  | { kind: 'question'; cat: string; val: number; item: Question; hint?: string; split: boolean }
   | { kind: 'dailyDouble'; cat: string; val: number; item: Question; teamId: number }
   | { kind: 'wildcard'; cat: string; val: number; teamId: number }
   | { kind: 'challenge'; ch: Challenge; val: number; teamId: number; done: Done; forfeit?: string }

@@ -37,10 +37,9 @@ export function Overlays() {
 
 /* ---------- Trivia question ---------- */
 function QuestionCard({ o }: { o: Of<'question'> }) {
-  const { cat, val, item, hint } = o;
+  const { cat, val, item, hint, split } = o;
   const s = useGame();
   const buzz = buzzStore.use();
-  const split = buzz.connected; // TV/stage hides answers until the host phone reveals
   const [localReveal, setLocalReveal] = useState(false);
   const [steal, setSteal] = useState(false);
   const remoteReveal = !!(buzz.prompt?.revealed && buzz.prompt.cat === cat && buzz.prompt.val === val);

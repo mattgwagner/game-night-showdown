@@ -26,7 +26,9 @@ export function setState(next: GameState) {
 
 /** A fresh game that keeps the weekend's drawn cards. */
 export function resetGame() {
-  setState({ ...freshState(), drawn: loadWeekend().drawn });
+  // Team ids keep counting across games: a phone still holding last game's
+  // team id must not match one of tonight's teams.
+  setState({ ...freshState(), drawn: loadWeekend().drawn, nextTeamId: state.nextTeamId });
 }
 
 const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };

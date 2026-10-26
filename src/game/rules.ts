@@ -2,7 +2,7 @@
    takes an immer draft (see store.ts) and mutates it. No DOM in here. */
 import { ROUNDS } from '../content';
 import type { Question, Round, TriviaRound } from '../content/types';
-import { drawFrom } from './decks';
+import { drawFrom, migrateDrawn } from './decks';
 import { VALUES, TEAM_COLORS, squareKey, type GameState, type Team } from './state';
 
 export function shuffle<T>(arr: readonly T[]): T[] {
@@ -155,7 +155,7 @@ export function undoLast(s: GameState): boolean {
   s.used = snap.used;
   s.readerIndex = snap.readerIndex;
   s.lastCorrectTeamId = snap.lastCorrectTeamId;
-  s.drawn = snap.drawn;
+  s.drawn = migrateDrawn(snap.drawn); // snapshots from the old version stored positions
   if (s.screen === 'winner') s.screen = 'board';
   return true;
 }

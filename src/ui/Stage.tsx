@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { stageHooks } from '../buzz/client';
+import { buzzStore, sendTeams, stageHooks } from '../buzz/client';
 import * as act from '../game/actions';
 import { setWakeLock } from '../game/wakeLock';
-import { useGame } from '../game/store';
+import { getState, useGame } from '../game/store';
 import { ScorePop, Toast } from './common';
 import { Overlays } from './overlays/Overlays';
 import { Scoreboard } from './Scoreboard';
@@ -15,7 +15,10 @@ import { flashToast, overlayStore } from './uiStore';
 
 // The host phone drives the TV through the buzz room.
 stageHooks.onQuestion = () => overlayStore.get()?.kind === 'question';
-stageHooks.remoteAward = (teamId, cat, val) => act.awardSquare(teamId, cat, val);
+stageHooks.remoteAward = (teamId, cat, val) => {
+  // A host phone still showing last game's teams can name a team that isn't playing.
+  if (getState().teams.some(t => t.id === teamId)) act.awardSquare(teamId, cat, val);
+};
 stageHooks.remoteNobody = (cat, val) => act.nobodySquare(cat, val);
 stageHooks.error = flashToast;
 
@@ -23,6 +26,7 @@ stageHooks.error = flashToast;
 export function Stage() {
   const s = useGame();
   const overlay = overlayStore.use();
+  const buzz = buzzStore.use();
   const onBoard = s.screen === 'board' && !s.boardIntro;
 
   useEffect(() => {
@@ -32,6 +36,11 @@ export function Stage() {
   useEffect(() => {
     setWakeLock(s.screen === 'board' || s.screen === 'mode' || !!overlay);
   }, [s.screen, overlay]);
+  // The room keeps whatever teams it was last told about; keep phones on tonight's.
+  const teamList = s.teams.map(t => t.id + ':' + t.name).join('|');
+  useEffect(() => {
+    if (buzz.connected && buzz.role === 'host') sendTeams();
+  }, [teamList, buzz.connected, buzz.role]);
   useEffect(() => {
     window.addEventListener('keydown', hostKeys);
     return () => window.removeEventListener('keydown', hostKeys);

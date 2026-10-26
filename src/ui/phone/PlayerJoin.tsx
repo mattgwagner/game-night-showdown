@@ -13,6 +13,9 @@ export function PlayerJoin() {
   const live = buzz.connected && !(buzz.teams.length && !buzz.teamName);
 
   useEffect(() => { document.body.classList.add('on-buzz'); }, []);
+  // A new team list (tonight's, from the TV) means picking again from scratch.
+  const teamsKey = buzz.teams.map(t => t.id + ':' + t.name).join('|');
+  useEffect(() => { setChoice(null); }, [teamsKey]);
 
   let body;
   if (!buzz.connected) {

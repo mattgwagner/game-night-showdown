@@ -5,6 +5,7 @@
 ============================================================ */
 import { ROUNDS } from '../content';
 import { migrateDrawn } from './decks';
+import { currentRound, drawWildcards } from './rules';
 import { freshState, TEAM_COLORS, type GameState } from './state';
 
 const SAVE_KEY = 'gns.save.v2';
@@ -40,7 +41,7 @@ export function clearSavedGame() {
  * Every saved game passes through here, so a field added to GameState gets its
  * default from freshState() instead of crashing a game saved before the deploy.
  */
-function upgrade(saved: Partial<GameState>): GameState | null {
+function upgrade(saved: Partial<GameState>, drawWild = false): GameState | null {
   if (!saved || !Array.isArray(saved.teams)) return null;
   const s: GameState = { ...freshState(), ...saved };
   s.teams = s.teams.map((t, i) => ({ ...t, color: t.color || TEAM_COLORS[i % TEAM_COLORS.length] }));
@@ -51,6 +52,8 @@ function upgrade(saved: Partial<GameState>): GameState | null {
     if (s.screen === 'board' || s.screen === 'winner') s.screen = 'roundselect';
   }
   if (s.roundOrder && !s.roundOrder.every(id => typeof id === 'string')) s.roundOrder = null;
+  // Saves from before wildcards were drawn at random: draw this board's now.
+  if (drawWild && s.activeCategories && currentRound(s)?.kind === 'trivia') drawWildcards(s, s.activeCategories);
   return s;
 }
 
@@ -67,8 +70,7 @@ function loadLegacy(): GameState | null {
     roundId: round ? round.id : null,
     roundOrder: null,
     nextTeamId: data.nextTeamId || Math.max(0, ...old.teams.map((t: { id: number }) => t.id)) + 1,
-    wild: old.wild || {},
-  });
+  }, !old.wild);
 }
 
 /* ---------- The weekend board: scores banked across games ---------- */

@@ -74,9 +74,10 @@ export function openSquare(cat: string, val: number) {
     return;
   }
   const hint = CATEGORY_HINTS[cat] || item.hint;
-  overlayStore.set({ kind: 'question', cat, val, item, hint });
   // TV/stage hides answers until the host phone reveals.
-  if (buzzStore.get().connected) {
+  const split = buzzStore.get().connected;
+  overlayStore.set({ kind: 'question', cat, val, item, hint, split });
+  if (split) {
     buzzArm();
     buzzSend({ type: 'prompt', cat, val, q: item.q, a: item.a, hint: hint || '' });
   }
@@ -221,9 +222,14 @@ export async function connectStage() {
   return ok;
 }
 
+let lastStageFailed = false;
+/** Connects the show if it isn't already. Says so once when it fails, not on every retry. */
 export function keepStageConnected() {
-  const p = ensureStageBuzz();
-  p?.then(ok => flashToast(ok ? 'Show live — host phone uses ' + getStageCode() : 'Could not start dual screen'));
+  ensureStageBuzz()?.then(ok => {
+    if (ok) flashToast('Show live — host phone uses ' + getStageCode());
+    else if (!lastStageFailed) flashToast('Could not start dual screen');
+    lastStageFailed = !ok;
+  });
 }
 
 export function openDualScreenCard() {
