@@ -49,8 +49,8 @@ nobody can agree.
 | 🎯 **Last Team Standing** | One question each around the room. Miss and you're out. Survive alone, take 1000. |
 | 🥔 **Hot Potato** | One category, teams alternate naming things. Stall or repeat and you're eliminated. |
 
-**Pick a board** — fourteen boards, listed in a fresh order every session. Thirteen are
-trivia, spanning 104 categories: beer, firearms, Disney, AI, college football, grilling,
+**Pick a board** — fifteen boards, listed in a fresh order every session. Fourteen are
+trivia, spanning 108 categories: beer, BattleBots, firearms, Disney, AI, college football, grilling,
 boats, Labor Day, NBA, golf, soccer, the Olympics, Star Wars, horror, dinosaurs, sharks,
 bourbon, presidents, Field Artillery, and a lot more. One board is nothing but formats
 that get people shouting — emoji decode, riddles, Before & After, brand slogans, Odd One
