@@ -49,6 +49,8 @@ type ServerMsg =
       armed: boolean;
       queue: BuzzEntry[];
       missed: string[];
+      answerLeft: number | null;
+      answerTotal: number;
       players: { id: string; name: string; teamName: string }[];
       teams: TeamInfo[];
       prompt: Prompt | null;
@@ -58,6 +60,8 @@ type ServerMsg =
       armed: boolean;
       queue: BuzzEntry[];
       missed: string[];
+      answerLeft: number | null;
+      answerTotal: number;
       players: { id: string; name: string; teamName: string }[];
       teams: TeamInfo[];
       prompt: Prompt | null;
@@ -75,6 +79,10 @@ const CORS = {
 function codeOk(code: string) {
   return /^[A-Z0-9]{4}$/.test(code);
 }
+
+// The answer clock: a clue gets 15s, and whoever is answering gets at least 8.
+const CLUE_SECONDS = 15;
+const BUZZ_SECONDS = 8;
 
 // A room with no activity for this long deletes its storage.
 const IDLE_MS = 24 * 60 * 60 * 1000;
@@ -133,6 +141,9 @@ export class BuzzRoom extends DurableObject<Env> {
   missed: Lockout[] = [];
   teams: TeamInfo[] = [];
   prompt: Prompt | null = null;
+  // When the current clue's answer clock runs out (server time). The TV closes the clue.
+  answerBy: number | null = null;
+  answerTotal = CLUE_SECONDS;
   code = "";
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -144,6 +155,8 @@ export class BuzzRoom extends DurableObject<Env> {
       this.missed = (await this.ctx.storage.get<Lockout[]>("missed")) || [];
       this.teams = (await this.ctx.storage.get<TeamInfo[]>("teams")) || [];
       this.prompt = (await this.ctx.storage.get<Prompt | null>("prompt")) || null;
+      this.answerBy = (await this.ctx.storage.get<number | null>("answerBy")) ?? null;
+      this.answerTotal = (await this.ctx.storage.get<number>("answerTotal")) || CLUE_SECONDS;
       this.code = (await this.ctx.storage.get<string>("code")) || "";
     });
   }
@@ -206,6 +219,7 @@ export class BuzzRoom extends DurableObject<Env> {
         armed: this.armed,
         queue: this.queue,
         missed: this.missedIds(),
+        ...this.clock(),
         players: this.playerList(),
         teams: this.teams,
         prompt: this.promptFor(att.role),
@@ -232,6 +246,7 @@ export class BuzzRoom extends DurableObject<Env> {
         teamName: att.teamName || "",
         at: Date.now(),
       });
+      if (this.queue.length === 1) this.ensureAnswerWindow(BUZZ_SECONDS);
       await this.persist();
       this.broadcastState();
       return;
@@ -254,6 +269,7 @@ export class BuzzRoom extends DurableObject<Env> {
       this.armed = true;
       this.queue = [];
       this.missed = [];
+      this.answerBy = null;
       await this.persist();
       this.broadcastState();
       return;
@@ -261,6 +277,7 @@ export class BuzzRoom extends DurableObject<Env> {
 
     if (msg.type === "disarm" && att.role === "host") {
       this.armed = false;
+      this.answerBy = null;
       await this.persist();
       this.broadcastState();
       return;
@@ -275,6 +292,8 @@ export class BuzzRoom extends DurableObject<Env> {
         hint: msg.hint ? String(msg.hint).slice(0, 200) : undefined,
         revealed: false,
       };
+      this.answerBy = Date.now() + CLUE_SECONDS * 1000;
+      this.answerTotal = CLUE_SECONDS;
       await this.persist();
       this.broadcastState();
       return;
@@ -283,6 +302,7 @@ export class BuzzRoom extends DurableObject<Env> {
     if (msg.type === "clearPrompt" && att.role === "host") {
       this.prompt = null;
       this.missed = [];
+      this.answerBy = null;
       await this.persist();
       this.broadcastState();
       return;
@@ -294,6 +314,7 @@ export class BuzzRoom extends DurableObject<Env> {
       if (wrong && !this.isLocked(wrong)) {
         this.missed.push({ id: wrong.id, name: wrong.name, teamId: wrong.teamId });
       }
+      if (this.queue.length) this.ensureAnswerWindow(BUZZ_SECONDS);
       await this.persist();
       this.broadcastState();
       return;
@@ -309,6 +330,7 @@ export class BuzzRoom extends DurableObject<Env> {
     if (msg.type === "revealAnswer") {
       if (this.prompt) {
         this.prompt = { ...this.prompt, revealed: true };
+        this.answerBy = null;
         await this.persist();
         this.broadcastState();
       }
@@ -324,6 +346,7 @@ export class BuzzRoom extends DurableObject<Env> {
       this.queue = [];
       this.missed = [];
       this.prompt = null;
+      this.answerBy = null;
       await this.persist();
       this.broadcastAll({ type: "remoteAward", teamId, val, cat });
       this.broadcastState();
@@ -338,6 +361,7 @@ export class BuzzRoom extends DurableObject<Env> {
       this.queue = [];
       this.missed = [];
       this.prompt = null;
+      this.answerBy = null;
       await this.persist();
       this.broadcastAll({ type: "remoteNobody", cat, val });
       this.broadcastState();
@@ -359,6 +383,24 @@ export class BuzzRoom extends DurableObject<Env> {
     } catch {
       /* ignore */
     }
+  }
+
+  /** A buzz-in gets at least `seconds` to answer, without shortening a longer clock. */
+  private ensureAnswerWindow(seconds: number) {
+    if (!this.prompt || this.prompt.revealed) return;
+    const next = Date.now() + seconds * 1000;
+    if (!this.answerBy || this.answerBy < next) {
+      this.answerBy = next;
+      this.answerTotal = seconds;
+    }
+  }
+
+  /** Time left rather than a timestamp, so a phone whose clock is off still counts right. */
+  private clock() {
+    return {
+      answerLeft: this.answerBy === null ? null : Math.max(0, this.answerBy - Date.now()),
+      answerTotal: this.answerTotal,
+    };
   }
 
   private missedIds() {
@@ -408,6 +450,7 @@ export class BuzzRoom extends DurableObject<Env> {
     this.missed = [];
     this.teams = [];
     this.prompt = null;
+    this.answerBy = null;
     this.code = "";
   }
 
@@ -418,6 +461,8 @@ export class BuzzRoom extends DurableObject<Env> {
       missed: this.missed,
       teams: this.teams,
       prompt: this.prompt,
+      answerBy: this.answerBy,
+      answerTotal: this.answerTotal,
     });
   }
 
@@ -449,6 +494,7 @@ export class BuzzRoom extends DurableObject<Env> {
         armed: this.armed,
         queue: this.queue,
         missed: this.missedIds(),
+        ...this.clock(),
         players: this.playerList(),
         teams: this.teams,
         prompt: this.promptFor(role),

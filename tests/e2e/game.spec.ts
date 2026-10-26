@@ -236,3 +236,75 @@ test('an award for a team that isn\'t playing tonight changes nothing', async ({
   await expect(score(page, 'Alpha')).toHaveText('0');
   await expect(score(page, 'Bravo')).toHaveText('0');
 });
+
+test('answer clock: every screen counts down, a late buzz gets time, and running out closes the clue', async ({ page, browser }) => {
+  const code = room();
+  await startBoard(page, code);
+  await rig(page);
+  const host = await (await browser.newContext()).newPage();
+  await host.goto(`/?host=${code}`);
+  const player = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  await player.goto(`/?join=${code}`);
+  await player.getByPlaceholder('Your name').fill('Pat');
+  await player.getByRole('button', { name: 'Join' }).click();
+  await player.getByRole('button', { name: 'Bravo' }).click();
+  await player.getByRole('button', { name: 'Continue' }).click();
+
+  const { cell, cat, val } = await firstSquare(page);
+  await cell.click();
+  const opened = Date.now();
+  for (const p of [page, host, player]) await expect(p.locator('.answer-clock')).toContainText('to answer');
+  // The whole BUZZ button still fits on the phone with the clock above it.
+  const btn = await player.getByRole('button', { name: 'BUZZ' }).boundingBox();
+  expect(btn!.y + btn!.height).toBeLessThanOrEqual(844);
+
+  // Buzz with ~5s left: the answerer gets 8, so the clue outlives its 15.
+  await page.waitForTimeout(10_000 - (Date.now() - opened));
+  await player.getByRole('button', { name: 'BUZZ' }).click();
+  await expect(host.locator('.buzz-lead')).toHaveText('Pat · Bravo');
+  await page.waitForTimeout(16_000 - (Date.now() - opened));
+  await expect(page.locator('#overlay .qtext')).toBeVisible();
+
+  await expect(page.locator('#overlay')).toHaveCount(0, { timeout: 5_000 });
+  expect(Date.now() - opened).toBeGreaterThan(17_500);
+  await expect(page.locator(`.cell[data-cat="${cat}"][data-val="${val}"]`)).toHaveClass(/used/);
+  await expect(score(page, 'Bravo')).toHaveText('0');
+  await expect(host.getByText('Waiting for a question on the TV…')).toBeVisible();
+  await expect(player.locator('.answer-clock')).toHaveCount(0);
+});
+
+// TV alone: no buzz room, so only the TV's own (fake) clock is in play.
+const tvOnly = async (page: Page) => {
+  await page.routeWebSocket(/\/ws/, () => {});
+  await page.clock.install();
+};
+
+test('answer clock: showing the answer stops it', async ({ page }) => {
+  await tvOnly(page);
+  await startBoard(page, room());
+  await rig(page);
+  const { cell } = await firstSquare(page);
+  await cell.click();
+  await expect(page.locator('#overlay .answer-clock')).toContainText('15');
+  await page.clock.fastForward(5_000);
+  await expect(page.locator('#overlay .answer-clock')).toContainText('10');
+  await page.keyboard.press('Space');
+  await expect(page.locator('#overlay .answer-clock')).toHaveCount(0);
+  await page.clock.fastForward(20_000);
+  await expect(page.locator('#overlay .atext')).toBeVisible();
+});
+
+test('answer clock: a Daily Double that runs out costs the wager', async ({ page }) => {
+  await tvOnly(page);
+  await startBoard(page, room());
+  const { cat, val } = await firstSquare(page);
+  await rig(page, { category: cat, value: val });
+  await page.locator(`.cell[data-cat="${cat}"][data-val="${val}"]`).click();
+  await page.getByRole('button', { name: '300', exact: true }).click();
+  await page.getByRole('button', { name: 'Lock In Wager' }).click();
+  await expect(page.locator('#overlay .answer-clock')).toBeVisible();
+  await page.clock.fastForward(16_000);
+  await expect(page.locator('#overlay')).toHaveCount(0);
+  await expect(score(page, 'Alpha')).toHaveText('-300');
+  await expect(page.locator(`.cell[data-cat="${cat}"][data-val="${val}"]`)).toHaveClass(/used/);
+});

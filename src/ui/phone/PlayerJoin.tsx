@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { buzzSend, buzzStore, joinAsPlayer, pickTeam } from '../../buzz/client';
 import type { TeamInfo } from '../../buzz/protocol';
 import { BUZZ_ROOM, getJoinCode } from '../../buzz/room';
+import { AnswerClock } from '../common';
 import { flashToast } from '../uiStore';
 
 /* ?join=CODE: a player's phone is one big buzzer. */
@@ -68,6 +69,7 @@ export function PlayerJoin() {
         <h2 style={{ textAlign: 'center', color: 'var(--gold)' }}>{buzz.name}</h2>
         <div className="hint" style={{ textAlign: 'center' }}>{buzz.teamName} · {buzz.code}</div>
         <div className="who-line" style={{ textAlign: 'center', fontSize: '1.2rem', marginTop: 12 }}>{status}</div>
+        <AnswerClock deadline={buzz.answerBy} total={buzz.answerTotal} />
         <button className={`buzz-btn ${canBuzz ? 'armed-pulse' : 'locked-out'}`} disabled={!canBuzz}
           onClick={() => buzzSend({ type: 'buzz' })}>{tried ? 'OUT' : 'BUZZ'}</button>
       </>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { buzzPop, buzzSend, buzzStore, connectBuzzSocket, resolveBuzzTeam } from '../../buzz/client';
 import { BUZZ_ROOM, getHostCode } from '../../buzz/room';
 import { playWrong } from '../../game/sound';
+import { AnswerClock } from '../common';
 
 /* ?host=CODE: answers stay on this phone, not on the TV. */
 export function HostCompanion() {
@@ -49,6 +50,7 @@ export function HostCompanion() {
         <div className="tag">{p.cat} — {p.val}</div>
         {p.hint && <div className="who-line">{p.hint}</div>}
         <div className="qtext">{p.q}</div>
+        <AnswerClock deadline={buzz.answerBy} total={buzz.answerTotal} />
         <div className="atext">{p.a}</div>
         {lead ? (
           <div className="buzz-panel">

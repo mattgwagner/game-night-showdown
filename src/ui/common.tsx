@@ -36,6 +36,48 @@ export function TeamButtons({ teams, onPick, prefix }: { teams: Team[]; onPick: 
   );
 }
 
+/** Whole seconds until `deadline` (a Date.now() time), ticking while it runs; null with no deadline. */
+function useSecondsLeft(deadline: number | null) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (deadline == null) return;
+    const id = setInterval(() => setTick(n => n + 1), 200);
+    return () => clearInterval(id);
+  }, [deadline]);
+  return deadline == null ? null : Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+}
+
+/** Calls `onExpire` once `deadline` passes, after the buzzer has a beat to sound. A later deadline cancels it. */
+export function useOnDeadline(deadline: number | null, onExpire: () => void) {
+  const cb = useRef(onExpire);
+  cb.current = onExpire;
+  useEffect(() => {
+    if (deadline == null) return;
+    let after: ReturnType<typeof setTimeout> | undefined;
+    const at = setTimeout(() => {
+      playBuzzer();
+      after = setTimeout(() => cb.current(), 700);
+    }, Math.max(0, deadline - Date.now()));
+    return () => { clearTimeout(at); clearTimeout(after); };
+  }, [deadline]);
+}
+
+/** The answer clock on a clue. Only the TV ticks; phones count down quietly. */
+export function AnswerClock({ deadline, total, ticks }: { deadline: number | null; total: number; ticks?: boolean }) {
+  const left = useSecondsLeft(deadline);
+  useEffect(() => {
+    if (ticks && left != null && left > 0 && left <= 5) playTick();
+  }, [ticks, left]);
+  if (left == null) return null;
+  return (
+    <div className="timer-wrap answer-clock">
+      <div className={`timer-num ${left > 0 && left <= 5 ? 'urgent' : ''} ${left <= 0 ? 'done' : ''}`}>{left <= 0 ? 'TIME' : left}</div>
+      <div className="timer-caption">{left <= 0 ? "time's up" : 'to answer'}</div>
+      <div className="timer-track"><div className="timer-fill" style={{ width: `${Math.min(100, (left / total) * 100)}%` }} /></div>
+    </div>
+  );
+}
+
 /** Countdown. Living rooms forget to tap Start, so it starts itself after a beat. */
 export function Timer({ seconds }: { seconds: number }) {
   const [running, setRunning] = useState(false);

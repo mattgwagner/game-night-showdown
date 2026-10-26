@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { buzzPop, buzzSend, buzzStore, resolveBuzzTeam } from '../../buzz/client';
+import { CLUE_SECONDS } from '../../buzz/protocol';
 import { roomLinks } from '../../buzz/room';
 import * as act from '../../game/actions';
 import { spiceOk, WILDCARD_EVENTS, type WildcardEvent } from '../../game/decks';
@@ -7,7 +8,7 @@ import { teamById } from '../../game/rules';
 import { playWildcardReveal, playWildcardSpin, playWrong } from '../../game/sound';
 import type { Team } from '../../game/state';
 import { getState, useGame } from '../../game/store';
-import { Card, copyLink, TeamButton, TeamButtons, Timer } from '../common';
+import { AnswerClock, Card, copyLink, TeamButton, TeamButtons, Timer, useOnDeadline } from '../common';
 import { flashToast, overlayStore, type Overlay } from '../uiStore';
 
 type Of<K extends Overlay['kind']> = Extract<Overlay, { kind: K }>;
@@ -46,12 +47,20 @@ function QuestionCard({ o }: { o: Of<'question'> }) {
   const revealed = localReveal || remoteReveal;
   const lead = buzz.queue[0];
   const leadTeam = resolveBuzzTeam(lead, s.teams);
+  // The clue gets its full time from when it opened; a buzz-in can add time on
+  // the room's clock. Showing the answer stops it so scoring isn't rushed.
+  const [openedBy] = useState(() => Date.now() + CLUE_SECONDS * 1000);
+  const onThisClue = buzz.prompt?.cat === cat && buzz.prompt.val === val;
+  const deadline = revealed ? null : Math.max(openedBy, (split && onThisClue && buzz.answerBy) || 0);
+  const total = deadline === openedBy ? CLUE_SECONDS : buzz.answerTotal;
+  useOnDeadline(deadline, () => act.nobodySquare(cat, val, true));
 
   return (
     <Card>
       <div className="tag">{cat} — {val} pts</div>
       {hint && <div className="who-line">{hint}</div>}
       <div className="qtext">{item.q}</div>
+      <AnswerClock deadline={deadline} total={total} ticks />
       {split && <BuzzPanel cat={cat} val={val} />}
       {revealed ? (
         <div>
@@ -111,7 +120,11 @@ function DailyDoubleCard({ o }: { o: Of<'dailyDouble'> }) {
   const [maxWager] = useState(() => Math.max(reader.score, 500));
   const [input, setInput] = useState(() => String(Math.min(reader.score || 200, 500) || 200));
   const [wager, setWager] = useState<number | null>(null);
+  const [answerBy, setAnswerBy] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
+  // Time running out on a Daily Double costs the wager, same as a wrong answer.
+  const deadline = revealed ? null : answerBy;
+  useOnDeadline(deadline, () => wager !== null && act.settleDailyDouble(o.teamId, wager, false, o.cat, o.val, true));
 
   if (wager === null) {
     return (
@@ -131,6 +144,7 @@ function DailyDoubleCard({ o }: { o: Of<'dailyDouble'> }) {
           let w = parseInt(input, 10);
           if (isNaN(w) || w < 0) w = 0;
           setWager(Math.min(w, maxWager));
+          setAnswerBy(Date.now() + CLUE_SECONDS * 1000);
         }}>Lock In Wager</button>
       </Card>
     );
@@ -139,6 +153,7 @@ function DailyDoubleCard({ o }: { o: Of<'dailyDouble'> }) {
     <Card>
       <div className="tag dd">🎯 DAILY DOUBLE — {wager} PTS 🎯</div>
       <div className="qtext">{o.item.q}</div>
+      <AnswerClock deadline={deadline} total={CLUE_SECONDS} ticks />
       {!revealed ? (
         <button className="btn-primary" id="revealDDBtn" onClick={() => setRevealed(true)}>Reveal Answer</button>
       ) : (

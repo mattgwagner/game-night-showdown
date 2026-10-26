@@ -12,7 +12,7 @@ import { getHostCode, getJoinCode, getStageCode } from './room';
 const BUZZ_API = import.meta.env.VITE_BUZZ_API || 'https://game-night-buzz.mattgwagner.workers.dev';
 const BUZZ_WS = BUZZ_API.replace(/^http/, 'ws') + '/ws';
 
-export interface BuzzView extends RoomState {
+export interface BuzzView extends Omit<RoomState, 'answerLeft' | 'answerTotal'> {
   connected: boolean;
   code: string;
   myId: string;
@@ -20,12 +20,15 @@ export interface BuzzView extends RoomState {
   name: string;
   teamId: number | null;
   teamName: string;
+  /** The room's answer clock on this device's clock (Date.now()), or null. */
+  answerBy: number | null;
+  answerTotal: number;
 }
 
 export const buzzStore = createStore<BuzzView>({
   connected: false, code: '', myId: '', role: null,
   armed: false, queue: [], missed: [], players: [], teams: [], prompt: null,
-  name: '', teamId: null, teamName: '',
+  name: '', teamId: null, teamName: '', answerBy: null, answerTotal: 15,
 });
 const view = () => buzzStore.get();
 const patch = (p: Partial<BuzzView>) => buzzStore.set({ ...view(), ...p });
@@ -93,6 +96,8 @@ function applyState(msg: RoomState) {
     players: msg.players || [],
     teams: msg.teams || b.teams,
     prompt: msg.prompt !== undefined ? msg.prompt : b.prompt,
+    answerBy: msg.answerLeft == null ? null : Date.now() + msg.answerLeft,
+    answerTotal: msg.answerTotal || b.answerTotal,
   };
   // Player: the room still carries last game's teams until the TV sends tonight's.
   // If my pick isn't on the new list, ask again rather than scoring a different team.
@@ -163,7 +168,7 @@ export function connectBuzzSocket(code: string, role: Role, opts: ConnectOpts = 
     sock.onclose = () => {
       if (g !== gen) return;
       ws = null;
-      patch({ connected: false, armed: false });
+      patch({ connected: false, armed: false, answerBy: null });
       if (!opened && !settled) { settled = true; reject(new Error('connect failed')); }
       if (opened) scheduleReconnect(code, role, opts, g);
     };

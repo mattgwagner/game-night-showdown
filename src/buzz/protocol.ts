@@ -1,4 +1,7 @@
 // Messages to and from the buzz worker (buzz/src/index.ts). Keep the two in step.
+
+/** Seconds to answer a clue. The worker has the same number. */
+export const CLUE_SECONDS = 15;
 export type Role = 'host' | 'player' | 'controller';
 export type BuzzEntry = { id: string; name: string; teamId: number | null; teamName: string; at: number };
 export type TeamInfo = { id: number; name: string; color?: string };
@@ -23,6 +26,9 @@ export type RoomState = {
   armed: boolean;
   queue: BuzzEntry[];
   missed: string[];
+  /** Milliseconds left on the answer clock when the room sent this; null when it isn't running. */
+  answerLeft?: number | null;
+  answerTotal?: number;
   players: PlayerInfo[];
   teams: TeamInfo[];
   prompt: Prompt | null;

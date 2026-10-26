@@ -41,9 +41,10 @@ export function awardSquare(teamId: number, cat: string, val: number) {
   markUsed(cat, val);
 }
 
-export function nobodySquare(cat: string, val: number) {
+/** `quiet` when the answer clock ran out: the buzzer already said so. */
+export function nobodySquare(cat: string, val: number, quiet = false) {
   if (buzzStore.get().connected) buzzEndQuestion();
-  playWrong();
+  if (!quiet) playWrong();
   markUsed(cat, val);
 }
 
@@ -170,14 +171,14 @@ export function runWildcardEvent(event: WildcardEvent, cat: string, val: number,
   overlayStore.set({ kind: 'instant', label: event.label, text, done });
 }
 
-export function settleDailyDouble(teamId: number, wager: number, right: boolean, cat: string, val: number) {
+export function settleDailyDouble(teamId: number, wager: number, right: boolean, cat: string, val: number, quiet = false) {
   if (right) {
     score(teamId, wager, { isAnswer: true });
     update(s => rules.giveControl(s, teamId));
     playCorrect();
   } else {
     score(teamId, -wager, { isAnswer: false });
-    playWrong();
+    if (!quiet) playWrong();
   }
   markUsed(cat, val);
 }
