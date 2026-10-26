@@ -76,6 +76,9 @@ function codeOk(code: string) {
   return /^[A-Z0-9]{4}$/.test(code);
 }
 
+// A room with no activity for this long deletes its storage.
+const IDLE_MS = 24 * 60 * 60 * 1000;
+
 function isStaff(role: Role) {
   return role === "host" || role === "controller";
 }
@@ -151,6 +154,7 @@ export class BuzzRoom extends DurableObject<Env> {
       this.code = (url.searchParams.get("room") || "").toUpperCase();
       await this.ctx.storage.put("code", this.code);
     }
+    await this.touch();
 
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
@@ -177,6 +181,7 @@ export class BuzzRoom extends DurableObject<Env> {
     }
 
     const att = (ws.deserializeAttachment() || {}) as Attachment;
+    await this.touch();
 
     if (msg.type === "hello") {
       const role: Role =
@@ -384,6 +389,26 @@ export class BuzzRoom extends DurableObject<Env> {
       if (a && a.role === "player") out.push({ id: a.id, name: a.name, teamName: a.teamName || "" });
     }
     return out;
+  }
+
+  /** Push the idle cleanup back a day from now. */
+  private async touch() {
+    await this.ctx.storage.setAlarm(Date.now() + IDLE_MS);
+  }
+
+  /** Idle a day: drop the room. A phone still connected keeps it alive. */
+  async alarm() {
+    if (this.ctx.getWebSockets().length > 0) {
+      await this.touch();
+      return;
+    }
+    await this.ctx.storage.deleteAll();
+    this.armed = false;
+    this.queue = [];
+    this.missed = [];
+    this.teams = [];
+    this.prompt = null;
+    this.code = "";
   }
 
   private async persist() {
