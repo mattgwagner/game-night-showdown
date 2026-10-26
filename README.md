@@ -1,21 +1,29 @@
 # Game Night Showdown
 
-A Jeopardy-style party game built for one specific friend group — no build step, no
-backend, no accounts. One HTML file. Open it and play.
+A Jeopardy-style party game built for one specific friend group. No accounts, no
+backend beyond a tiny buzzer relay. The TV shows the board, the host's phone holds the
+answers, and everybody else's phone is a buzzer.
 
 Built for a long weekend in a house full of people, which is why it is not only trivia:
 a few squares on every board are live-action — challenges, duels and point swings.
 
 ## Run it
 
-Double-click `index.html`, or serve it so the TV or an iPad can join over WiFi:
-
 ```bash
-cd GameNight
-python3 -m http.server 8934
-# then http://localhost:8934 here,
-# or http://<this-machine's-LAN-IP>:8934 from anything else on the network
+npm install
+npm run dev      # prints a LAN address; open it on the iPad, the TV, or your phone
 ```
+
+Live at https://mattgwagner.github.io/game-night-showdown/. Every push to `main` is
+type-checked, tested, built and deployed to GitHub Pages by `.github/workflows/deploy.yml`.
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server on your LAN |
+| `npm test` | Content and game-rule tests (fast; run these after editing questions) |
+| `npm run check` | Type-check + tests, the same gate CI runs before deploying |
+| `npm run test:e2e` | Browser tests: show, host phone and a player against a local buzz worker |
+| `npm run build` | Production build into `dist/` |
 
 ## How it plays
 
@@ -99,22 +107,63 @@ Because real life overrules the app:
 - **↩ Undo** — reverses the last square completely: scores, streaks, the square itself.
 - **Autosave** — the game survives a closed tab. Reopen and Resume.
 
-## Editing the content
+## Adding questions and categories
 
-Everything lives in plain JS objects at the top of `index.html`:
+All the content lives in `src/content/`. You never touch game code to add any of it.
 
-- `ROUNDS` — the boards, categories, questions and Daily Doubles
+**Add a category** to a round in `src/content/rounds/`: a name and exactly five
+questions, easiest first (100 → 500).
 
-Adding a category is just adding an entry to `categories` and a matching block in
-`questions`, with all five values filled. **You do not pick wildcard squares** — at game
-start, about one random square per three categories becomes a wildcard (never the Daily
-Double). A square that's missing a question plays as an off-category `BONUS_QUESTIONS` item.
-- `CHALLENGES` — 111 tasks, tagged `physical` / `burn` / `performance` / `speed` / `social` / `room` / `drink`
-- `DUELS`, `BONUS_QUESTIONS`, `FINAL_SHOWDOWN`, `LIST_PROMPTS`, `FORFEITS`
-- `WILDCARD_EVENTS` — each carries a `weight` that biases the draw
+```ts
+"Grilling & BBQ": [
+  { q: "The low-and-slow method that cooks with smoke instead of flame.", a: "Smoking" },
+  { q: "...", a: "..." },
+  { q: "...", a: "..." },
+  { q: "...", a: "..." },
+  { q: "Hours to smoke a whole brisket at 225°F?", a: "About 12 (1 to 1.5 hours a pound)", hint: "Closest guess wins." },
+],
+```
 
-Add `spice: "party"` to hide an item in Family Friendly mode, or `drinks: true` to put
-it behind the drinking toggle. Set `who` to `"room"` for a challenge the whole party plays
-at once — 39 of the 111 are whole-room or whole-team, which are the ones that actually get
-people laughing. Decks draw without
-repeats until exhausted, so you won't get the same dare twice in a night.
+The editor and `npm test` reject a category with four or six questions, a blank
+answer, or a question that's already on another board. `hint` is optional and shows
+above the question. To show the same hint on every question in a category (in any
+round), add it to `src/content/category-hints.ts` instead.
+
+**Add a round**: copy any file in `src/content/rounds/`, give it a new `id` and
+`name`, and fill in at least four categories (eight is the norm; the host puts 4, 6
+or 8 on the board). Files load automatically, so there is no list to update. Never
+reuse or rename a round's `id`, because saved games find their round by it.
+
+**You don't place the Daily Double or the wildcards.** At game start one random square
+becomes the Daily Double, and about one square per three categories becomes a wildcard.
+
+**Decks** (each is one file in `src/content/`):
+
+- `challenges.ts` — tasks tagged `physical` / `burn` / `performance` / `speed` / `social` / `room` / `drink`.
+  `who` is `"one"`, `"team"` or `"room"` (everybody plays, the winner's team scores).
+- `duels.ts`, `bonus-questions.ts` (Lightning Round and Last Team Standing), `final-showdown.ts`,
+  `list-prompts.ts` (Hot Potato), `forfeits.ts`, `team-names.ts`
+
+Add `spice: "party"` to hide a card in Family Friendly mode, or `drinks: true` to put it
+behind the drinking toggle. Decks draw without repeats for the whole weekend. A card's
+title (or question) is how the game remembers it's been drawn, so keep titles unique;
+the tests check this.
+
+Fact-check new trivia before it goes on the TV: have a second pass look for wrong answers,
+answers with two accepted names, squares that give away another square, and difficulty
+that doesn't fit the point value.
+
+## How the code is laid out
+
+```
+src/content/   questions, rounds and decks (the only folder most changes touch)
+src/game/      rules, state, saving, decks, sounds; no UI
+src/buzz/      the WebSocket client for phones and the TV
+src/ui/        React screens: screens/ (setup, board, winner, modes), overlays/ (every card), phone/
+buzz/          the Cloudflare Worker that relays buzzes between phones and the TV
+tests/         content + rules tests (vitest); tests/e2e browser tests (Playwright)
+```
+
+The game state is one object (`src/game/state.ts`) that's saved after every change, so a
+closed tab resumes. If you add a field, give it a default in `freshState()`; old saves
+pick it up from there automatically (`src/game/persistence.ts`).
